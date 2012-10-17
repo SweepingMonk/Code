@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int main()
 {
@@ -13,7 +14,7 @@ int main()
             max = T;
         sum += T * T;
     }
-    if(sum = 0.0)
+    if(sum == 0)
         return 0;
 
     /* 现在已经知道从A到B距离最大的一维的距离max， A到B的距离介于max

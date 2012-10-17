@@ -178,5 +178,54 @@ for J:=N-M+1 to N do
 ** 求平方根 求多维空间中两个点间的距离
 1. K维空间中有两个点A和B，求它们间的距离
 2. 其中最重要的是求平方根操作，使用牛顿迭代可以减小开方操作的时间
+3. 先找出A到B的距离中距离最大的一维 并记该距离为M，则A到B的距离值介于M和sqrt(K) * M
+   之间
+4. 用二分法直到两次求的的距离值小于一定范围为止
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <math.h>
+#define exp 1.0e-7
+
+int main()
+{
+    double A[16]={4,6,2,6,1,9,12,64,43};
+    double B[16]={4,6,8,15,31,26,43,17,41};
+    double T = A[0]-B[0];
+    double max = T;
+    double sum= T * T;
+    for(int i=1;i<10;i++){
+        T =fabs(A[i]-B[i]);
+        if(T > max)
+            max = T;
+        sum += T * T;
+    }
+    printf("%lf\n", sum);
+    if(sum - 0.0 < exp)
+        return 0;
+
+    /* 现在已经知道从A到B距离最大的一维的距离max， A到B的距离介于max
+     * 和 sqrt(k) * max 之间 */
+
+    /* 方法一 ------------------------------------------------------------------------*/
+    double z = max;
+    double newz;
+    while(1){
+        newz = 0.5 * (z + sum / z); #每一步都缩小了newz和精确值的差距
+        if(fabs(newz - z) < z * exp)
+            break;
+        z = newz;
+    }
+    /* 改进 --------------------------------------------------------------------------*/
+    max = max * 2;
+    max = 0.5 * (max + sum / max);
+    max = 0.5 * (max + sum / max);
+    max = 0.5 * (max + sum / max);
+    max = 0.5 * (max + sum / max);
+    /* ------------------------------------------------------------------------------*/
+    printf("%lf\n", newz);
+    return 0;
+}
+#+END_EXAMPLE
+
 
 

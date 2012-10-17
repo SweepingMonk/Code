@@ -1,0 +1,9 @@
+*.exe
+*.EXE
+main
+*.o
+*.class
+*.s
+Makefile
+makefile
+TAGS

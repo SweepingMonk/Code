@@ -2,6 +2,7 @@
 *.EXE
 main
 *.o
+*.c
 *.class
 *.s
 Makefile

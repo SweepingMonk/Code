@@ -12,12 +12,22 @@ darkroom-mode.el frame-local-vars.el
 新增sr-speedbar功能，使speedbar可以在同一个frame中显示，不用重新开启一
 个frame
 下载sr-speedbar.el文件，在init.el文件中添加 (require 'sr-speedbar)
-**** 10.17 查看历史打开文件
-recentf-open-files命令
+**** 10.17 查看历史打开文件 和历史编辑记录
+recentf-open-files命令  C-c o按键
+goto-last-change        C-c k 查看立即编辑记录
 **** 10.17 查看历史编辑记录
 使用goto-last-change命令回到上次编辑的位置，快捷键是C-c k   快捷键C-c
 h被ecb占用
-
+**** 10.17 用iexp命令在org模式插入括号
+C-x p  you may try.
+**** 10.18 emacs打开文件的字符编码问题
+使用命令revert-buffer-with-coding-system手动选择打开文件的字符编码，
+在保存的时候还可以指定文件的保存编码，使用命令
+set-buffer-file-coding-system
+**** 10.18 emacs配置etags
+find -name "*.[chCH]" -print | etags - 命令用来生成TAGS
+成功配置etags 
+f5可以查找TAG，f6可以查找当前TAG,C-f6可以回跳
 ** 学习笔记
 *** 可执行文件的内存布局
 可执行文件内部主要包括文本端text，数据段data，和BSS段，用size命令可以
@@ -35,7 +45,50 @@ h被ecb占用
 字节，用于捕获使用空指针和小整形值的指针引用内存的情况。
 堆栈段占据进程空间的最高地址，并向下增长。
 
+*** java中创建socke超时的解决办法
+Socket s = new Socket("time....", 13); #创建一个Socket连接
+s.setSoTimeOut(1000);                  #设置socket获取信息的超时时间
 
+这里有一个问题，创建socket也有一个时间，如果连接不到服务器就会一直阻塞，
+这里哟一个办法，先创建一个未连接的套接字，然后把该套接字连接到给定的地
+址。
+Socket s = new Socket();   #设置创建socket的超时时间
+s.connect(new InetSocketAddress("time...", 13), 1000);
+s.setSoTimeOut(1000;        #设置获取信息的超时时间
+*** java获取本机地址的方式
+InetAddress.getByName("localhost") #结果总是127.0.0.1
+InetAddress.getLocalHost();     #得到本机的有效网络地址
+
+*** 段错误和BUS错误
+常见的段错误和BUS错误，BUS错误通常是由于数据在内存中不对齐引起的
+#+BEGIN_EXAMPLE
+union{ char a[10];
+       int i;
+}u;
+int * p = (int *)&(u.a[1]);
+*p = 17;
+#+END_EXAMPLE
+在实例中，数组a在共用体中是和int对齐的，所以a[1]必然不和int对齐，然后
+在这个地方放入一个4字节的数据会引发BUS错误。
+
+段错误比较常见，通常是
+1. 坏指针值错误。在指针赋值前就用它来引用内存，指针释放后再将它置为空
+   值。
+2. 改写错误。 数组越界。
+3. 释放链表出错。
+*** 捕捉信号signal
+使用头文件signal.h,使用句柄函数signal(SIGSGEV, handler)
+常见的错误信号值SIGBUS,SIGSGEV,SIGILL
+*** 类型提升 不怎么准
+整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类
+型将被提升为int，前提是int能够完整的容纳原先的数据，否则将被转换为
+unsigined int。float将被转换为double类型，任何数组将被转换为相应类型的
+指针。
+char c1,c2;
+c1 = c1 + c2;
+运算的时候，把每个变量的值提升为int的长度，然后对int执行加法，然后对运
+算结果进行裁剪。
+试试sizeof('c')的值
 * 各种有趣问题
 ** 用磁带机求第K小元素                                                         :第K大元素:
 如果输入在磁带机上， 你的机器只有一个磁带机驱动器和几十字的内存，如何
@@ -228,4 +281,23 @@ int main()
 #+END_EXAMPLE
 
 
+
+
+
+* 时间表                                                                        :工作计划:
+ [[file:../arrange.gif][ 基本流程]]
+** TODO 后缀数组
+** TODO 后缀树
+** TODO java webservice
+** TODO bitmap位图
+** TODO 爬虫程序
+** 快捷键
+*** todo 常用快捷键
+| 快捷键      | 功能               |
+|-------------+--------------------|
+| C-c C-t     | 在定义的状态中循环 |
+| C-u C-c C-t | 指定一个状态       |
+| S-right     | 在定义的状态中循环 |
+| S-Left      | 在定义的状态中循环 |
+| C-c C-q     | 为当前状态插入标签 |
 

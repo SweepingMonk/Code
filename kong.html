@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>kong</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="kong"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-10-18 16:35:47 �й���׼ʱ��"/>
+<meta name="author" content=""/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">kong</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 笔记</a>
+<ul>
+<li><a href="#sec-1-1">1.1 个人笔记</a>
+<ul>
+<li><a href="#sec-1-1-1">1.1.1 配置emacs</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-2">1.2 学习笔记</a>
+<ul>
+<li><a href="#sec-1-2-1">1.2.1 可执行文件的内存布局</a></li>
+<li><a href="#sec-1-2-2">1.2.2 进程的地址空间</a></li>
+<li><a href="#sec-1-2-3">1.2.3 java中创建socke超时的解决办法</a></li>
+<li><a href="#sec-1-2-4">1.2.4 java获取本机地址的方式</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 各种有趣问题</a>
+<ul>
+<li><a href="#sec-2-1">2.1 用磁带机求第K小元素</a></li>
+<li><a href="#sec-2-2">2.2 裁纸机程序</a></li>
+<li><a href="#sec-2-3">2.3 从0-N中随机生成M个数</a></li>
+<li><a href="#sec-2-4">2.4 求平方根 求多维空间中两个点间的距离</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 指定时间表规划</a>
+<ul>
+<li><a href="#sec-3-1">3.1 后缀数组</a></li>
+<li><a href="#sec-3-2">3.2 后缀树</a></li>
+<li><a href="#sec-3-3">3.3 java webservice</a></li>
+<li><a href="#sec-3-4">3.4 快捷键</a>
+<ul>
+<li><a href="#sec-3-4-1">3.4.1 todo 常用快捷键</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 笔记</h2>
+<div class="outline-text-2" id="text-1">
+
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 个人笔记</h3>
+<div class="outline-text-3" id="text-1-1">
+
+
+</div>
+
+<div id="outline-container-1-1-1" class="outline-4">
+<h4 id="sec-1-1-1"><span class="section-number-4">1.1.1</span> 配置emacs</h4>
+<div class="outline-text-4" id="text-1-1-1">
+
+<ul>
+<li id="sec-1-1-1-1">10.16 ecb 和 全屏显示<br/>
+配置ecb   darkroom 和 win32fullscreen
+其中darkroom和win32fullscreen都可以实现全屏显示
+主要用到了四个文件w32-fullscreen.el w32toggletitle.exe
+darkroom-mode.el frame-local-vars.el
+将w32toggletitle.exe放在path目录中，其它三个el文件都配置在init.el文件
+中
+</li>
+</ul>
+<ul>
+<li id="sec-1-1-1-2">10.17 sr-speedbar<br/>
+新增sr-speedbar功能，使speedbar可以在同一个frame中显示，不用重新开启一
+个frame
+下载sr-speedbar.el文件，在init.el文件中添加 (require 'sr-speedbar)
+</li>
+</ul>
+<ul>
+<li id="sec-1-1-1-3">10.17 查看历史打开文件<br/>
+recentf-open-files命令
+</li>
+</ul>
+<ul>
+<li id="sec-1-1-1-4">10.17 查看历史编辑记录<br/>
+使用goto-last-change命令回到上次编辑的位置，快捷键是C-c k   快捷键C-c
+h被ecb占用
+</li>
+</ul>
+<ul>
+<li id="sec-1-1-1-5">10.17 用iexp命令在org模式插入括号<br/>
+C-x p  you may try.
+</li>
+</ul>
+<ul>
+<li id="sec-1-1-1-6">10.18 emacs打开文件的字符编码问题<br/>
+使用命令revert-buffer-with-coding-system手动选择打开文件的字符编码，
+在保存的时候还可以指定文件的保存编码，使用命令set-buffer-file-coding-system
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 学习笔记</h3>
+<div class="outline-text-3" id="text-1-2">
+
+
+</div>
+
+<div id="outline-container-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> 可执行文件的内存布局</h4>
+<div class="outline-text-4" id="text-1-2-1">
+
+<p>可执行文件内部主要包括文本端text，数据段data，和BSS段，用size命令可以
+查看可执行文件a.out的大小。
+数据段主要放置的是经过初始化的全局变量和静态变量，注意是经过初始化的，
+如果没有被初始化则会放在BSS段，文本段主要放置可执行程序的指令。
+局部变量并不进入a.out，它们在运行时创建。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> 进程的地址空间</h4>
+<div class="outline-text-4" id="text-1-2-2">
+
+<p>注意：进程的地址空间和可执行程序的内存空间不太一样。
+它除了包括上边的文本段，数据段和BSS段之外，还需要保存堆栈段，用于保存
+局部与函数的数据。
+同时，注意虚拟地址空间的最低部分未被映射，它位于进程的地址空间中，但并未赋予
+物理地址，所有对它的引用都是非法的，在典型情况下，它是地址零开始的几K
+字节，用于捕获使用空指针和小整形值的指针引用内存的情况。
+堆栈段占据进程空间的最高地址，并向下增长。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-2-3" class="outline-4">
+<h4 id="sec-1-2-3"><span class="section-number-4">1.2.3</span> java中创建socke超时的解决办法</h4>
+<div class="outline-text-4" id="text-1-2-3">
+
+<p>Socket s = new Socket("time&hellip;.", 13); #创建一个Socket连接
+s.setSoTimeOut(1000);                  #设置socket获取信息的超时时间
+</p>
+<p>
+这里有一个问题，创建socket也有一个时间，如果连接不到服务器就会一直阻塞，
+这里哟一个办法，先创建一个未连接的套接字，然后把该套接字连接到给定的地
+址。
+Socket s = new Socket();   #设置创建socket的超时时间
+s.connect(new InetSocketAddress("time&hellip;", 13), 1000);
+s.setSoTimeOut(1000;        #设置获取信息的超时时间
+</p></div>
+
+</div>
+
+<div id="outline-container-1-2-4" class="outline-4">
+<h4 id="sec-1-2-4"><span class="section-number-4">1.2.4</span> java获取本机地址的方式</h4>
+<div class="outline-text-4" id="text-1-2-4">
+
+<p>InetAddress.getByName("localhost") #结果总是127.0.0.1
+InetAddress.getLocalHost();     #得到本机的有效网络地址
+</p></div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 各种有趣问题</h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 用磁带机求第K小元素 &nbsp;&nbsp;&nbsp;<span class="tag"><span class="_K___">第K大元素</span></span></h3>
+<div class="outline-text-3" id="text-2-1">
+
+<p>如果输入在磁带机上， 你的机器只有一个磁带机驱动器和几十字的内存，如何
+找第K小的数
+</p><ol>
+<li>遍历一遍磁带，随即选择一个数M
+</li>
+<li>再遍历一遍磁带， 计算大于和小于M的个数，这样就可以获得数M在总序列中
+   的排名，这里考虑到可能有重复元素所以要统计大于和小于的个数
+</li>
+<li>如果M的排名正好为所求，则结束；否则如果M的排名大于K，则下次遍历磁带
+   时随即选择一个小于M的数，统计它的排名；如果M的排名小于K，下次遍历磁
+   带的时候随即选择一个大于M的数，统计排名
+</li>
+<li>经过步骤3，所选数的范围缩小，最后就能找到所要求的数
+</li>
+<li>最多遍历磁带2logN次， 每次遍历时间O(n),总时间复杂度为O(nlogn)
+</li>
+</ol>
+
+
+<p>
+目前求第K小的数，比较好的算法时间复杂度为O(n),常数大概为3.4
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 裁纸机程序</h3>
+<div class="outline-text-3" id="text-2-2">
+
+<p>一个字条上边印有一串数字，对字条进行切割，满足一下条件
+</p><ol>
+<li>每个字条上边都有字
+</li>
+<li>所有字条上数字的和小于给定数字
+</li>
+</ol>
+
+
+<p>
+一个长度为n的数字串，共有n-1个位置可以切割，每个位置可以切割也可以不切
+割时间复杂度为o(2<sup>(n-1)</sup>)
+</p>
+
+
+<pre class="example">#include &lt;stdio.h&gt;
+long long s = 0;
+long long k, max = -1;
+int flag=0;
+void cutpaper(long long d, long long t)
+{
+    t *= 10;
+    if(d &lt; t){
+        s += d;
+        if(s &lt;k &amp;&amp; s &gt;= max){
+            if(s==max)
+                flag=1;
+            else{
+                max=s;
+                flag=0;
+            }
+        }
+        s -= d;
+        return;
+    }
+    cutpaper(d, t);
+    long long temp = d % t;
+    d = d/t;
+    s += temp;
+    cutpaper(d, 1);
+    s -= temp;
+}
+
+int main()
+{
+    long long d, t;
+    scanf("%ld%ld", &amp;d, &amp;k);
+    cutpaper(d, 1);
+    if(max &gt;= k)
+        printf("not exists\n");
+    else if(flag)
+        printf("not service\n");
+    else
+        printf("%ld\n", max);
+    return 0;
+}
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> 从0-N中随机生成M个数</h3>
+<div class="outline-text-3" id="text-2-3">
+
+<p>思路一：先从N个数中随机找出M个，然后对这M个数进行随机排列，时间复杂度
+为O(n),空间复杂度为O(M)。
+</p>
+
+
+<pre class="example">#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+#include &lt;stdlib.h&gt;
+
+int s[100];
+int f=0;
+
+int getrand(int a, int b)
+{
+    return a + rand() % (b - a);
+}
+int in(int a)
+{
+    for(int i=0;i&lt;f;i++)
+        if(s[i]==a)
+            return 1;
+    return 0;
+}
+
+void swap(int i, int j)
+{
+    int t = s[i];
+    s[i]=s[j];
+    s[j]=t;
+}
+
+int main()
+{
+    int n,m;
+    srand(time(NULL));
+    scanf("%d%d", &amp;n, &amp;m);
+    for(int i=n-m;i&lt;n;i++){
+        int temp=getrand(0, i + 1); #注：这里是 i + 1
+        if(!in(temp))
+            s[f++]=temp;
+        else
+            s[f++]=i;
+    }
+    for(int i=m-1;i&gt;0;i--){
+        int temp = getrand(0, i+1);
+        swap(i, temp);
+    }
+    for(int i=0;i&lt;f;i++)
+        printf("%d\n", s[i]);
+    return 0;
+}
+</pre>
+
+
+<p>
+思路二：直接从N个数中生成M个随机数
+</p>
+
+
+<pre class="example">for(int i=1;i&lt;=N;i++)
+    s[i]=i;      #这样保证了生成的数不会重复，缺点是需要O(N)的空间
+for(int i =1;i&lt;=M;i++)
+    int temp = RandInt(i, N);
+    swap(i, temp);
+</pre>
+
+
+<p>
+思路三：对思路一中的情况进行了修改,插入S时刻意选择插入的位置，这样可以
+制造更好的随机，编程珠玑（续）
+</p>
+
+
+<pre class="example">initialize sequence S to empty
+for J:=N-M+1 to N do
+    T = RandInt(1, J)
+    if T is not in S then
+       prefix T to S
+    else
+       insert J in S after T
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> 求平方根 求多维空间中两个点间的距离</h3>
+<div class="outline-text-3" id="text-2-4">
+
+<ol>
+<li>K维空间中有两个点A和B，求它们间的距离
+</li>
+<li>其中最重要的是求平方根操作，使用牛顿迭代可以减小开方操作的时间
+</li>
+<li>先找出A到B的距离中距离最大的一维 并记该距离为M，则A到B的距离值介于M和sqrt(K) * M
+   之间
+</li>
+<li>用二分法直到两次求的的距离值小于一定范围为止
+</li>
+</ol>
+
+
+
+
+<pre class="example">#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+#define exp 1.0e-7
+
+int main()
+{
+    double A[16]={4,6,2,6,1,9,12,64,43};
+    double B[16]={4,6,8,15,31,26,43,17,41};
+    double T = A[0]-B[0];
+    double max = T;
+    double sum= T * T;
+    for(int i=1;i&lt;10;i++){
+        T =fabs(A[i]-B[i]);
+        if(T &gt; max)
+            max = T;
+        sum += T * T;
+    }
+    printf("%lf\n", sum);
+    if(sum - 0.0 &lt; exp)
+        return 0;
+
+    /* 现在已经知道从A到B距离最大的一维的距离max， A到B的距离介于max
+     * 和 sqrt(k) * max 之间 */
+
+    /* 方法一 ------------------------------------------------------------------------*//
+    double z = max;
+    double newz;
+    while(1){
+        newz = 0.5 * (z + sum / z); #每一步都缩小了newz和精确值的差距
+        if(fabs(newz - z) &lt; z * exp)
+            break;
+        z = newz;
+    }
+    /* 改进 --------------------------------------------------------------------------*/
+    max = max * 2;
+    max = 0.5 * (max + sum / max);
+    max = 0.5 * (max + sum / max);
+    max = 0.5 * (max + sum / max);
+    max = 0.5 * (max + sum / max);
+    /* ------------------------------------------------------------------------------*/
+    printf("%lf\n", newz);
+    return 0;
+}
+</pre>
+
+
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 指定时间表规划 &nbsp;&nbsp;&nbsp;<span class="tag"><span class="____">工作计划</span></span></h2>
+<div class="outline-text-2" id="text-3">
+
+<p> <a href="../arrange.gif"> 基本流程</a>
+</p>
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> <span class="todo TODO">TODO</span> 后缀数组</h3>
+<div class="outline-text-3" id="text-3-1">
+
+</div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> <span class="todo TODO">TODO</span> 后缀树</h3>
+<div class="outline-text-3" id="text-3-2">
+
+</div>
+
+</div>
+
+<div id="outline-container-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> <span class="todo TODO">TODO</span> java webservice</h3>
+<div class="outline-text-3" id="text-3-3">
+
+</div>
+
+</div>
+
+<div id="outline-container-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> 快捷键</h3>
+<div class="outline-text-3" id="text-3-4">
+
+
+</div>
+
+<div id="outline-container-3-4-1" class="outline-4">
+<h4 id="sec-3-4-1"><span class="section-number-4">3.4.1</span> todo 常用快捷键</h4>
+<div class="outline-text-4" id="text-3-4-1">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">快捷键</th><th scope="col" class="left">功能</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">C-c C-t</td><td class="left">在定义的状态中循环</td></tr>
+<tr><td class="left">C-u C-c C-t</td><td class="left">指定一个状态</td></tr>
+<tr><td class="left">S-right</td><td class="left">在定义的状态中循环</td></tr>
+<tr><td class="left">S-Left</td><td class="left">在定义的状态中循环</td></tr>
+<tr><td class="left">C-c C-q</td><td class="left">为当前状态插入标签</td></tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2012-10-18 16:35:47 �й���׼ʱ��</p>
+<p class="author">Author: </p>
+<p class="creator">Org version 7.8.11 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>

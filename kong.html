@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="kong"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-10-18 16:35:47 �й���׼ʱ��"/>
+<meta name="generated" content="2012-10-19 14:37:08 中国标准时间"/>
 <meta name="author" content=""/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -103,6 +103,7 @@
 <li><a href="#sec-1-1">1.1 个人笔记</a>
 <ul>
 <li><a href="#sec-1-1-1">1.1.1 配置emacs</a></li>
+<li><a href="#sec-1-1-2">1.1.2 学习Lisp</a></li>
 </ul>
 </li>
 <li><a href="#sec-1-2">1.2 学习笔记</a>
@@ -111,6 +112,15 @@
 <li><a href="#sec-1-2-2">1.2.2 进程的地址空间</a></li>
 <li><a href="#sec-1-2-3">1.2.3 java中创建socke超时的解决办法</a></li>
 <li><a href="#sec-1-2-4">1.2.4 java获取本机地址的方式</a></li>
+<li><a href="#sec-1-2-5">1.2.5 段错误和BUS错误</a></li>
+<li><a href="#sec-1-2-6">1.2.6 捕捉信号signal</a></li>
+<li><a href="#sec-1-2-7">1.2.7 类型提升 不怎么准  在ANSI C中已经取消了</a></li>
+<li><a href="#sec-1-2-8">1.2.8 unix系统中逐字符输入的两种实现</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-3">1.3 面试经验收集</a>
+<ul>
+<li><a href="#sec-1-3-1">1.3.1 百度某部门 java研发</a></li>
 </ul></li>
 </ul>
 </li>
@@ -122,14 +132,16 @@
 <li><a href="#sec-2-4">2.4 求平方根 求多维空间中两个点间的距离</a></li>
 </ul>
 </li>
-<li><a href="#sec-3">3 指定时间表规划</a>
+<li><a href="#sec-3">3 时间表</a>
 <ul>
 <li><a href="#sec-3-1">3.1 后缀数组</a></li>
 <li><a href="#sec-3-2">3.2 后缀树</a></li>
 <li><a href="#sec-3-3">3.3 java webservice</a></li>
-<li><a href="#sec-3-4">3.4 快捷键</a>
+<li><a href="#sec-3-4">3.4 bitmap位图</a></li>
+<li><a href="#sec-3-5">3.5 爬虫程序</a></li>
+<li><a href="#sec-3-6">3.6 快捷键</a>
 <ul>
-<li><a href="#sec-3-4-1">3.4.1 todo 常用快捷键</a></li>
+<li><a href="#sec-3-6-1">3.6.1 todo 常用快捷键</a></li>
 </ul>
 </li>
 </ul>
@@ -174,8 +186,9 @@ darkroom-mode.el frame-local-vars.el
 </li>
 </ul>
 <ul>
-<li id="sec-1-1-1-3">10.17 查看历史打开文件<br/>
-recentf-open-files命令
+<li id="sec-1-1-1-3">10.17 查看历史打开文件 和历史编辑记录<br/>
+recentf-open-files命令  C-c o按键
+goto-last-change        C-c k 查看立即编辑记录
 </li>
 </ul>
 <ul>
@@ -192,7 +205,71 @@ C-x p  you may try.
 <ul>
 <li id="sec-1-1-1-6">10.18 emacs打开文件的字符编码问题<br/>
 使用命令revert-buffer-with-coding-system手动选择打开文件的字符编码，
-在保存的时候还可以指定文件的保存编码，使用命令set-buffer-file-coding-system
+在保存的时候还可以指定文件的保存编码，使用命令
+set-buffer-file-coding-system
+</li>
+</ul>
+<ul>
+<li id="sec-1-1-1-7">10.18 emacs配置etags<br/>
+find -name "*.[chCH]" -print | etags - 命令用来生成TAGS
+成功配置etags 
+f5可以查找TAG，f6可以查找当前TAG,C-f6可以回跳
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1-1-2" class="outline-4">
+<h4 id="sec-1-1-2"><span class="section-number-4">1.1.2</span> 学习Lisp</h4>
+<div class="outline-text-4" id="text-1-1-2">
+
+<ul>
+<li id="sec-1-1-2-1">学习Lisp 基本操作符<br/>
+Lisp 的 7 个公理（基本操作符）
+操作符一： quote
+(quote x) 返回x
+操作符二： atom
+(atom x) 当 x 是一个原子或者空表时返回原子 t，否则返回NIL
+操作符三： eq
+(eq x y) 当 x 和y 指向相同的对象的时候返回t，否则返回NIL，值得注意的是
+在Common Lisp中，原子对象在内存中只会有一份拷贝，所以(eq 'a 'a)返回t
+操作符四： car
+(car x) 要求 x 是一个表，它返回 x 中的第一个元素
+操作符五： cdr
+(cdr x) 同样要求 x 是一个表，它返回x中除第一个元素之外的所有元素组成的
+表
+操作符六： cons
+(cons x y) 返回一个cons cell (x y)，如果y不是一个list，将会一dotted
+pair形式展现这个cons cell
+
+<p>
+<b>多重的cons cell就构成了表</b>
+(cons 'a (cons 'b (cons 'c ())))
+(a b c)
+</p>
+<p>
+操作符七： cond
+(cond (p1 e1) &hellip;(pn en)) 的求值规则如下. 对“条件表达式p”依次求值直
+到有一个返回t. 如果能找到这样的p表达式,相应的“结果表达式e”的值作为整
+个cond表达式的返回值.
+(cond ((eq 'a 'b) 'first)  ((atom 'a)  'second))
+</p>
+</li>
+</ul>
+<ul>
+<li id="sec-1-1-2-2">Lisp高级属性<br/>
+<b>构造函数</b>
+cons
+(cons 'lions '(tigers bears)) cons带有两个参数，一个原子和一个列表，
+cons将原子作为第一个原子添加到该列表中。
+append
+(append '(lions) '(tigers bears)) append连接两个列表
+list
+(list 'lions 'tigers 'bears) list包含一个有所有参数组成的列表
+
+
+
 </li>
 </ul>
 </div>
@@ -261,7 +338,178 @@ s.setSoTimeOut(1000;        #设置获取信息的超时时间
 
 <p>InetAddress.getByName("localhost") #结果总是127.0.0.1
 InetAddress.getLocalHost();     #得到本机的有效网络地址
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-2-5" class="outline-4">
+<h4 id="sec-1-2-5"><span class="section-number-4">1.2.5</span> 段错误和BUS错误</h4>
+<div class="outline-text-4" id="text-1-2-5">
+
+<p>常见的段错误和BUS错误，BUS错误通常是由于数据在内存中不对齐引起的
+</p>
+
+
+<pre class="example">union{ char a[10];
+       int i;
+}u;
+int * p = (int *)&amp;(u.a[1]);
+*p = 17;
+</pre>
+
+<p>
+在实例中，数组a在共用体中是和int对齐的，所以a<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>必然不和int对齐，然后
+在这个地方放入一个4字节的数据会引发BUS错误。
+</p>
+<p>
+段错误比较常见，通常是
+</p><ol>
+<li>坏指针值错误。在指针赋值前就用它来引用内存，指针释放后再将它置为空
+   值。
+</li>
+<li>改写错误。 数组越界。
+</li>
+<li>释放链表出错。
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-1-2-6" class="outline-4">
+<h4 id="sec-1-2-6"><span class="section-number-4">1.2.6</span> 捕捉信号signal</h4>
+<div class="outline-text-4" id="text-1-2-6">
+
+<p>使用头文件signal.h,使用句柄函数signal(SIGSGEV, handler)
+常见的错误信号值SIGBUS,SIGSGEV,SIGILL
 </p></div>
+
+</div>
+
+<div id="outline-container-1-2-7" class="outline-4">
+<h4 id="sec-1-2-7"><span class="section-number-4">1.2.7</span> 类型提升 不怎么准  在ANSI C中已经取消了</h4>
+<div class="outline-text-4" id="text-1-2-7">
+
+<p>整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类
+型将被提升为int，前提是int能够完整的容纳原先的数据，否则将被转换为
+unsigined int。float将被转换为double类型，任何数组将被转换为相应类型的
+指针。
+char c1,c2;
+c1 = c1 + c2;
+运算的时候，把每个变量的值提升为int的长度，然后对int执行加法，然后对运
+算结果进行裁剪。
+试试sizeof('c')的值
+注意：另一个会发生隐式类型转换的地方就是参数传递，由于函数的参数也是表
+达式，所以也会发生类型提升，在被调用函数的内部，提升后的参数被裁剪为原
+先声明的大小。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-2-8" class="outline-4">
+<h4 id="sec-1-2-8"><span class="section-number-4">1.2.8</span> unix系统中逐字符输入的两种实现</h4>
+<div class="outline-text-4" id="text-1-2-8">
+
+<p>一种是把I/O设置为raw状态，可以实现阻塞式读入，如果终端没有字符输入，进
+程就一直等待，直到有字符输入为止。
+</p>
+
+
+<pre class="example">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main()
+{
+    int c;
+    /* 中断驱动原来处于普通的一次一行模式*/
+    /* 把终端设置为raw状态可以实现阻塞式读入*/
+    system("stty raw");
+    while(1){
+        /*现在驱动处于一次一字符的模式*/
+        c=getchar();
+        putchar(c);
+        if(c=='q')
+            break;
+    }
+    /* 终端驱动又处于一次一字符的方式 */
+    system("stty cooked");
+    return 0;
+}
+</pre>
+
+
+<p>
+另外一种方式是使用ioctl(),这样只有当一个字符等待被读入时，进程才进行读
+取，这种类型的I/O被称为轮询，就好像你不断地询问设备的状态，看看它是否
+有字符要传给你。
+</p>
+
+
+
+<pre class="example">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;sys/ioctl.h&gt;
+
+int kbhit()
+{
+    int i;
+    /* 设置I/O轮询 */
+    ioctl(0, FIONREAD, &amp;i);
+    return i;
+}
+
+int main()
+{
+    int i=0;
+    int c=' ';
+    system("stty raw -echo");
+    printf("enter 'q' to quit \n");
+    for(;c!='q';i++){
+        if(kbhit()){
+            c=getchar();
+            printf("\n got %c, on iteration %d", c, i);
+        }
+    }
+    system("stty cooked echo");
+}
+</pre>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> 面试经验收集</h3>
+<div class="outline-text-3" id="text-1-3">
+
+
+</div>
+
+<div id="outline-container-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1"><span class="section-number-4">1.3.1</span> 百度某部门 java研发</h4>
+<div class="outline-text-4" id="text-1-3-1">
+
+<p>研一小硕一枚，本科我邮计算机，玩了四年，在论坛上看到百度忘记哪个部门招java实习生，就投了简历凑了凑热闹 
+先是电面，问了几个比较基础的问题，比如.equals()和==的区别，Spring中IOC和AOP什么意思，还有java中collection框架的架构..然后有人通知面试，这勉强算第一面 
+下午到百度，然后先做了一个小时的笔试题，大概能做出来一半吧..发现他们问的题都很底层，比如SSH，不会问你怎么用，而是问你怎么理解它的设计思想的..貌似有个Hibernate中的懒加载..就果断不会了&hellip;Java也是很底层的，印象比较深的有个问什么叫unchecked Exception和checked Exception&hellip;.当时只知道有RuntimeException&hellip;就随便写了写.还有设计模式的东西，面java肯定要问设计模式的..后来感觉笔试仅仅是给你一个表现自己的机会，有个题不会也不要紧，把与题目相关的东西，知道多少就写多少&hellip; 
+交完卷子等了半个小时然后来了个美女mm来二面&hellip;先是讲了项目上的东西，问了很多关于SSH和Flex里面的东西..看到我项目里面用过Ibatis/Mybatis..然后巴拉巴拉讨论了很多，比如Ibatis/Hibernate的区别以及Ibatis/Mybatis的区别，还有使用时的细节&hellip;然后又问了很多java基础的知识..设计模式的时候问了个单例模式，之前在一本书上看过单例模式有线程安全和线程不安全的两种写法，就巴拉巴拉讲了一大堆..还问了很多线程方面的知道。数据库方面先出了一个题让我写一个SQL语句，然后让我自己写一个我能想到最复杂的Sql语句..我的项目里面有涉及到数据库设计的，又讨论了很多.. 
+二面结束了让我在原地等着..后来来了一个看着就像大牛的员工来三面..三面问的东西各种发散各种宽广..差不多五分钟一道题问了一个小时&hellip;.印象比较深的是HashMap/HashSet的内部实现原理，还好之前看过它们的源码..这个问题不要简简单单的回答散列表&hellip;看看源码就会知道里面还有好多重要知识&hellip;还有+号和append的区别..线程的实现方式以及优缺点..以及我对java中collection框架的看法..还有很多SSH方面的问题..具体的忘了&hellip;算法问了一个全排列的递归和非递归，编程之美上面有的..还有一个二分查找 
+三面完了让我在那里等..一般实习生最多就是三面..我就在那里等结果..出来一个HR姐姐对我说项目头儿想面我..让我明天下午来..当时我就凌乱了..我是下午一点半开始笔试的&hellip;面到五点半.. 
+第二天下午四面，面试官问的知识更发散了..有个问题是让我自己设计一套jdk我该怎么设计&hellip;当时我就凌乱了&hellip;反正也没正确答案就胡诌了一堆东西..然后问了很多代码优化的东西，问我对自己参与过的项目代码的优化经历以及有什么想法..还有对设计模式的理解和看法..反正问的都是没有正确答案的，要靠自己的经历总结和归纳，当时是能想多少就说多少&hellip;我的项目里面涉及到数据库的不少,问了一个内存数据库的问题..就是把数据库放在内存中需要注意哪些问题&hellip;问题很发散&hellip;和面试官巴拉巴拉聊了两个小时..然后让我回去等消息 
+在回去的地铁上收到了HR的电话让去报道..
+虽然因为某些原因最终还是没有去百度实习..这次面试获益匪浅啊..一次电面，一次笔试，然后三面.. 
+java基础方面一定要扎实..能看源码最好看源码..以前学的太漂了..
+框架方面主要理解思想跟设计方法..比较注重于概念..
+数据库设计跟Sql的书写还是挺重要的
+算法这次问的倒不多..估计跟岗位有关系吧..
+</p>
+</div>
 </div>
 </div>
 
@@ -537,7 +785,7 @@ int main()
 </div>
 
 <div id="outline-container-3" class="outline-2">
-<h2 id="sec-3"><span class="section-number-2">3</span> 指定时间表规划 &nbsp;&nbsp;&nbsp;<span class="tag"><span class="____">工作计划</span></span></h2>
+<h2 id="sec-3"><span class="section-number-2">3</span> 时间表 &nbsp;&nbsp;&nbsp;<span class="tag"><span class="____">工作计划</span></span></h2>
 <div class="outline-text-2" id="text-3">
 
 <p> <a href="../arrange.gif"> 基本流程</a>
@@ -569,15 +817,31 @@ int main()
 </div>
 
 <div id="outline-container-3-4" class="outline-3">
-<h3 id="sec-3-4"><span class="section-number-3">3.4</span> 快捷键</h3>
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> <span class="todo TODO">TODO</span> bitmap位图</h3>
 <div class="outline-text-3" id="text-3-4">
+
+</div>
+
+</div>
+
+<div id="outline-container-3-5" class="outline-3">
+<h3 id="sec-3-5"><span class="section-number-3">3.5</span> <span class="todo TODO">TODO</span> 爬虫程序</h3>
+<div class="outline-text-3" id="text-3-5">
+
+</div>
+
+</div>
+
+<div id="outline-container-3-6" class="outline-3">
+<h3 id="sec-3-6"><span class="section-number-3">3.6</span> 快捷键</h3>
+<div class="outline-text-3" id="text-3-6">
 
 
 </div>
 
-<div id="outline-container-3-4-1" class="outline-4">
-<h4 id="sec-3-4-1"><span class="section-number-4">3.4.1</span> todo 常用快捷键</h4>
-<div class="outline-text-4" id="text-3-4-1">
+<div id="outline-container-3-6-1" class="outline-4">
+<h4 id="sec-3-6-1"><span class="section-number-4">3.6.1</span> todo 常用快捷键</h4>
+<div class="outline-text-4" id="text-3-6-1">
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 <caption></caption>
@@ -595,14 +859,24 @@ int main()
 </tbody>
 </table>
 
-</div>
+
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> DEFINITION NOT FOUND: 1
+</p>
+
 </div>
 </div>
 </div>
 </div>
 
+</div>
+</div>
+</div>
+
 <div id="postamble">
-<p class="date">Date: 2012-10-18 16:35:47 �й���׼ʱ��</p>
+<p class="date">Date: 2012-10-19 14:37:08 中国标准时间</p>
 <p class="author">Author: </p>
 <p class="creator">Org version 7.8.11 with Emacs version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>

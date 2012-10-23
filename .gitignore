@@ -5,7 +5,11 @@ main
 *.c
 *.class
 *.s
+*.elc
+*.lisp
+*.html
 Makefile
 makefile
 TAGS
 .gitignore
+*in

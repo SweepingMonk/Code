@@ -225,6 +225,12 @@ DROP PROCEDURE  IF  EXISTS存储过程名
 ***** 存储过程参数的三种形态
 见示例
 http://www.exampledepot.com/egs/java.sql/CallProcedure.html
+***** 数据库一些不常见概念
+CachedRowSet 被缓存的行集：允许与用户的整个交互过程中，断开连接，并且
+可以将修改的部分同步到数据库
+数据库元数据 DatabaseMetaData:可以获取数据库的一些信息，比如表格
+结果集元数据 RestltSetMetaData: 可以获取结果集的总列数，列名，列的宽度
+可滚动的结果集
 *** c编程
 **** 类型提升 不怎么准  在ANSI C中已经取消了
 整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类

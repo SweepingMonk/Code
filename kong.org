@@ -154,6 +154,77 @@ sql语句执行的时候要先编译，然后执行。存储过程（Stored Proc
 
 数据库存储过程的实质就是部署在数据库端的一组定义代码以及SQL。
 
+mysql存储过程实现过程
+（1）MySQL存储过程是在“命令提示符”下创建的，所以首先应该打开“命令提示符”窗口。
+（2）进入“命令提示符”窗口后，首先应该登录MySQL数据库服务器，在“命令提示符”下输入如下命令：
+mysql –u用户名 –p用户密码
+（3）更改语句结束符号，本实例将语句结束符更改为“//”。代码如下：
+delimiter //
+说明:存储过程用以;作为结束符，而;又是命令行下sql语句的结束符，所以要进
+行更改
+（4）创建存储过程前应首先选择某个数据库。代码如下：
+use 数据库名
+（5）delimiter ;
+（6）创建存储过程。
+（7）通过call语句调用存储过程。
+
+存储过程示例:
+#+BEGIN_EXAMPLE
+create procedure pr_add
+(
+a int,
+b int
+)
+begin
+declare c int;
+-- 用来声明局部变量
+-- DECLARE仅被用在BEGIN ... END复合语句里，并且必须在复合语句的开头，在任何其它语句之前。
+if a is null then
+set a = 0;
+end if;
+if b is null then
+set b = 0;
+end if;
+set c = a + b;
+select c as sum;
+/*
+return c;
+不能在 MySQL 存储过程中使用。return 只能出现在函数中。
+*/
+end;
+
+#执行：
+set @a = 10;
+set @b = 20;
+call pr_add(@a, @b);
+
+create procedure pro_sort(a int)
+begin
+if a=0
+then
+select * from student order by age desc;   -- 降序排列
+else
+select * from student order by age asc;    -- 升序排列
+end if;
+end;
+
+#创建 MySQL 存储过程的简单语法为：
+
+create procedure 存储过程名字()
+(
+[in|out|inout] 参数 datatype
+)
+begin
+MySQL 语句;
+end;
+#+END_EXAMPLE
+删除存储过程
+DROP PROCEDURE  IF  EXISTS存储过程名
+不能在一个存储过程中删除另一个存储过程，只能调用另一个存储过程
+
+***** 存储过程参数的三种形态
+见示例
+http://www.exampledepot.com/egs/java.sql/CallProcedure.html
 *** c编程
 **** 类型提升 不怎么准  在ANSI C中已经取消了
 整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类

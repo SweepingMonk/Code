@@ -742,3 +742,8 @@ int main()
 *** TODO 后缀树
 *** TODO 后缀数组
 *** TODO java webservice
+
+
+* 图形子系统
+  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
+Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.

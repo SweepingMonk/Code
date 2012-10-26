@@ -355,7 +355,11 @@ Content-Length: 122
 |    |cPNK  |
 |    |世界    |
 +----+------+
-#+end_src  
+#+end_src
+
+#+results:
+[[file:helloworld.png]]
+
 #+end_example
 
 

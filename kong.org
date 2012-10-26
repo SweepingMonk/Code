@@ -855,6 +855,7 @@ int main()
 *** TODO 后缀树
 *** TODO 后缀数组
 *** TODO java webservice
+<<<<<<< HEAD
 *** TODO Delvik虚拟机和Java虚拟机的区别  Android技术内幕
 * 图形子系统
 * Android编译框架
@@ -875,3 +876,10 @@ make：最常规的编译，通常用来编译整个Android源码
 mm：用来编译当前目录下的所有子项目
 mmm： 用来编译指定目录下的所有子项目
 
+=======
+
+
+* 图形子系统
+  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
+Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.
+>>>>>>> 23d57b91fb1b3ef574112f2d46aa55d4e5a7676c

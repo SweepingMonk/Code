@@ -1,7 +1,7 @@
 * 笔记
 ** 个人笔记
 *** 配置emacs
- **** emacs快捷键
+**** emacs快捷键
  | 命令类型                           | 快捷键          | 快捷键描述                             |
  |------------------------------------+-----------------+----------------------------------------|
  | 查找                               | C-s C-w         | 在查找模式下，查找光标指定位置处的单词 |
@@ -36,6 +36,37 @@ find -name "*.[chCH]" -print | etags - 命令用来生成TAGS
 visit-tags-table 用来查找指定的TAGS
 成功配置etags 
 f5可以查找TAG，f6可以查找当前TAG,C-f6可以回跳
+**** 10.28 emacs显示图片
+参考博文： http://www.cnblogs.com/tianyuhuo/archive/2012/09/12/2012-9-12-1.html
+window中的emacs默认不能显示图片，而是一堆乱码，根本原因是缺少解析图片
+所需要的dll，只要下载好指定图片对应的dll就可以了。
+
+两个下载地址：
+地址1：GnuWin Packages
+
+地址2：winterTTr's github
+
+然后按M-x iimage-mode RET就可以了
+
+要在org-mode里启用iimage-mode需要把一下代码加入emacs配置文件中
+#+BEGIN_EXAMPLE
+(defun org-toggle-iimage-in-org () 
+
+　　"display images in your org file"
+
+　　(interactive) 
+
+　　(if (face-underline-p 'org-link) 
+
+　　　　(set-face-underline-p 'org-link nil)
+
+　　　　(set-face-underline-p 'org-link t)) 
+
+　　　　(iimage-mode)) 
+#+END_EXAMPLE
+以后你只要输入M-x org-toggle-iimage-in-org RET或M-x iimage-mode RET就
+可以了。
+
 *** 学习Lisp
 **** List命令
 | 关键字 | 简介                                 |
@@ -358,6 +389,74 @@ Content-Length: 122
 #+end_src  
 #+end_example
 
+**** javabean 和 Enterprise JavaBean的区别和联系
+javabean是一种java语言编写的可重用组件。javabean的类必须是具体的和公开的，并且具有无参数构造器，javabean通过提供符合一致性设计模式(这和通常的设计模式不同，只是一种理念)的公共方法暴露内部域成员变量，通常是get/set方法
+
+JavaBean 和 Server Bean（通常称为 Enterprise JavaBean (EJB)）有一些基本相同之处。它们都是用一组特性创建，以执行其特定任务的对象，获得其它特性的能力。这使得 bean 的行为根据特定任务和所在环境的不同而有所不同。
+
+| javabean                             | Enterprise JavaBean                  |
+|--------------------------------------+--------------------------------------|
+| 使用java.beans包开发            | 使用javax.ejb包开发             |
+| beans包是java2标准的一部分   | ejb包是标准JDK的扩展          |
+| 一台机器上同一个地址空间中运行的组件 | 在多台机器上跨几个地址空间运行的组件 |
+| javabean是进程内组件           | ejb是进程间组件                |
+| 通常用作GUI窗口小部件       | 用作分布式商业对象                   |
+
+javabean存在与四种范围：页面(page)，请求(request)，对话(sessin)，应用(application)。
+
+对话范围：
+对话范围的JavaBean 主要应用与跨多个页面和时间段： 例如填充用户信息。 添加信息并且接受回馈，保存用户最近执行页面的轨迹。对话范围JavaBean保留一些和用户对话 ID 相关的信息。这些信息来自临时的对话cookie，并在当用户关闭浏览器时，这个cookie将从客户端和服务器删除。
+页面/请求范围：
+页面和请求范围的JavaBean有时类似表单 的bean ， 这是因为他们大都用于处理表单。表单需要很长的时间来处理用户的输入??外页面和请求范围的bean可以用于减少大型站点服务器上的负载，如果使用对话bean，耽搁的处理就可能会消耗掉很多资源。
+应用：
+应用范围通常应用于服务器的部件，例如 JDBC连接池、应用监视、用户计数和
+其他参与用户行为的类。
+
+javaBean持久化是指以流的形式，用JavaBean的属性来保存bean，并在以后的某
+个时候或者在另一个虚拟机中再将它们读回来，和对象的序列化有点类似，然而
+它们有一个非常重要的区别，javabean持久化适合于长期存储。
+
+当一个对象被序列化存储以后，如果类的实现发生了变化，则把对象重新读出来
+的时候就要在新旧数据表现之间进行转化。因此对象序列化仅适合于短期存储或
+者应用程序之间的RMI。
+
+JavaBean的持久化可以考虑三种方式：数据库、XML文件、二进制流
+第一种方式可以使用O/R Mapping技术将一个JavaBean映射到关系数据库中的表；
+第二种方式可以使用JAVA1.4 的
+java.beans.XMLDecoder/java.beans.XMLEncoder将Bean映射到一个XML文件中；
+第三种方式要求Bean实现Java的Serializable接口；
+**** 类加载器
+一般来说，java虚拟机使用一个类的方式如下：java源程序在经过java编译器编
+译之后就被转换成java字节码文件.class，虚拟机加载字节码文件被转换为
+java.lang.Class的一个实例，每个这样的实例代表一个java类，然后通过这个实例
+的newInstance()方法生成一个对象。
+基本上所有类加载器都是java.lang.ClassLoader的实例。
+
+java.lang.ClassLoader的主要作用是根据一个给定类的名字，查找该类的字节
+码文件，并生成一个class实例，它同时也加载java类所需要的一些资源如图像
+和配置文件。
+java.lang.ClassLoader与加载类有关的方法
+| 方法                                                 | 说明                                                  |
+|------------------------------------------------------+-------------------------------------------------------|
+| getParent()                                          | 返回该类加载器的父加载器                              |
+| loadClass(String name)                               | 加载名称为name的类，返回结果是java.lang.Class的实例   |
+| findClass(String name)                               | 查找名称为name的类，返回结果是java.lang.Class类的实例 |
+| findLoadedClass(String name)                         | 查找名字为name的已经加载过的类，返回结果同上          |
+| defineClass(String name, byte[] b, int off, int len) | 把字节数组b中的内容转换成java类，返回结果同上         |
+| resolveClass(Class<?> c)                             | 连接指定的java类                                            |
+
+java中的类加载器分为两种，一种是系统提供的，另一种是由java应用开发人员
+编写的。
+
+java中系统提供的类加载器有三种：
+bootstrap class loader  引导类加载器
+extension class loader  扩展类加载器
+system class loader     系统类加载器
+
+Class.forName()是使用系统类加载器加载的。
+类是由它的全名和类加载器来确定的，因此在同一个虚拟机中可以有两个类，它
+们的类名和包名都是相同的，只要是由不同的加载器来加载就行。
+
 
 *** c编程
 **** 类型提升 不怎么准 在ANSI C中已经取消了
@@ -611,6 +710,17 @@ FILE * fp = fdopen(fd, "r") 根据文件描述符加上访问模式可以得到�
 **** /etc/shadow文件被覆盖 su故障
 重启电脑在root账户下执行passwd kong重新生成账户密码, 执行 sudo passwd root重新生成ro
 ot的密码,然后su就可以恢复工作
+**** 文件的每一行后边多一个^M
+这个问题是由于Unix和Window的换行符不一样造成的Unix中是以\n作为换行，
+Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文件在Window中
+打开都是一行，Window下的文件在Unix下打开的话在 每行的结尾可能会多出一
+个^M符号。
+
+在Unix下转换Window下文件的两种方式：
+1. 命令dos2unix test.file
+2. 去掉'\r', 用命令sed -i 's/\r//' test.file
+ok!!
+
 ** 面试经验收集
 *** 面试资料
 v_july_v整理的面试题 http://blog.csdn.net/v_july_v
@@ -815,6 +925,20 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
   
 选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
 * 各种有趣问题
+** 哈希表的尴尬
+由于cache命中率的原因，哈希表的性能通常好于红黑树。即使只有32个元素，
+也要进行5次随机内存访问。随机内存访问对cpu cache是不友好的。
+
+hash表最大的缺陷是当数据量难以估计时，没法设置合适的bucket，元素可能是
+10个也可能是10000个
+这里有几种思路：
+1. 设置缺省bucket值为100左右，然后让hash表自动扩容，缺点是扩容的时候性
+   能要受到影响。
+2. 结合业务，每次给10000的bucket，缺点是浪费内存，而且无法处理100W这样
+   的极端情况。
+3. 把hash表的list变成哈希表，缺点是结构复杂，多次哈希速度慢。
+综合来看方案一是比较好的这种。
+
 ** 用磁带机求第K小元素                                                         :第K大元素:
 如果输入在磁带机上， 你的机器只有一个磁带机驱动器和几十字的内存，如何
 找第K小的数
@@ -1048,6 +1172,30 @@ int main()
 *** TODO java webservice
 <<<<<<< HEAD
 *** TODO Delvik虚拟机和Java虚拟机的区别  Android技术内幕
+*** TODO 一致性哈希表
+* 一些热点信息收集
+** redis
+*** redis备忘录
+redis是一个带持久化的高速key-value存储系统。
+
+特点是：热数据放在内存里面实现高速访问，支持可配置的数据持久化，支持主从同步，不依赖任何第三方库（包括通讯层），自己实现了类似virtual memory的机制，代码量不大。
+
+和mysql相比，redis的读写速度要快很多。
+
+和memcached相比，redis带有持久化和主从机制，不过redis重启比较慢。
+
+和bdb相比，redis的读写速度快一些、扩展性也相对好一些。
+
+和mongodb相比，redis要简单得多。mongodb没有行级锁，性能特征很不相同；其实主要是是scheme less的数据库，和redis没有多少可比性。
+
+redis是一个很有潜力的存储系统。目前最大的缺点是尚未有重量级的公司应用；我们不应该忘记cassandra的故事，看起来很美，但是twitter用了没几天就不用了。
+
+另外有谣言说redis的稳定性有问题。
+
+
+那么目前对待redis的最好态度是什么呢？静观其变，看谁先吃螃蟹。这是“死道友莫死贫道”的意思。
+
+mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需求。
 * 图形子系统
 * Android编译框架
 ** 编译框架基本概念
@@ -1074,3 +1222,9 @@ mmm： 用来编译指定目录下的所有子项目
   在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
 Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.
 >>>>>>> 23d57b91fb1b3ef574112f2d46aa55d4e5a7676c
+
+
+
+
+bind -m emacs '"\C-o": menu-complete'
+bash-completion包

@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="kong"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-10-27 13:00:31 中国标准时间"/>
+<meta name="generated" content="2012-10-28 16:23:43 中国标准时间"/>
 <meta name="author" content=""/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -111,27 +111,30 @@
 <li><a href="#sec-1-2-1">1.2.1 java编程</a></li>
 <li><a href="#sec-1-2-2">1.2.2 c编程</a></li>
 <li><a href="#sec-1-2-3">1.2.3 系统编程</a></li>
+<li><a href="#sec-1-2-4">1.2.4 Linux常见问题</a></li>
 </ul>
 </li>
 <li><a href="#sec-1-3">1.3 面试经验收集</a>
 <ul>
-<li><a href="#sec-1-3-1">1.3.1 2012百度某部门 java研发</a></li>
-<li><a href="#sec-1-3-2">1.3.2 百度三面</a></li>
-<li><a href="#sec-1-3-3">1.3.3 2012微软面试心得</a></li>
+<li><a href="#sec-1-3-1">1.3.1 面试资料</a></li>
+<li><a href="#sec-1-3-2">1.3.2 2012百度某部门 java研发</a></li>
+<li><a href="#sec-1-3-3">1.3.3 百度三面</a></li>
+<li><a href="#sec-1-3-4">1.3.4 2012微软面试心得</a></li>
 </ul></li>
 </ul>
 </li>
 <li><a href="#sec-2">2 各种有趣问题</a>
 <ul>
-<li><a href="#sec-2-1">2.1 用磁带机求第K小元素</a></li>
-<li><a href="#sec-2-2">2.2 裁纸机程序</a></li>
-<li><a href="#sec-2-3">2.3 从0-N中随机生成M个数</a></li>
-<li><a href="#sec-2-4">2.4 求平方根 求多维空间中两个点间的距离</a></li>
-<li><a href="#sec-2-5">2.5 检测链表中是否存在循环 前提是链表中所有结点元素都不相同</a></li>
-<li><a href="#sec-2-6">2.6 如何判断一个变量时有符号数还是无符号数</a></li>
-<li><a href="#sec-2-7">2.7 一个文本文件中存入了很多字符串，如果随机的从中选中一个</a></li>
-<li><a href="#sec-2-8">2.8 判定点是否在多边形内部</a></li>
-<li><a href="#sec-2-9">2.9 poj1503 简单求大整数的和</a></li>
+<li><a href="#sec-2-1">2.1 哈希表的尴尬</a></li>
+<li><a href="#sec-2-2">2.2 用磁带机求第K小元素</a></li>
+<li><a href="#sec-2-3">2.3 裁纸机程序</a></li>
+<li><a href="#sec-2-4">2.4 从0-N中随机生成M个数</a></li>
+<li><a href="#sec-2-5">2.5 求平方根 求多维空间中两个点间的距离</a></li>
+<li><a href="#sec-2-6">2.6 检测链表中是否存在循环 前提是链表中所有结点元素都不相同</a></li>
+<li><a href="#sec-2-7">2.7 如何判断一个变量时有符号数还是无符号数</a></li>
+<li><a href="#sec-2-8">2.8 一个文本文件中存入了很多字符串，如果随机的从中选中一个</a></li>
+<li><a href="#sec-2-9">2.9 判定点是否在多边形内部</a></li>
+<li><a href="#sec-2-10">2.10 poj1503 简单求大整数的和</a></li>
 </ul>
 </li>
 <li><a href="#sec-3">3 工作计划</a>
@@ -142,16 +145,26 @@
 <li><a href="#sec-3-2">3.2 后缀数组</a></li>
 <li><a href="#sec-3-3">3.3 java webservice</a></li>
 <li><a href="#sec-3-4">3.4 Delvik虚拟机和Java虚拟机的区别  Android技术内幕</a></li>
+<li><a href="#sec-3-5">3.5 一致性哈希表</a></li>
 </ul></li>
 </ul>
 </li>
-<li><a href="#sec-4">4 图形子系统</a></li>
-<li><a href="#sec-5">5 Android编译框架</a>
+<li><a href="#sec-4">4 一些热点信息收集</a>
 <ul>
-<li><a href="#sec-5-1">5.1 编译框架基本概念</a></li>
-<li><a href="#sec-5-2">5.2 Android中的三种不同编译方式</a></li>
+<li><a href="#sec-4-1">4.1 redis</a>
+<ul>
+<li><a href="#sec-4-1-1">4.1.1 redis备忘录</a></li>
+</ul></li>
 </ul>
 </li>
+<li><a href="#sec-5">5 图形子系统</a></li>
+<li><a href="#sec-6">6 Android编译框架</a>
+<ul>
+<li><a href="#sec-6-1">6.1 编译框架基本概念</a></li>
+<li><a href="#sec-6-2">6.2 Android中的三种不同编译方式</a></li>
+</ul>
+</li>
+<li><a href="#sec-7">7 图形子系统</a></li>
 </ul>
 </div>
 </div>
@@ -675,28 +688,122 @@ Content-Length: 122
 </pre>
 
 
+
+<pre class="example">#+begin_src ditaa :file helloworld.png :cmdline -r -s 1.5 -e UTF-8
++-----------+
+| cBLU      |
+| 你好        |
+|    +------+
+|    |cPNK  |
+|    |世界    |
++----+------+
+#+end_src  
+</pre>
+
+
 </li>
 </ul>
 <ul>
-<li id="sec-1-2-1-7">服务器执行web请求的过程<br/>
-<ol>
-<li>表单页 用户点击提交
-</li>
-<li>客户端浏览器 发送表单数据给服务器
-</li>
-<li>HTTP服务器 开始执行脚本产生响应页
-</li>
-<li>响应页 脚本产生响应
-</li>
-<li>响应页返回结果给HTTP服务器
-</li>
-<li>HTTP服务器返回响应结果给客户端浏览器
-</li>
-<li>客户端浏览器显示响应
-</li>
-</ol>
+<li id="sec-1-2-1-7">javabean 和 Enterprise JavaBean的区别和联系<br/>
+javabean是一种java语言编写的可重用组件。javabean的类必须是具体的和公开的，并且具有无参数构造器，javabean通过提供符合一致性设计模式(这和通常的设计模式不同，只是一种理念)的公共方法暴露内部域成员变量，通常是get/set方法
+
+<p>
+JavaBean 和 Server Bean（通常称为 Enterprise JavaBean (EJB)）有一些基本相同之处。它们都是用一组特性创建，以执行其特定任务的对象，获得其它特性的能力。这使得 bean 的行为根据特定任务和所在环境的不同而有所不同。
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">javabean</th><th scope="col" class="left">Enterprise JavaBean</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">使用java.beans包开发</td><td class="left">使用javax.ejb包开发</td></tr>
+<tr><td class="left">beans包是java2标准的一部分</td><td class="left">ejb包是标准JDK的扩展</td></tr>
+<tr><td class="left">一台机器上同一个地址空间中运行的组件</td><td class="left">在多台机器上跨几个地址空间运行的组件</td></tr>
+<tr><td class="left">javabean是进程内组件</td><td class="left">ejb是进程间组件</td></tr>
+<tr><td class="left">通常用作GUI窗口小部件</td><td class="left">用作分布式商业对象</td></tr>
+</tbody>
+</table>
 
 
+<p>
+javabean存在与四种范围：页面(page)，请求(request)，对话(sessin)，应用(application)。
+</p>
+<p>
+对话范围：
+对话范围的JavaBean 主要应用与跨多个页面和时间段： 例如填充用户信息。 添加信息并且接受回馈，保存用户最近执行页面的轨迹。对话范围JavaBean保留一些和用户对话 ID 相关的信息。这些信息来自临时的对话cookie，并在当用户关闭浏览器时，这个cookie将从客户端和服务器删除。
+页面/请求范围：
+页面和请求范围的JavaBean有时类似表单 的bean ， 这是因为他们大都用于处理表单。表单需要很长的时间来处理用户的输入??外页面和请求范围的bean可以用于减少大型站点服务器上的负载，如果使用对话bean，耽搁的处理就可能会消耗掉很多资源。
+应用：
+应用范围通常应用于服务器的部件，例如 JDBC连接池、应用监视、用户计数和
+其他参与用户行为的类。
+</p>
+<p>
+javaBean持久化是指以流的形式，用JavaBean的属性来保存bean，并在以后的某
+个时候或者在另一个虚拟机中再将它们读回来，和对象的序列化有点类似，然而
+它们有一个非常重要的区别，javabean持久化适合于长期存储。
+</p>
+<p>
+当一个对象被序列化存储以后，如果类的实现发生了变化，则把对象重新读出来
+的时候就要在新旧数据表现之间进行转化。因此对象序列化仅适合于短期存储或
+者应用程序之间的RMI。
+</p>
+<p>
+JavaBean的持久化可以考虑三种方式：数据库、XML文件、二进制流
+第一种方式可以使用O/R Mapping技术将一个JavaBean映射到关系数据库中的表；
+第二种方式可以使用JAVA1.4 的
+java.beans.XMLDecoder/java.beans.XMLEncoder将Bean映射到一个XML文件中；
+第三种方式要求Bean实现Java的Serializable接口；
+</p></li>
+</ul>
+<ul>
+<li id="sec-1-2-1-8">类加载器<br/>
+一般来说，java虚拟机使用一个类的方式如下：java源程序在经过java编译器编
+译之后就被转换成java字节码文件.class，虚拟机加载字节码文件被转换为
+java.lang.Class的一个实例，每个这样的实例代表一个java类，然后通过这个实例
+的newInstance()方法生成一个对象。
+基本上所有类加载器都是java.lang.ClassLoader的实例。
+
+<p>
+java.lang.ClassLoader的主要作用是根据一个给定类的名字，查找该类的字节
+码文件，并生成一个class实例，它同时也加载java类所需要的一些资源如图像
+和配置文件。
+java.lang.ClassLoader与加载类有关的方法
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">方法</th><th scope="col" class="left">说明</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">getParent()</td><td class="left">返回该类加载器的父加载器</td></tr>
+<tr><td class="left">loadClass(String name)</td><td class="left">加载名称为name的类，返回结果是java.lang.Class的实例</td></tr>
+<tr><td class="left">findClass(String name)</td><td class="left">查找名称为name的类，返回结果是java.lang.Class类的实例</td></tr>
+<tr><td class="left">findLoadedClass(String name)</td><td class="left">查找名字为name的已经加载过的类，返回结果同上</td></tr>
+<tr><td class="left">defineClass(String name, byte[] b, int off, int len)</td><td class="left">把字节数组b中的内容转换成java类，返回结果同上</td></tr>
+<tr><td class="left">resolveClass(Class&lt;?&gt; c)</td><td class="left">连接指定的java类</td></tr>
+</tbody>
+</table>
+
+
+<p>
+java中的类加载器分为两种，一种是系统提供的，另一种是由java应用开发人员
+编写的。
+</p>
+<p>
+java中系统提供的类加载器有三种：
+bootstrap class loader  引导类加载器
+extension class loader  扩展类加载器
+system class loader     系统类加载器
+</p>
+<p>
+Class.forName()是使用系统类加载器加载的。
+类是由它的全名和类加载器来确定的，因此在同一个虚拟机中可以有两个类，它
+们的类名和包名都是相同的，只要是由不同的加载器来加载就行。
+<img src="pic/arrange.gif"  alt="pic/arrange.gif" />
+</p>
 </li>
 </ul>
 </div>
@@ -1081,6 +1188,40 @@ FILE * fp = fdopen(fd, "r") 根据文件描述符加上访问模式可以得到�
 </li>
 </ul>
 </div>
+
+</div>
+
+<div id="outline-container-1-2-4" class="outline-4">
+<h4 id="sec-1-2-4"><span class="section-number-4">1.2.4</span> Linux常见问题</h4>
+<div class="outline-text-4" id="text-1-2-4">
+
+<ul>
+<li id="sec-1-2-4-1">/etc/shadow文件被覆盖 su故障<br/>
+重启电脑在root账户下执行passwd kong重新生成账户密码, 执行 sudo passwd root重新生成ro
+ot的密码,然后su就可以恢复工作
+</li>
+</ul>
+<ul>
+<li id="sec-1-2-4-2">文件的每一行后边多一个<sup>M</sup><br/>
+这个问题是由于Unix和Window的换行符不一样造成的Unix中是以\n作为换行，
+Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文件在Window中
+打开都是一行，Window下的文件在Unix下打开的话在 每行的结尾可能会多出一
+个<sup>M符号。</sup>
+
+<p>
+在Unix下转换Window下文件的两种方式：
+</p><ol>
+<li>命令dos2unix test.file
+</li>
+<li>去掉'\r', 用命令sed -i 's/\r//' test.file
+</li>
+</ol>
+
+<p>ok!!
+</p>
+</li>
+</ul>
+</div>
 </div>
 
 </div>
@@ -1093,8 +1234,19 @@ FILE * fp = fdopen(fd, "r") 根据文件描述符加上访问模式可以得到�
 </div>
 
 <div id="outline-container-1-3-1" class="outline-4">
-<h4 id="sec-1-3-1"><span class="section-number-4">1.3.1</span> 2012百度某部门 java研发</h4>
+<h4 id="sec-1-3-1"><span class="section-number-4">1.3.1</span> 面试资料</h4>
 <div class="outline-text-4" id="text-1-3-1">
+
+<p>v<sub>july</sub><sub>v整理的面试题</sub> <a href="http://blog.csdn.net/v_july_v">http://blog.csdn.net/v_july_v</a>
+程序员面试题精选100题-何海涛
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2"><span class="section-number-4">1.3.2</span> 2012百度某部门 java研发</h4>
+<div class="outline-text-4" id="text-1-3-2">
 
 <p>研一小硕一枚，本科我邮计算机，玩了四年，在论坛上看到百度忘记哪个部门招java实习生，就投了简历凑了凑热闹 
 先是电面，问了几个比较基础的问题，比如.equals()和==的区别，Spring中IOC和AOP什么意思，还有java中collection框架的架构..然后有人通知面试，这勉强算第一面 
@@ -1114,9 +1266,9 @@ java基础方面一定要扎实..能看源码最好看源码..以前学的太漂
 
 </div>
 
-<div id="outline-container-1-3-2" class="outline-4">
-<h4 id="sec-1-3-2"><span class="section-number-4">1.3.2</span> 百度三面</h4>
-<div class="outline-text-4" id="text-1-3-2">
+<div id="outline-container-1-3-3" class="outline-4">
+<h4 id="sec-1-3-3"><span class="section-number-4">1.3.3</span> 百度三面</h4>
+<div class="outline-text-4" id="text-1-3-3">
 
 <p>今天让同学帮查了百度面试结果，倒在三面上，写点东西纪念下吧。 
 百度一直是我最想进的公司。应该是四月份开始吧，就到处寻找百度的实习信息投简历，也让师兄帮忙内推，但每一次都是石沉大海，毫无音讯。直至迎来了暑期实习招聘。当时前两面地挺顺利，但是由于时间太晚，HR就让先回去了。之后等了好久才等来电话三面，直接拿手机做算法题被搞死了。 
@@ -1201,9 +1353,9 @@ java基础方面一定要扎实..能看源码最好看源码..以前学的太漂
 
 </div>
 
-<div id="outline-container-1-3-3" class="outline-4">
-<h4 id="sec-1-3-3"><span class="section-number-4">1.3.3</span> 2012微软面试心得</h4>
-<div class="outline-text-4" id="text-1-3-3">
+<div id="outline-container-1-3-4" class="outline-4">
+<h4 id="sec-1-3-4"><span class="section-number-4">1.3.4</span> 2012微软面试心得</h4>
+<div class="outline-text-4" id="text-1-3-4">
 
 <p>注：没太多规划便写了，想到哪写到哪，有些乱，望见谅…… 
 注2：上传程序员面试题精选100题-何海涛 电子版~ 
@@ -1351,8 +1503,36 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
 </div>
 
 <div id="outline-container-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 用磁带机求第K小元素 &nbsp;&nbsp;&nbsp;<span class="tag"><span class="_K___">第K大元素</span></span></h3>
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 哈希表的尴尬</h3>
 <div class="outline-text-3" id="text-2-1">
+
+<p>由于cache命中率的原因，哈希表的性能通常好于红黑树。即使只有32个元素，
+也要进行5次随机内存访问。随机内存访问对cpu cache是不友好的。
+</p>
+<p>
+hash表最大的缺陷是当数据量难以估计时，没法设置合适的bucket，元素可能是
+10个也可能是10000个
+这里有几种思路：
+</p><ol>
+<li>设置缺省bucket值为100左右，然后让hash表自动扩容，缺点是扩容的时候性
+   能要受到影响。
+</li>
+<li>结合业务，每次给10000的bucket，缺点是浪费内存，而且无法处理100W这样
+   的极端情况。
+</li>
+<li>把hash表的list变成哈希表，缺点是结构复杂，多次哈希速度慢。
+</li>
+</ol>
+
+<p>综合来看方案一是比较好的这种。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 用磁带机求第K小元素 &nbsp;&nbsp;&nbsp;<span class="tag"><span class="_K___">第K大元素</span></span></h3>
+<div class="outline-text-3" id="text-2-2">
 
 <p>如果输入在磁带机上， 你的机器只有一个磁带机驱动器和几十字的内存，如何
 找第K小的数
@@ -1380,9 +1560,9 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
 
 </div>
 
-<div id="outline-container-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 裁纸机程序</h3>
-<div class="outline-text-3" id="text-2-2">
+<div id="outline-container-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> 裁纸机程序</h3>
+<div class="outline-text-3" id="text-2-3">
 
 <p>一个字条上边印有一串数字，对字条进行切割，满足一下条件
 </p><ol>
@@ -1447,9 +1627,9 @@ int main()
 
 </div>
 
-<div id="outline-container-2-3" class="outline-3">
-<h3 id="sec-2-3"><span class="section-number-3">2.3</span> 从0-N中随机生成M个数</h3>
-<div class="outline-text-3" id="text-2-3">
+<div id="outline-container-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> 从0-N中随机生成M个数</h3>
+<div class="outline-text-3" id="text-2-4">
 
 <p>思路一：先从N个数中随机找出M个，然后对这M个数进行随机排列，时间复杂度
 为O(n),空间复杂度为O(M)。
@@ -1538,9 +1718,9 @@ for J:=N-M+1 to N do
 
 </div>
 
-<div id="outline-container-2-4" class="outline-3">
-<h3 id="sec-2-4"><span class="section-number-3">2.4</span> 求平方根 求多维空间中两个点间的距离</h3>
-<div class="outline-text-3" id="text-2-4">
+<div id="outline-container-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> 求平方根 求多维空间中两个点间的距离</h3>
+<div class="outline-text-3" id="text-2-5">
 
 <ol>
 <li>K维空间中有两个点A和B，求它们间的距离
@@ -1606,9 +1786,9 @@ int main()
 
 </div>
 
-<div id="outline-container-2-5" class="outline-3">
-<h3 id="sec-2-5"><span class="section-number-3">2.5</span> 检测链表中是否存在循环 前提是链表中所有结点元素都不相同</h3>
-<div class="outline-text-3" id="text-2-5">
+<div id="outline-container-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> 检测链表中是否存在循环 前提是链表中所有结点元素都不相同</h3>
+<div class="outline-text-3" id="text-2-6">
 
 <p>思路：
 </p><ol>
@@ -1627,18 +1807,18 @@ int main()
 
 </div>
 
-<div id="outline-container-2-6" class="outline-3">
-<h3 id="sec-2-6"><span class="section-number-3">2.6</span> 如何判断一个变量时有符号数还是无符号数</h3>
-<div class="outline-text-3" id="text-2-6">
+<div id="outline-container-2-7" class="outline-3">
+<h3 id="sec-2-7"><span class="section-number-3">2.7</span> 如何判断一个变量时有符号数还是无符号数</h3>
+<div class="outline-text-3" id="text-2-7">
 
 <p>如果宏的参数是一个类型，其中一个方法是使用类型转换
 </p></div>
 
 </div>
 
-<div id="outline-container-2-7" class="outline-3">
-<h3 id="sec-2-7"><span class="section-number-3">2.7</span> 一个文本文件中存入了很多字符串，如果随机的从中选中一个</h3>
-<div class="outline-text-3" id="text-2-7">
+<div id="outline-container-2-8" class="outline-3">
+<h3 id="sec-2-8"><span class="section-number-3">2.8</span> 一个文本文件中存入了很多字符串，如果随机的从中选中一个</h3>
+<div class="outline-text-3" id="text-2-8">
 
 <ol>
 <li>最简单的方法就是读一次文件，并记录每个字符串到文件开头的偏移量，最
@@ -1657,9 +1837,9 @@ int main()
 
 </div>
 
-<div id="outline-container-2-8" class="outline-3">
-<h3 id="sec-2-8"><span class="section-number-3">2.8</span> 判定点是否在多边形内部</h3>
-<div class="outline-text-3" id="text-2-8">
+<div id="outline-container-2-9" class="outline-3">
+<h3 id="sec-2-9"><span class="section-number-3">2.9</span> 判定点是否在多边形内部</h3>
+<div class="outline-text-3" id="text-2-9">
 
 <p>思路：二维空间中多个点的连线构成了一个多边形，給一定点p(x, y)，判断该点是否在
 多边形内部
@@ -1687,9 +1867,9 @@ int main()
 
 </div>
 
-<div id="outline-container-2-9" class="outline-3">
-<h3 id="sec-2-9"><span class="section-number-3">2.9</span> poj1503 简单求大整数的和</h3>
-<div class="outline-text-3" id="text-2-9">
+<div id="outline-container-2-10" class="outline-3">
+<h3 id="sec-2-10"><span class="section-number-3">2.10</span> poj1503 简单求大整数的和</h3>
+<div class="outline-text-3" id="text-2-10">
 
 <p>当输入字符串为0时表示输入结束
 错误点：最后验证字符串输入结束的标志是s<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>='0' &amp;&amp; s<sup><a class="footref" name="fnr.1.2" href="#fn.1">1</a></sup>=0
@@ -1725,7 +1905,8 @@ int main()
 <h4 id="sec-3-3"><span class="section-number-4">3.3</span> <span class="todo TODO">TODO</span> java webservice</h4>
 <div class="outline-text-4" id="text-3-3">
 
-</div>
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+</p></div>
 
 </div>
 
@@ -1734,28 +1915,89 @@ int main()
 <div class="outline-text-4" id="text-3-4">
 
 </div>
+
+</div>
+
+<div id="outline-container-3-5" class="outline-4">
+<h4 id="sec-3-5"><span class="section-number-4">3.5</span> <span class="todo TODO">TODO</span> 一致性哈希表</h4>
+<div class="outline-text-4" id="text-3-5">
+
+</div>
 </div>
 
 </div>
 
 <div id="outline-container-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> 图形子系统</h2>
+<h2 id="sec-4"><span class="section-number-2">4</span> 一些热点信息收集</h2>
 <div class="outline-text-2" id="text-4">
 
+
+</div>
+
+<div id="outline-container-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> redis</h3>
+<div class="outline-text-3" id="text-4-1">
+
+
+</div>
+
+<div id="outline-container-4-1-1" class="outline-4">
+<h4 id="sec-4-1-1"><span class="section-number-4">4.1.1</span> redis备忘录</h4>
+<div class="outline-text-4" id="text-4-1-1">
+
+<p>redis是一个带持久化的高速key-value存储系统。
+</p>
+<p>
+特点是：热数据放在内存里面实现高速访问，支持可配置的数据持久化，支持主从同步，不依赖任何第三方库（包括通讯层），自己实现了类似virtual memory的机制，代码量不大。
+</p>
+<p>
+和mysql相比，redis的读写速度要快很多。
+</p>
+<p>
+和memcached相比，redis带有持久化和主从机制，不过redis重启比较慢。
+</p>
+<p>
+和bdb相比，redis的读写速度快一些、扩展性也相对好一些。
+</p>
+<p>
+和mongodb相比，redis要简单得多。mongodb没有行级锁，性能特征很不相同；其实主要是是scheme less的数据库，和redis没有多少可比性。
+</p>
+<p>
+redis是一个很有潜力的存储系统。目前最大的缺点是尚未有重量级的公司应用；我们不应该忘记cassandra的故事，看起来很美，但是twitter用了没几天就不用了。
+</p>
+<p>
+另外有谣言说redis的稳定性有问题。
+</p>
+
+<p>
+那么目前对待redis的最好态度是什么呢？静观其变，看谁先吃螃蟹。这是“死道友莫死贫道”的意思。
+</p>
+<p>
+mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需求。
+</p></div>
+</div>
 </div>
 
 </div>
 
 <div id="outline-container-5" class="outline-2">
-<h2 id="sec-5"><span class="section-number-2">5</span> Android编译框架</h2>
+<h2 id="sec-5"><span class="section-number-2">5</span> 图形子系统</h2>
 <div class="outline-text-2" id="text-5">
+
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Android编译框架</h2>
+<div class="outline-text-2" id="text-6">
 
 
 </div>
 
-<div id="outline-container-5-1" class="outline-3">
-<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 编译框架基本概念</h3>
-<div class="outline-text-3" id="text-5-1">
+<div id="outline-container-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> 编译框架基本概念</h3>
+<div class="outline-text-3" id="text-6-1">
 
 <p>Android编译系统是通过各种.mk文件和shell脚本建立的一个编译框架，这个框
 架基于基本的make概念。换句话说Android并没有建立新的编译脚本，而是建立
@@ -1771,14 +2013,38 @@ Android编译系统的源码在./build目录下，了解编译系统的本质实
 
 </div>
 
-<div id="outline-container-5-2" class="outline-3">
-<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Android中的三种不同编译方式</h3>
-<div class="outline-text-3" id="text-5-2">
+<div id="outline-container-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> Android中的三种不同编译方式</h3>
+<div class="outline-text-3" id="text-6-2">
 
 <p>make mm mmm
 make：最常规的编译，通常用来编译整个Android源码
 mm：用来编译当前目录下的所有子项目
 mmm： 用来编译指定目录下的所有子项目
+</p>
+<p>
+=======
+</p>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 图形子系统</h2>
+<div class="outline-text-2" id="text-7">
+
+<p>  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
+Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 23d57b91fb1b3ef574112f2d46aa55d4e5a7676c
+</p>
+
+
+
+<p>
+bind -m emacs '"\C-o": menu-complete'
+bash-completion包
 </p>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
@@ -1787,10 +2053,7 @@ mmm： 用来编译指定目录下的所有子项目
 </p>
 
 <p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> DEFINITION NOT FOUND: 0
-</p>
-
-</div>
-</div>
+</p></div>
 </div>
 
 </div>
@@ -1798,7 +2061,7 @@ mmm： 用来编译指定目录下的所有子项目
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-10-27 13:00:31 中国标准时间</p>
+<p class="date">Date: 2012-10-28 16:23:43 中国标准时间</p>
 <p class="author">Author: </p>
 <p class="creator">Org version 7.8.11 with Emacs version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>

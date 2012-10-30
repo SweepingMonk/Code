@@ -744,7 +744,7 @@ ot的密码,然后su就可以恢复工作
 这个问题是由于Unix和Window的换行符不一样造成的Unix中是以\n作为换行，
 Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文件在Window中
 打开都是一行，Window下的文件在Unix下打开的话在 每行的结尾可能会多出一
-个^M符号。
+个^M符号
 
 在Unix下转换Window下文件的两种方式：
 1. 命令dos2unix test.file
@@ -1196,13 +1196,6 @@ int main()
 ** poj1503 简单求大整数的和
 当输入字符串为0时表示输入结束
 错误点：最后验证字符串输入结束的标志是s[0]='0' && s[1]=0
-* 工作计划
-*** TODO 后缀树
-*** TODO 后缀数组
-*** TODO java webservice
-<<<<<<< HEAD
-*** TODO Delvik虚拟机和Java虚拟机的区别  Android技术内幕
-*** TODO 一致性哈希表
 * 一些热点信息收集
 ** redis
 *** redis备忘录
@@ -1246,8 +1239,6 @@ mm：用来编译当前目录下的所有子项目
 mmm： 用来编译指定目录下的所有子项目
 
 =======
-
-
 * 图形子系统
   在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
 Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.
@@ -1258,3 +1249,11 @@ Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处�
 
 bind -m emacs '"\C-o": menu-complete'
 bash-completion包
+* 工作计划
+*** TODO 后缀树
+*** TODO 后缀数组
+*** TODO java webservice
+<<<<<<< HEAD
+*** TODO Delvik虚拟机和Java虚拟机的区别  Android技术内幕
+*** TODO 一致性哈希表
+*** TODO source . exec的区别

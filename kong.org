@@ -494,47 +494,37 @@ Annotation(注释)是JDK5.0及以后版本引入的,它可以用于创建文档�
 根据注释参数的个数，我们可以将注释分为：标记注释、单值注释、完整注释三
 类。它们都不会直接影响到程序的语义.只是作为注释（标识）存在。
 
-java中，内置了三种类型的注释，@Override @Deprecated @SuppressWarnings
-@Override表明重写了父类的方法
-@Deprecated表明这个方法不应该再使用
-@SuppressWarnings 
-| 参数        | 错误类型                                                |
-|-------------+---------------------------------------------------------|
-| eprecation  | 使用了过时的类或方法时的警告                            |
-| unchecked   | 执行了未检查的转换时的警告                              |
-| fallthrough | 当 Switch 程序块直接通往下一种情况而没有 Break 时的警告 |
-| path        | 在类路径、源文件路径等中有不存在的路径时的警告          |
-| serial      | 当在可序列化的类上缺少 serialVersionUID 定义时的警告    |
-| finally     | 任何 finally 子句不能正常完成时的警告                   |
-| all         | 关于以上所有情况的警告                                                         |
-
-#+BEGIN_EXAMPLE
+***** 用于编译的注解
+@Deprecated注解可以被添加到任何不在鼓励使用的项上
+@SuppressWarnings注解会告知编译器阻止特殊类型的警告信息，例如：
 @SuppressWarnings("unchecked")
-public void add(String data){
-list.add(data);
-}
-#+END_EXAMPLE
+@Override这种注解只能应用到方法上，编译器会阻止具有这种注解的方法去覆
+盖一个来自于超类的方法。
+@Generated注解的目的是供代码生成工具来使用。任何生成的源代码都可以使用，
+用来区分程序员写的代码。
+***** 用于管理资源的注解
+@PostConstruct和@PreDestroy注解用于
 
 #+BEGIN_EXAMPLE
-public @interface Test {  
-    public int id();  
-    public String description() default "no description";  
+public @interface Test {
+    public int id();
+    public String description() default "no description";
 }
-package Test_annotation;  
+package Test_annotation;
 
-import java.lang.reflect.Method;  
+import java.lang.reflect.Method;
 
-public class Test_1 {  
-    /* 
-     * 被注解的三个方法 
-     */ 
-    @Test(id = 1, description = "hello method_1")  
-    public void method_1() {  
-    }  
+public class Test_1 {
+    /*
+     * 被注解的三个方法
+     */
+    @Test(id = 1, description = "hello method_1")
+    public void method_1() {
+    }
 
-    @Test(id = 2)  
-    public void method_2() {  
-    }  
+    @Test(id = 2)
+    public void method_2() {
+    }
 
     @Test(id = 3, description = "last method")
     public void method_3() {

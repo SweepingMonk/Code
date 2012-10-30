@@ -488,6 +488,83 @@ API。另外一种做法是使用接口。
 
 **** JNI见参考文档
 
+**** java注解
+Annotation(注释)是JDK5.0及以后版本引入的。它可以用于创建文档，跟踪代码
+中的依赖性，甚至执行基本编译时检查。注释是以‘@注释名’在代码中存在的，
+根据注释参数的个数，我们可以将注释分为：标记注释、单值注释、完整注释三
+类。它们都不会直接影响到程序的语义，只是作为注释（标识）存在。
+
+java中，内置了三种类型的注释，@Override @Deprecated @SuppressWarnings
+@Override表明重写了父类的方法
+@Deprecated表明这个方法不应该再被使用
+@SuppressWarnings 
+| 参数        | 错误类型                                                |
+|-------------+---------------------------------------------------------|
+| eprecation  | 使用了过时的类或方法时的警告                            |
+| unchecked   | 执行了未检查的转换时的警告                              |
+| fallthrough | 当 Switch 程序块直接通往下一种情况而没有 Break 时的警告 |
+| path        | 在类路径、源文件路径等中有不存在的路径时的警告          |
+| serial      | 当在可序列化的类上缺少 serialVersionUID 定义时的警告    |
+| finally     | 任何 finally 子句不能正常完成时的警告                   |
+| all         | 关于以上所有情况的警告                                                         |
+
+#+BEGIN_EXAMPLE
+@SuppressWarnings("unchecked")
+public void add(String data){
+list.add(data);
+}
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+public @interface Test {  
+    public int id();  
+    public String description() default "no description";  
+}
+package Test_annotation;  
+
+import java.lang.reflect.Method;  
+
+public class Test_1 {  
+    /* 
+     * 被注解的三个方法 
+     */ 
+    @Test(id = 1, description = "hello method_1")  
+    public void method_1() {  
+    }  
+
+    @Test(id = 2)  
+    public void method_2() {  
+    }  
+
+    @Test(id = 3, description = "last method")
+    public void method_3() {
+    }
+
+    /*
+     * 解析注解，将Test_1类 所有被注解方法 的信息打印出来
+     */
+    public static void main(String[] args) {
+        Method[] methods = Test_1.class.getDeclaredMethods();
+        for (Method method : methods) {
+            /*
+             * 判断方法中是否有指定注解类型的注解
+             */
+            boolean hasAnnotation = method.isAnnotationPresent(Test.class);
+            if (hasAnnotation) {
+                /*
+                 * 根据注解类型返回方法的指定类型注解
+                 */
+                Test annotation = method.getAnnotation(Test.class);
+                System.out.println("Test( method = " + method.getName()
+                        + " , id = " + annotation.id() + " , description = "
+                        + annotation.description() + " )");
+            }
+        }
+    }
+}
+#+END_EXAMPLE
+
+
 *** c编程
 **** 类型提升 不怎么准 在ANSI C中已经取消了
 整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类

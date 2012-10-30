@@ -65,7 +65,7 @@ window中的emacs默认不能显示图片，而是一堆乱码，根本原因是
 　　　　(iimage-mode)) 
 #+END_EXAMPLE
 以后你只要输入M-x org-toggle-iimage-in-org RET或M-x iimage-mode RET就
-可以了。
+可以了
 
 *** 学习Lisp
 **** List命令

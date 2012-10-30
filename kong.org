@@ -503,7 +503,20 @@ Annotation(注释)是JDK5.0及以后版本引入的,它可以用于创建文档�
 @Generated注解的目的是供代码生成工具来使用。任何生成的源代码都可以使用，
 用来区分程序员写的代码。
 ***** 用于管理资源的注解
-@PostConstruct和@PreDestroy注解用于
+@PostConstruct和@PreDestroy注解用于控制对象生命周期的环境中，标记了这
+些注解的方法应该在对象被构建之后，或者在对象被移除之前，紧接着调用。
+
+@Resurce注解用于资源注入，例如，数据库访问信息不应该被硬编码到web应用
+中，而是应该让web容器提供某种用户接口，以便设置连接参数和数据库资源
+JNDI名字，在web应用中，可以像下面这样引用数据源：
+@Resource(name="jdbc/mydb")
+private DataSource source;这样由容器给DataSource对象赋值
+
+***** 元注解@Target
+@Target元注解可以应用于一个注解，以限制该注解可以应用的范围，例如：
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface BugReport
+表明注解BugReport只可以应用在类，接口和方法上。
 
 #+BEGIN_EXAMPLE
 public @interface Test {

@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="kong"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-10-28 17:04:19 中国标准时间"/>
+<meta name="generated" content="2012-10-30 19:35:24 中国标准时间"/>
 <meta name="author" content=""/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -137,34 +137,36 @@
 <li><a href="#sec-2-10">2.10 poj1503 简单求大整数的和</a></li>
 </ul>
 </li>
-<li><a href="#sec-3">3 工作计划</a>
+<li><a href="#sec-3">3 一些热点信息收集</a>
+<ul>
+<li><a href="#sec-3-1">3.1 redis</a>
+<ul>
+<li><a href="#sec-3-1-1">3.1.1 redis备忘录</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 图形子系统</a></li>
+<li><a href="#sec-5">5 Android编译框架</a>
+<ul>
+<li><a href="#sec-5-1">5.1 编译框架基本概念</a></li>
+<li><a href="#sec-5-2">5.2 Android中的三种不同编译方式</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6 图形子系统</a></li>
+<li><a href="#sec-7">7 工作计划</a>
 <ul>
 <li>
 <ul>
-<li><a href="#sec-3-1">3.1 后缀树</a></li>
-<li><a href="#sec-3-2">3.2 后缀数组</a></li>
-<li><a href="#sec-3-3">3.3 java webservice</a></li>
-<li><a href="#sec-3-4">3.4 Delvik虚拟机和Java虚拟机的区别  Android技术内幕</a></li>
-<li><a href="#sec-3-5">3.5 一致性哈希表</a></li>
-</ul></li>
+<li><a href="#sec-7-1">7.1 后缀树</a></li>
+<li><a href="#sec-7-2">7.2 后缀数组</a></li>
+<li><a href="#sec-7-3">7.3 java webservice</a></li>
+<li><a href="#sec-7-4">7.4 Delvik虚拟机和Java虚拟机的区别  Android技术内幕</a></li>
+<li><a href="#sec-7-5">7.5 一致性哈希表</a></li>
+<li><a href="#sec-7-6">7.6 source . exec的区别</a></li>
 </ul>
 </li>
-<li><a href="#sec-4">4 一些热点信息收集</a>
-<ul>
-<li><a href="#sec-4-1">4.1 redis</a>
-<ul>
-<li><a href="#sec-4-1-1">4.1.1 redis备忘录</a></li>
-</ul></li>
 </ul>
 </li>
-<li><a href="#sec-5">5 图形子系统</a></li>
-<li><a href="#sec-6">6 Android编译框架</a>
-<ul>
-<li><a href="#sec-6-1">6.1 编译框架基本概念</a></li>
-<li><a href="#sec-6-2">6.2 Android中的三种不同编译方式</a></li>
-</ul>
-</li>
-<li><a href="#sec-7">7 图形子系统</a></li>
 </ul>
 </div>
 </div>
@@ -197,7 +199,7 @@
 <tr><th scope="col" class="left">命令类型</th><th scope="col" class="left">快捷键</th><th scope="col" class="left">快捷键描述</th></tr>
 </thead>
 <tbody>
-<tr><td class="left">查找</td><td class="left">C-s C-w</td><td class="left">在查找模式下，查找光标指定位置处的单词</td></tr>
+<tr><td class="left">查找命令</td><td class="left">C-s C-w</td><td class="left">在查找模式下，查找光标指定位置处的单词</td></tr>
 <tr><td class="left">指定目录下查找文件</td><td class="left">find-name-dired</td><td class="left"></td></tr>
 <tr><td class="left">指定目录下查找只包含指定内容的文件</td><td class="left">find-grep-dired</td><td class="left"></td></tr>
 <tr><td class="left">与上边两个类似但自由度最高</td><td class="left">find-dired</td><td class="left">gre</td></tr>
@@ -293,7 +295,7 @@ window中的emacs默认不能显示图片，而是一堆乱码，根本原因是
 
 <p>
 以后你只要输入M-x org-toggle-iimage-in-org RET或M-x iimage-mode RET就
-可以了。
+可以了
 </p>
 </li>
 </ul>
@@ -858,10 +860,11 @@ Class.forName()是使用系统类加载器加载的。
 只有在其父类加载器加载失败时，它才会加载给定类。
 </p>
 <p>
-类加载器树状组织结构示意图：
+类加载器树状组织结构示意图
+</p>
+<p>
 <img src="pic/ClassLoaderTree.jpg"  alt="pic/ClassLoaderTree.jpg" />
 </p>
-
 </li>
 </ul>
 <ul>
@@ -878,7 +881,103 @@ Sample.class文件，并定义出两个 java.lang.Class类的实例来表示这�
 两个实例是不相同的。对于 Java 虚拟机来说，它们是不同的类。试图对这两个
 类的对象进行相互赋值，会抛出运行时异常 ClassCastException。
 </p>
+<p>
+了解了这一点之后，就可以理解代理模式的设计动机了。代理模式是为了保证 Java 核心库的类型安全。所有 Java 应用都至少需要引用 java.lang.Object类，也就是说在运行的时候，java.lang.Object这个类需要被加载到 Java 虚拟机中。如果这个加载过程由 Java 应用自己的类加载器来完成的话，很可能就存在多个版本的 java.lang.Object类，而且这些类之间是不兼容的。通过代理模式，对于 Java 核心库的类的加载工作由引导类加载器来统一完成，保证了 Java 应用所使用的都是同一个版本的 Java 核心库的类，是互相兼容的。
+</p>
+</li>
+</ul>
+<ul>
+<li id="sec-1-2-1-8-5">网络类加载器<br/>
+Java 字节代码（.class）文件存放在服务器上，客户端通过网络的方式获取字节代码并执行。当有版本更新的时候，只需要替换掉服务器上保存的文件即可。通过类加载器可以比较简单的实现这种需求。
+类 NetworkClassLoader负责通过网络下载 Java 类字节代码并定义出 Java 类。
+它的实现与 FileSystemClassLoader类似。在通过 NetworkClassLoader加载了
+某个版本的类之后，一般有两种做法来使用它。第一种做法是使用 Java 反射
+API。另外一种做法是使用接口。
 
+<p>
+需要注意的是，并不能直接在客户端代码中引用从服务器上下载的类，因为客户端代码的类加载器找不到这些类。使用 Java 反射 API 可以直接调用 Java 类的方法。而使用接口的做法则是把接口的类放在客户端中，从服务器上加载实现此接口的不同版本的类。在客户端通过相同的接口来使用这些实现类。
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li id="sec-1-2-1-9">JNI见参考文档<br/>
+
+</li>
+</ul>
+<ul>
+<li id="sec-1-2-1-10">java注解<br/>
+Annotation(注释)是JDK5.0及以后版本引入的,它可以用于创建文档，跟踪代码
+中的依赖性，甚至执行基本编译时检查。注释是以‘@注释名’在代码中存在的，
+根据注释参数的个数，我们可以将注释分为：标记注释、单值注释、完整注释三
+类。它们都不会直接影响到程序的语义.只是作为注释（标识）存在。
+
+<ul>
+<li id="sec-1-2-1-10-1">用于编译的注解<br/>
+@Deprecated注解可以被添加到任何不在鼓励使用的项上
+@SuppressWarnings注解会告知编译器阻止特殊类型的警告信息，例如：
+@SuppressWarnings("unchecked")
+@Override这种注解只能应用到方法上，编译器会阻止具有这种注解的方法去覆
+盖一个来自于超类的方法。
+@Generated注解的目的是供代码生成工具来使用。任何生成的源代码都可以使用，
+用来区分程序员写的代码。
+</li>
+</ul>
+<ul>
+<li id="sec-1-2-1-10-2">用于管理资源的注解<br/>
+@PostConstruct和@PreDestroy注解用于
+
+
+
+
+<pre class="example">public @interface Test {
+    public int id();
+    public String description() default "no description";
+}
+package Test_annotation;
+
+import java.lang.reflect.Method;
+
+public class Test_1 {
+    /*
+     * 被注解的三个方法
+     */
+    @Test(id = 1, description = "hello method_1")
+    public void method_1() {
+    }
+
+    @Test(id = 2)
+    public void method_2() {
+    }
+
+    @Test(id = 3, description = "last method")
+    public void method_3() {
+    }
+
+    /*
+     * 解析注解，将Test_1类 所有被注解方法 的信息打印出来
+     */
+    public static void main(String[] args) {
+        Method[] methods = Test_1.class.getDeclaredMethods();
+        for (Method method : methods) {
+            /*
+             * 判断方法中是否有指定注解类型的注解
+             */
+            boolean hasAnnotation = method.isAnnotationPresent(Test.class);
+            if (hasAnnotation) {
+                /*
+                 * 根据注解类型返回方法的指定类型注解
+                 */
+                Test annotation = method.getAnnotation(Test.class);
+                System.out.println("Test( method = " + method.getName()
+                        + " , id = " + annotation.id() + " , description = "
+                        + annotation.description() + " )");
+            }
+        }
+    }
+}
+</pre>
 
 
 
@@ -1286,7 +1385,7 @@ ot的密码,然后su就可以恢复工作
 这个问题是由于Unix和Window的换行符不一样造成的Unix中是以\n作为换行，
 Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文件在Window中
 打开都是一行，Window下的文件在Unix下打开的话在 每行的结尾可能会多出一
-个<sup>M符号。</sup>
+个<sup>M符号</sup>
 
 <p>
 在Unix下转换Window下文件的两种方式：
@@ -1959,71 +2058,22 @@ int main()
 </div>
 
 <div id="outline-container-3" class="outline-2">
-<h2 id="sec-3"><span class="section-number-2">3</span> 工作计划</h2>
+<h2 id="sec-3"><span class="section-number-2">3</span> 一些热点信息收集</h2>
 <div class="outline-text-2" id="text-3">
 
 
 </div>
 
-<div id="outline-container-3-1" class="outline-4">
-<h4 id="sec-3-1"><span class="section-number-4">3.1</span> <span class="todo TODO">TODO</span> 后缀树</h4>
-<div class="outline-text-4" id="text-3-1">
-
-</div>
-
-</div>
-
-<div id="outline-container-3-2" class="outline-4">
-<h4 id="sec-3-2"><span class="section-number-4">3.2</span> <span class="todo TODO">TODO</span> 后缀数组</h4>
-<div class="outline-text-4" id="text-3-2">
-
-</div>
-
-</div>
-
-<div id="outline-container-3-3" class="outline-4">
-<h4 id="sec-3-3"><span class="section-number-4">3.3</span> <span class="todo TODO">TODO</span> java webservice</h4>
-<div class="outline-text-4" id="text-3-3">
-
-<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-</p></div>
-
-</div>
-
-<div id="outline-container-3-4" class="outline-4">
-<h4 id="sec-3-4"><span class="section-number-4">3.4</span> <span class="todo TODO">TODO</span> Delvik虚拟机和Java虚拟机的区别  Android技术内幕</h4>
-<div class="outline-text-4" id="text-3-4">
-
-</div>
-
-</div>
-
-<div id="outline-container-3-5" class="outline-4">
-<h4 id="sec-3-5"><span class="section-number-4">3.5</span> <span class="todo TODO">TODO</span> 一致性哈希表</h4>
-<div class="outline-text-4" id="text-3-5">
-
-</div>
-</div>
-
-</div>
-
-<div id="outline-container-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> 一些热点信息收集</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> redis</h3>
+<div class="outline-text-3" id="text-3-1">
 
 
 </div>
 
-<div id="outline-container-4-1" class="outline-3">
-<h3 id="sec-4-1"><span class="section-number-3">4.1</span> redis</h3>
-<div class="outline-text-3" id="text-4-1">
-
-
-</div>
-
-<div id="outline-container-4-1-1" class="outline-4">
-<h4 id="sec-4-1-1"><span class="section-number-4">4.1.1</span> redis备忘录</h4>
-<div class="outline-text-4" id="text-4-1-1">
+<div id="outline-container-3-1-1" class="outline-4">
+<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> redis备忘录</h4>
+<div class="outline-text-4" id="text-3-1-1">
 
 <p>redis是一个带持久化的高速key-value存储系统。
 </p>
@@ -2060,24 +2110,24 @@ mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需
 
 </div>
 
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 图形子系统</h2>
+<div class="outline-text-2" id="text-4">
+
+</div>
+
+</div>
+
 <div id="outline-container-5" class="outline-2">
-<h2 id="sec-5"><span class="section-number-2">5</span> 图形子系统</h2>
+<h2 id="sec-5"><span class="section-number-2">5</span> Android编译框架</h2>
 <div class="outline-text-2" id="text-5">
 
-</div>
 
 </div>
 
-<div id="outline-container-6" class="outline-2">
-<h2 id="sec-6"><span class="section-number-2">6</span> Android编译框架</h2>
-<div class="outline-text-2" id="text-6">
-
-
-</div>
-
-<div id="outline-container-6-1" class="outline-3">
-<h3 id="sec-6-1"><span class="section-number-3">6.1</span> 编译框架基本概念</h3>
-<div class="outline-text-3" id="text-6-1">
+<div id="outline-container-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 编译框架基本概念</h3>
+<div class="outline-text-3" id="text-5-1">
 
 <p>Android编译系统是通过各种.mk文件和shell脚本建立的一个编译框架，这个框
 架基于基本的make概念。换句话说Android并没有建立新的编译脚本，而是建立
@@ -2093,9 +2143,9 @@ Android编译系统的源码在./build目录下，了解编译系统的本质实
 
 </div>
 
-<div id="outline-container-6-2" class="outline-3">
-<h3 id="sec-6-2"><span class="section-number-3">6.2</span> Android中的三种不同编译方式</h3>
-<div class="outline-text-3" id="text-6-2">
+<div id="outline-container-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Android中的三种不同编译方式</h3>
+<div class="outline-text-3" id="text-5-2">
 
 <p>make mm mmm
 make：最常规的编译，通常用来编译整个Android源码
@@ -2104,16 +2154,14 @@ mmm： 用来编译指定目录下的所有子项目
 </p>
 <p>
 =======
-</p>
-
-</div>
+</p></div>
 </div>
 
 </div>
 
-<div id="outline-container-7" class="outline-2">
-<h2 id="sec-7"><span class="section-number-2">7</span> 图形子系统</h2>
-<div class="outline-text-2" id="text-7">
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 图形子系统</h2>
+<div class="outline-text-2" id="text-6">
 
 <p>  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
 Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.
@@ -2125,7 +2173,63 @@ Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处�
 <p>
 bind -m emacs '"\C-o": menu-complete'
 bash-completion包
-</p>
+</p></div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 工作计划</h2>
+<div class="outline-text-2" id="text-7">
+
+
+</div>
+
+<div id="outline-container-7-1" class="outline-4">
+<h4 id="sec-7-1"><span class="section-number-4">7.1</span> <span class="todo TODO">TODO</span> 后缀树</h4>
+<div class="outline-text-4" id="text-7-1">
+
+</div>
+
+</div>
+
+<div id="outline-container-7-2" class="outline-4">
+<h4 id="sec-7-2"><span class="section-number-4">7.2</span> <span class="todo TODO">TODO</span> 后缀数组</h4>
+<div class="outline-text-4" id="text-7-2">
+
+</div>
+
+</div>
+
+<div id="outline-container-7-3" class="outline-4">
+<h4 id="sec-7-3"><span class="section-number-4">7.3</span> <span class="todo TODO">TODO</span> java webservice</h4>
+<div class="outline-text-4" id="text-7-3">
+
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+</p></div>
+
+</div>
+
+<div id="outline-container-7-4" class="outline-4">
+<h4 id="sec-7-4"><span class="section-number-4">7.4</span> <span class="todo TODO">TODO</span> Delvik虚拟机和Java虚拟机的区别  Android技术内幕</h4>
+<div class="outline-text-4" id="text-7-4">
+
+</div>
+
+</div>
+
+<div id="outline-container-7-5" class="outline-4">
+<h4 id="sec-7-5"><span class="section-number-4">7.5</span> <span class="todo TODO">TODO</span> 一致性哈希表</h4>
+<div class="outline-text-4" id="text-7-5">
+
+</div>
+
+</div>
+
+<div id="outline-container-7-6" class="outline-4">
+<h4 id="sec-7-6"><span class="section-number-4">7.6</span> <span class="todo TODO">TODO</span> source . exec的区别</h4>
+<div class="outline-text-4" id="text-7-6">
+
+
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
@@ -2135,13 +2239,14 @@ bash-completion包
 <p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> DEFINITION NOT FOUND: 0
 </p></div>
 </div>
+</div>
 
 </div>
 </div>
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-10-28 17:04:19 中国标准时间</p>
+<p class="date">Date: 2012-10-30 19:35:24 中国标准时间</p>
 <p class="author">Author: </p>
 <p class="creator">Org version 7.8.11 with Emacs version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>

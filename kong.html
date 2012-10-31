@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="kong"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-10-31 20:04:54 中国标准时间"/>
+<meta name="generated" content="2012-10-31 22:08:21 中国标准时间"/>
 <meta name="author" content=""/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -413,6 +413,7 @@ list
 常见的do操作
 (do ((i 0 (+ 1 i))) ((&gt; i 10)) (print i))
 </p>
+
 </li>
 </ul>
 </div>
@@ -1010,9 +1011,126 @@ public class Test_1 {
 </pre>
 
 
-
 </li>
 </ul>
+</li>
+</ul>
+<ul>
+<li id="sec-1-2-1-11">java虚拟机和delvik虚拟机的区别<br/>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">java虚拟机</th><th scope="col" class="left">Dalvik</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">基于堆栈</td><td class="left">基于寄存器</td></tr>
+<tr><td class="left"></td><td class="left">透过zygote预加载类完成虚拟机的启动</td></tr>
+<tr><td class="left">运行java字节码</td><td class="left">运行dex字节码</td></tr>
+</tbody>
+</table>
+
+
+<p>
+Dalvik虚拟机主要是完成对象生命周期的管理，堆栈的管理，线程管理，安全和
+异常的管理，以及垃圾回收等等重要功能。
+</p>
+<p>
+Dalvik适用于那些内存容量和数据处理能力比较小的机器，因此适合移动终端。
+一般而言基于栈的机器需要更多指令，而基于寄存器的机器指令更大.
+</p>
+<p>
+Dalvik虚拟机的主要特征
+<b>专有的DEX文件格式</b>
+</p><ol>
+<li>一个应用中会定义很多类，编译完成后会形成很多的class文件，class文件
+   之间有不少冗余信息，而dex文件格式会把所有的class文件全都整合到一块。
+   这样除了减少了文件大小，便利I/O操作外，也加快了查找速度。
+   原来每个类文件中都存在一个常量池，在dex文件中由一个常量池来管理。见
+   上图
+</li>
+<li>增加了新的操作码的支持
+</li>
+<li>文件结构尽量简洁，使用等长的指令，提高解析速度
+</li>
+<li>尽量扩大只读结构的大小，借以提高进程的数据共享
+</li>
+<li>如何生成dex文件呢
+</li>
+</ol>
+
+
+<p>
+<img src="pic/JVM_vs_DVM.jpg"  alt="pic/JVM_vs_DVM.jpg" />
+<img src="pic/DVM_Convert.jpg"  alt="pic/DVM_Convert.jpg" />
+java字节码文件由多个.class文件组成，在运行期间虚拟机会从相应的.class文
+件中加载相应类，而Dalvik字节码只由一个.dex文件组成，它包括了应用的所有
+类。
+.dex文件形成的过程： java编译器编译java源文件形成.class字节码文件，
+Dalvik dx编译器删除所有的.class文件，并把它们重新编译成Dalvik字节码文
+件，之后dx编译器把它们合成一个.dex文件。
+</p>
+<p>
+原来每个类文件中都存在一个常量池，在dex文件中由一个常量池来管理。
+</p>
+<p>
+<b>DEX优化</b>
+</p><ol>
+<li>调整所有字段的字节序和对其结构中的每一个域
+</li>
+<li>验证DEX文件中的所有类
+</li>
+<li>对一些特定的类进行优化，对方法里的操作码进行优化
+</li>
+</ol>
+
+<p>由于dex文件的结构是紧凑的，所有优化之后文件的大小会有所增减，大概是原来文件的1-4倍。
+</p>
+<p>
+优化发生的时机有两个：对于预置应用，可以在系统编译后，生成优化文件，以ODEX结尾。这样在发布时除APK文件（不包含DEX）以外，还有一个相应的ODEX文件；对于非预置应用，包含在APK文件里的DEX文件会在运行时被优化，优化后的文件将被保存在缓存中。
+</p>
+<p>
+<b>基于寄存器</b>
+基于堆栈虚拟机实现，基于寄存器的虚拟机实现虽然在硬件通用性上要差一些，
+但是它在代码的执行效率却更胜一筹，虚拟机中指令的解释时间主要花在下面三
+个： 分发指令、访问运算数、执行运算， 其中分发指令这个环节对性能的影响
+最大。在基于寄存器的虚拟机里，可以更为有效的减少冗余指令的分发和减少内
+存的读写访问。
+</p>
+<p>
+<b>一个应用，一个虚拟机实例，一个进程</b>
+每一个Android应用都运行在一个Dalvik虚拟机实例里，而每一个虚拟机实例都
+是一个独立的进程空间。虚拟机的线程机制，内存分配和管理，Mutex等等都是
+依赖底层操作系统而实现的。所有Android应用的线程都对应一个Linux线程，虚
+拟机因而可以更多的依赖操作系统的线程调度和管理机制
+</p>
+<p>
+不同的应用在不同的进程空间里运行，加之对不同来源的应用都使用不同的Linux用户来运行，可以最大程度的保护应用的安全和独立运行
+</p>
+<p>
+Zygote是一个虚拟机进程，同时也是一个虚拟机实例的孵化器，每当系统要求执
+行一个Android应用程序，Zygote就会FORK出一个子进程来执行该应用程序。这
+样做的好处显而易见：Zygote进程是在系统启动时产生的，它会完成虚拟机的初
+始化，库的加载，预置类库的加载和初始化等等操作，而在系统需要一个新的虚
+拟机实例时，Zygote通过复制自身，最快速的提供给系统。另外，对于一些只读的系统库，所有虚拟机实例都和Zygote共享一块内存区域，大大节省了内存开销。
+</p>
+<p>
+应用程序包被发布到手机上后，运行前会对其中的dex文件进行优化，优化后的
+文件被保存在缓冲区（优化后的格式被称为dey），虚拟机会直接执行该文件，
+如果应用包文件不发生变化，dey文件不会被重新生成。
+<img src="pic/DalvikOptimize.jpg"  alt="pic/DalvikOptimize.jpg" />
+</p>
+<p>
+Android应用所使用的编程语言是Java语言，和Java SE一样，编译时使用Sun
+JDK将Java源程序编程成标准的Java字节码文件（.class文件），而后通过工具
+软件DX把所有的字节码文件转成DEX文件（classes.dex）。最后使用Android打
+包工具（aapt）将DEX文件，资源文件以及AndroidManifest.xml文件（二进制格
+式）组合成一个应用程序包（APK）。应用程序包可以被发布到手机上运行。
+<img src="pic/AndroidPackage.jpg"  alt="pic/AndroidPackage.jpg" />
+</p>
+
 </li>
 </ul>
 </div>
@@ -1428,6 +1546,7 @@ Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文
 
 <p>ok!!
 </p>
+
 </li>
 </ul>
 </div>
@@ -1700,6 +1819,7 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
 选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决
 于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
 </p>
+
 </div>
 </div>
 </div>
@@ -2085,6 +2205,7 @@ int main()
 <p>当输入字符串为0时表示输入结束
 错误点：最后验证字符串输入结束的标志是s<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>='0' &amp;&amp; s<sup><a class="footref" name="fnr.1.2" href="#fn.1">1</a></sup>=0
 </p>
+
 </div>
 </div>
 
@@ -2148,6 +2269,7 @@ mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需
 <div id="outline-container-4" class="outline-2">
 <h2 id="sec-4"><span class="section-number-2">4</span> 图形子系统</h2>
 <div class="outline-text-2" id="text-4">
+
 
 
 </div>
@@ -2546,7 +2668,7 @@ Animantion中的动画参数对该视图进行变换，然后把变换后的图�
 <h3 id="sec-7-1"><span class="section-number-3">7.1</span> 电影</h3>
 <div class="outline-text-3" id="text-7-1">
 
-<p>我如何度过这个夏天
+<p><a name="" class="target">我如何度过这个夏天</a> 
 </p></div>
 
 </div>
@@ -2639,7 +2761,7 @@ Animantion中的动画参数对该视图进行变换，然后把变换后的图�
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-10-31 20:04:54 中国标准时间</p>
+<p class="date">Date: 2012-10-31 22:08:21 中国标准时间</p>
 <p class="author">Author: </p>
 <p class="creator">Org version 7.8.11 with Emacs version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>

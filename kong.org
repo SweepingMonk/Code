@@ -1521,6 +1521,13 @@ Animation中保存了动画的开始时间和结束时间，在不同时间返�
 数，View系统不断从Animation中读取动画参数并进行变换，给用户的感觉就是一个连续
 的动画。
 
+除了Animation类外，与动画相关的重要类还有Interpolator和
+Transformation。 Interpolator是一个接口，接口中定义了一个唯一的函数
+getInterpolation(), 对这个函数的实现可以在不同的时间段使用不同的加速曲
+线，从而达到特别的动画效果。Transformation保存了Animation中的动画参数。
+
+
+
 * 收集
 bind -m emacs '"\C-o": menu-complete'
 bash-completion包

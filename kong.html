@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="kong"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-10-30 19:35:24 中国标准时间"/>
+<meta name="generated" content="2012-10-31 20:04:54 中国标准时间"/>
 <meta name="author" content=""/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -152,19 +152,32 @@
 <li><a href="#sec-5-2">5.2 Android中的三种不同编译方式</a></li>
 </ul>
 </li>
-<li><a href="#sec-6">6 图形子系统</a></li>
-<li><a href="#sec-7">7 工作计划</a>
+<li><a href="#sec-6">6 图形子系统</a>
 <ul>
-<li>
+<li><a href="#sec-6-1">6.1 视图的绘制</a></li>
+<li><a href="#sec-6-2">6.2 动画的绘制</a>
 <ul>
-<li><a href="#sec-7-1">7.1 后缀树</a></li>
-<li><a href="#sec-7-2">7.2 后缀数组</a></li>
-<li><a href="#sec-7-3">7.3 java webservice</a></li>
-<li><a href="#sec-7-4">7.4 Delvik虚拟机和Java虚拟机的区别  Android技术内幕</a></li>
-<li><a href="#sec-7-5">7.5 一致性哈希表</a></li>
-<li><a href="#sec-7-6">7.6 source . exec的区别</a></li>
+<li><a href="#sec-6-2-1">6.2.1 窗口动画</a></li>
+<li><a href="#sec-6-2-2">6.2.2 视图动画</a></li>
+<li><a href="#sec-6-2-3">6.2.3 布局动画</a></li>
+</ul></li>
 </ul>
 </li>
+<li><a href="#sec-7">7 兴趣收集</a>
+<ul>
+<li><a href="#sec-7-1">7.1 电影</a></li>
+<li><a href="#sec-7-2">7.2 读书</a></li>
+<li><a href="#sec-7-3">7.3 音乐</a></li>
+</ul>
+</li>
+<li><a href="#sec-8">8 工作计划</a>
+<ul>
+<li><a href="#sec-8-1">8.1 后缀树</a></li>
+<li><a href="#sec-8-2">8.2 后缀数组</a></li>
+<li><a href="#sec-8-3">8.3 java webservice</a></li>
+<li><a href="#sec-8-4">8.4 Delvik虚拟机和Java虚拟机的区别 Android技术内幕</a></li>
+<li><a href="#sec-8-5">8.5 一致性哈希表 布隆过滤器</a></li>
+<li><a href="#sec-8-6">8.6 source . exec的区别</a></li>
 </ul>
 </li>
 </ul>
@@ -926,7 +939,24 @@ Annotation(注释)是JDK5.0及以后版本引入的,它可以用于创建文档�
 </ul>
 <ul>
 <li id="sec-1-2-1-10-2">用于管理资源的注解<br/>
-@PostConstruct和@PreDestroy注解用于
+@PostConstruct和@PreDestroy注解用于控制对象生命周期的环境中，标记了这
+些注解的方法应该在对象被构建之后，或者在对象被移除之前，紧接着调用。
+
+<p>
+@Resurce注解用于资源注入，例如，数据库访问信息不应该被硬编码到web应用
+中，而是应该让web容器提供某种用户接口，以便设置连接参数和数据库资源
+JNDI名字，在web应用中，可以像下面这样引用数据源：
+@Resource(name="jdbc/mydb")
+private DataSource source;这样由容器给DataSource对象赋值
+</p>
+</li>
+</ul>
+<ul>
+<li id="sec-1-2-1-10-3">元注解@Target<br/>
+@Target元注解可以应用于一个注解，以限制该注解可以应用的范围，例如：
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface BugReport
+表明注解BugReport只可以应用在类，接口和方法上。
 
 
 
@@ -1667,8 +1697,10 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
 同时，在同一家公司，不同部门间的待遇、发展空间亦可能巨大。找工作只关注公司不关注部门和将来做的工作，犹如考研只关注学院和专业方向不关注报考导师一般，真没啥意义。上过研的能理解吧！ 
 </p>
 <p>  
-选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
-</p></div>
+选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决
+于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
+</p>
+</div>
 </div>
 </div>
 
@@ -2052,7 +2084,8 @@ int main()
 
 <p>当输入字符串为0时表示输入结束
 错误点：最后验证字符串输入结束的标志是s<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>='0' &amp;&amp; s<sup><a class="footref" name="fnr.1.2" href="#fn.1">1</a></sup>=0
-</p></div>
+</p>
+</div>
 </div>
 
 </div>
@@ -2104,7 +2137,9 @@ redis是一个很有潜力的存储系统。目前最大的缺点是尚未有重
 </p>
 <p>
 mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需求。
-</p></div>
+</p>
+
+</div>
 </div>
 </div>
 
@@ -2113,6 +2148,7 @@ mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需
 <div id="outline-container-4" class="outline-2">
 <h2 id="sec-4"><span class="section-number-2">4</span> 图形子系统</h2>
 <div class="outline-text-2" id="text-4">
+
 
 </div>
 
@@ -2154,7 +2190,10 @@ mmm： 用来编译指定目录下的所有子项目
 </p>
 <p>
 =======
-</p></div>
+</p>
+
+
+</div>
 </div>
 
 </div>
@@ -2163,71 +2202,425 @@ mmm： 用来编译指定目录下的所有子项目
 <h2 id="sec-6"><span class="section-number-2">6</span> 图形子系统</h2>
 <div class="outline-text-2" id="text-6">
 
-<p>  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
-Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; 23d57b91fb1b3ef574112f2d46aa55d4e5a7676c
+<p>  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处
+  理中使用到, 在对Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对
+  Surface处理在双缓冲技术则不同.
 </p>
 
 
+</div>
+
+<div id="outline-container-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> 视图的绘制</h3>
+<div class="outline-text-3" id="text-6-1">
+
+<p>Android UI界面由以下树形结构组成, 从图中可以看出, UI界面是由View与
+ViewGroup两大类控件组成，其中ViewGroup继承自android.view.View, 并实现
+了android.view.ViewParent和android.view.ViewManager两个接口, 赋予其装
+载子控件和管理子控件的能力。作为一个容器，它可以装载其它由View派生出来
+的元素(View和ViewGroup)。常见的控件Button,TextView是从View派生出来的，
+容器如FrameLayout, linearLayout是从ViewGroup派生出来的。
+<img src="pic/ViewTree.png"  alt="pic/ViewTree.png" />
+在android.view下边有一个ViewRoot类，其在performTraversals()方法中完成对View树的遍历。
+</p>
+
+
+<pre class="example">private void performTraversals() {
+    final View  host = mView;  
+    ...  
+    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);  
+    ...  
+    host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());  
+    ...  
+draw(fullRedrawNeeded);
+…
+}
+</pre>
 
 <p>
-bind -m emacs '"\C-o": menu-complete'
-bash-completion包
-</p></div>
+在这里mView是PhoneWindow.DecorView类型,它继承自FrameLayout，DecorView
+是Window的最顶层View，称之为主View，DecorView会缺省的attach到Activity
+的主窗口中。
+<img src="pic/draw.jpg"  alt="pic/draw.jpg" />
+由上边代码可以知道绘制工作分为三步：判断是否需要重新计算大小(measure),是否需要重新安置视图的位置(layout),以及是否需要重绘(draw)。其中measure()和layout()是直接调用mView的measure()和layout()方法，而draw()调用的是 ViewRootImpl内部的draw(boolean fullRedrawNeeded)函数，再由draw(boolean fullRedrawNeeded)函数来调用mView.draw()函数，draw(boolean fullRedrawNeeded)包含draw过程的一些前期处理。
+由此可见meassure(),layout()和draw()三个过程均是调用自mView。由于mView是DecorView类型,而DecorView继承自FrameLayout,FrameLayout继承自ViewGroup, ViewGroup继承自View,因此最终的工作是在ViewGroup和View中完成的。
+它们间的继承关系如下：
+DecorView-&gt; FrameLayout-&gt; ViewGroup-&gt; View
+由于ViewGroup继承自View，因此ViewGroup类及其子类从本质上看也都是View，但为了下边描述方便，严格区分View和ViewGroup类型。
+</p>
+<p>
+整个过程涉及到一些方法，分别列出：
+View
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">函数</th><th scope="col" class="left">描述</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">measure()</td><td class="left">计算窗口大小</td></tr>
+<tr><td class="left">onMeasure()</td><td class="left">被measure()调用</td></tr>
+<tr><td class="left">layout()</td><td class="left">计算控件布局</td></tr>
+<tr><td class="left">setFrame()</td><td class="left">判断是否发生改变，被layout()调用</td></tr>
+<tr><td class="left">onLayout()</td><td class="left">这里是空方法，View类型的控件这里不用做处理，被layout()方法调用</td></tr>
+<tr><td class="left">draw()</td><td class="left">绘制控件</td></tr>
+<tr><td class="left">onDraw()</td><td class="left">绘制View本身，自定义View往往会重载该函数来绘制View本身的内容。 被draw()方法调用</td></tr>
+<tr><td class="left">dispatchDraw()</td><td class="left">View中的dispatchDraw默认是空实现，ViewGroup中覆写了该函数。被draw()方法调用</td></tr>
+<tr><td class="left">onDrawScrollBars()</td><td class="left">绘制装饰,被draw()方法调用</td></tr>
+</tbody>
+</table>
+
+
+<p>
+ViewGroup
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">函数</th><th scope="col" class="left">描述</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">layout()</td><td class="left">功能主要由View中的layout()方法实现</td></tr>
+<tr><td class="left">abstract onLayout()</td><td class="left">抽象方法</td></tr>
+<tr><td class="left">dispatchDraw()</td><td class="left">覆盖父类中的方法</td></tr>
+<tr><td class="left">drawChild()</td><td class="left">遍历，对于ViewGroup类型则继续调用dispatchDraw()方法，对于View类型则调用draw()方法。此方法被ViewGroup中的dispatchDraw()方法调用</td></tr>
+</tbody>
+</table>
+
+
+<p>
+FrameLayout
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">函数</th><th scope="col" class="left">描述</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">onMeasure()</td><td class="left">遍历调用每个子View的measure()方法</td></tr>
+<tr><td class="left">onLayout()</td><td class="left">实现ViewGroup中的抽象方法</td></tr>
+<tr><td class="left">draw()</td><td class="left">实际功能由View的draw()方法实现</td></tr>
+</tbody>
+</table>
+
+
+<p>
+DecorView
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">函数</th><th scope="col" class="left">描述</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">onMeasure()</td><td class="left">实际由FrameLayout的onMeasure()方法实现</td></tr>
+<tr><td class="left">setFrame()</td><td class="left">实际由View的setFrame()方法实现</td></tr>
+<tr><td class="left">draw()</td><td class="left">实际功能由View的draw()方法实现</td></tr>
+</tbody>
+</table>
+
+前边说过，窗口绘制的三个过程measure, layout, draw都是从DecorView调用开始的。
+下面对三个过程一一说明：
+meassure方法: 实际调用的是View中的measure()方法
+<ol>
+<li>判断是否需要重新计算大小
+</li>
+<li>调用onMeasure()方法，实际调用的是FrameLayout的onMeasure()方法,遍历调用所有子控件的measure()方法，求出子控件的大小
+</li>
+<li>调用setMeasuredDimension(int, int)确定自身大小
+</li>
+</ol>
+
+
+<p>
+由于第二步会调用子控件的measure()方法，也会经历上边几步，直到整个View树遍历完，所有控件的大小都确定。控件的大小是由父控件和自身决定的，主要取决在于父控件， 控件自身只提供参考值， 这是因为控件的measure方法是由父控件调用的, 而父控件大小有限，可能不完全按照你的申请要求给出。
+</p>
+<p>
+layout方法: 实际调用的是View类中的layout()方法
+</p><ol>
+<li>设置自身相对父控件的位置并判断是否需要重新布局，使用setFrame(left, top, right, bottom);
+</li>
+<li>调用onLayout()布局子控件，如果是ViewGroup类型则会调用子控件的
+        layout()方法
+</li>
+</ol>
+
+
+
+
+
+<pre class="example">public void layout(int l, int t, int r, int b) {
+   boolean changed = setFrame(l, t, r, b);
+   …
+   onLayout(changed, l, t, r, b);
+…
+}
+
+protected boolean setFrame(int left, int top, int right, int bottom) {
+        boolean changed = false;
+        …
+        if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
+            changed = true;
+        …
+return changed;
+}
+//View中onLayout方法为空，表明View类型视图不需要做操作
+protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+}
+
+//FrameLayout中onLayout方法, 对子控件进行遍历，调用它们的layout()方法
+protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+  …
+         for (int i = 0; i &lt; count; i++) {
+            final View child = getChildAt(i);
+            ...
+            child.layout(childLeft, childTop, childLeft + width, childTop + height);
+         }
+         ... 
+}
+</pre>
+
+<p>
+由于FrameLayout会遍历调用子视图的layout()方法，这样保证所有子视图都会
+调用各自的layout()方法，布局结束。
+</p>
+<p>
+draw()方法：实际调用的是View中的draw()方法
+1 绘制背景  background.draw(canvas)
+2 保存画布的层次
+3 调用onDraw()绘制控件内容
+4 调用dispatchDraw()绘制子控件。View中dispatchDraw()默认为空实现，因为
+其不包含子视图，而ViewGroup重载了dispatchDraw()来对其子视图进行绘制，
+通常应用程序不应该对dispatchDraw()进行重载，其默认实现体现了View系统绘
+制的流程。因此DecorView会调用ViewGroup中的dispatchDraw()方法，在此方法
+中会调用drawChild()方法,在drawChild()方法中，会对每个子控件重新调用
+dispatchDraw()方法，对于ViewGroup类型会继续遍历，对于View类型对象则调用自身的draw()方法。
+5 绘制渐变边界并恢复层次
+fade.setLocalMatrix(matrix);
+canvas.drawRect(right - length, top, right, bottom, p);
+6 调用onDrawScrollBars(canvas)绘制装饰, 比如滑动条
+View中的draw()方法:
+</p>
+
+
+<pre class="example">public void draw(Canvas canvas) {
+ …
+ // Step 1, draw the background, if needed
+background.draw(canvas);
+…
+// Step 2, save the canvas' layers
+if (solidColor == 0) {
+   final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
+
+   if (drawTop) {
+     canvas.saveLayer(left, top, right, top + length, null, flags);
+   }
+}
+…
+// Step 3, draw the content
+if (!dirtyOpaque) 
+onDraw(canvas);
+     // Step 4, draw the children
+     dispatchDraw(canvas);
+     …
+     // Step 5, draw the fade effect and restore layers
+     if (drawTop) {  
+         matrix.setScale(1, fadeHeight * topFadeStrength);
+         matrix.postTranslate(left, top);
+         fade.setLocalMatrix(matrix);
+         canvas.drawRect(left, top, right, top + length, p);
+     }  
+     …
+     // Step 6, draw decorations (scrollbars)
+     onDrawScrollBars(canvas);
+
+</pre>
+
+<p>
+View中的dispatchDraw()方法是个空方法，View对象不需要做任何操作。
+ViewGroup重载了dispatchGroup()方法，它的核心功能就是通过for循环调用
+drawChild()对ViewGroup的每个子视图进行绘制。如果
+FLAG<sub>USE</sub><sub>CHILD</sub><sub>DRAWING</sub><sub>ORDER为true，则子视图的绘制顺序通过</sub>
+getChildDrawingOrder来决定，默认的绘制顺序即是子视图加入ViewGroup的顺
+序，而我们可以重载getChildDrawingOrder函数来更改默认的绘制顺序，这会影
+响到子视图之间的重叠关系。
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> 动画的绘制</h3>
+<div class="outline-text-3" id="text-6-2">
+
+<p>Android中的动画类似于电影的胶片，通过不断在荧屏上绘制不同的静态图像，
+从而达到动画的效果。在前边视图的绘制那里讲到，真正的绘制工作最后是在
+View类的draw()函数中完成的，在该函数中会判断当前视图是否包含动画，
+如果包含，就根据动画参数对当前图像进行相应的变换，并重新绘制到屏幕上，
+绘制结束后会再发起一个重绘消息，这样连续绘制，直到动画参数指示动画结束。
+View系统中的动画分为三类，分别是窗口动画、视图动画、布局动画。
+</p>
+<p>
+窗口动画：窗口动画一般定义了窗口在显示、消失时的动画.
+视图动画：View对象在显示和消失时的动画.
+布局动画：指ViewGroup对象包含的动画。其本质是根据布局动画为子视图分别
+设置不同的动画，从而使得整体上看来像是一个布局文件的效果。
+</p>
+<p>
+Android中View系统仅支持基本的五种动画，分别为平移、缩放、旋转、扭曲及
+颜色阿尔法通道变化，这称之为"动画参数"或"动画类型"，应用程序将这五种基
+本动画进行组合产生新的动画。
+</p>
+<p>
+动画的设计思想: 首先要有一个动画主体，实际上就是一个View对象，然后可以
+为该View对象指定一个动画，动画使用一个Animation类来表示，当View开始绘
+制的时候，从Animation类获取动画的参数，并根据参数对View进行图形变换，
+然后将变换后的图形绘制到屏幕上。
+</p>
+<p>
+Animation中保存了动画的开始时间和结束时间，在不同时间返回不同的动画参
+数，View系统不断从Animation中读取动画参数并进行变换，给用户的感觉就是一个连续
+的动画。
+</p>
+<p>
+除了Animation类外，与动画相关的重要类还有Interpolator和
+Transformation。 Interpolator是一个接口，接口中定义了一个唯一的函数
+getInterpolation(), 对这个函数的实现可以在不同的时间段使用不同的加速曲
+线，从而达到特别的动画效果。Transformation保存了Animation中的动画参数。
+</p>
+
+</div>
+
+<div id="outline-container-6-2-1" class="outline-4">
+<h4 id="sec-6-2-1"><span class="section-number-4">6.2.1</span> 窗口动画</h4>
+<div class="outline-text-4" id="text-6-2-1">
+
+</div>
+
+</div>
+
+<div id="outline-container-6-2-2" class="outline-4">
+<h4 id="sec-6-2-2"><span class="section-number-4">6.2.2</span> 视图动画</h4>
+<div class="outline-text-4" id="text-6-2-2">
+
+<p>视图动画是在ViewGroup类中的drawChild()函数中完成的。 函数原型如下
+drawChild(Canvas canvas, View child, long drawingTime)在该函数中首先调
+用child.getAnimation()获取Animation对象，判断如果Animation不为null,则利用
+Animantion中的动画参数对该视图进行变换，然后把变换后的图像绘制到canvas
+中，主要流程包括：
+</p><ol>
+<li>查看动画对象是否已经初始化，如果没有则先调用a.initialize()初始化该
+   动画对象，初始化的参数中包含了子视图
+</li>
+</ol>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-6-2-3" class="outline-4">
+<h4 id="sec-6-2-3"><span class="section-number-4">6.2.3</span> 布局动画</h4>
+<div class="outline-text-4" id="text-6-2-3">
+
+
+
+</div>
+</div>
+</div>
 
 </div>
 
 <div id="outline-container-7" class="outline-2">
-<h2 id="sec-7"><span class="section-number-2">7</span> 工作计划</h2>
+<h2 id="sec-7"><span class="section-number-2">7</span> 兴趣收集</h2>
 <div class="outline-text-2" id="text-7">
 
 
 </div>
 
-<div id="outline-container-7-1" class="outline-4">
-<h4 id="sec-7-1"><span class="section-number-4">7.1</span> <span class="todo TODO">TODO</span> 后缀树</h4>
-<div class="outline-text-4" id="text-7-1">
+<div id="outline-container-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> 电影</h3>
+<div class="outline-text-3" id="text-7-1">
 
-</div>
-
-</div>
-
-<div id="outline-container-7-2" class="outline-4">
-<h4 id="sec-7-2"><span class="section-number-4">7.2</span> <span class="todo TODO">TODO</span> 后缀数组</h4>
-<div class="outline-text-4" id="text-7-2">
-
-</div>
-
-</div>
-
-<div id="outline-container-7-3" class="outline-4">
-<h4 id="sec-7-3"><span class="section-number-4">7.3</span> <span class="todo TODO">TODO</span> java webservice</h4>
-<div class="outline-text-4" id="text-7-3">
-
-<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+<p>我如何度过这个夏天
 </p></div>
 
 </div>
 
-<div id="outline-container-7-4" class="outline-4">
-<h4 id="sec-7-4"><span class="section-number-4">7.4</span> <span class="todo TODO">TODO</span> Delvik虚拟机和Java虚拟机的区别  Android技术内幕</h4>
-<div class="outline-text-4" id="text-7-4">
+<div id="outline-container-7-2" class="outline-3">
+<h3 id="sec-7-2"><span class="section-number-3">7.2</span> 读书</h3>
+<div class="outline-text-3" id="text-7-2">
+
 
 </div>
 
 </div>
 
-<div id="outline-container-7-5" class="outline-4">
-<h4 id="sec-7-5"><span class="section-number-4">7.5</span> <span class="todo TODO">TODO</span> 一致性哈希表</h4>
-<div class="outline-text-4" id="text-7-5">
+<div id="outline-container-7-3" class="outline-3">
+<h3 id="sec-7-3"><span class="section-number-3">7.3</span> 音乐</h3>
+<div class="outline-text-3" id="text-7-3">
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 工作计划</h2>
+<div class="outline-text-2" id="text-8">
+
+
+</div>
+
+<div id="outline-container-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> <span class="todo TODO">TODO</span> 后缀树</h3>
+<div class="outline-text-3" id="text-8-1">
 
 </div>
 
 </div>
 
-<div id="outline-container-7-6" class="outline-4">
-<h4 id="sec-7-6"><span class="section-number-4">7.6</span> <span class="todo TODO">TODO</span> source . exec的区别</h4>
-<div class="outline-text-4" id="text-7-6">
+<div id="outline-container-8-2" class="outline-3">
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> <span class="todo TODO">TODO</span> 后缀数组</h3>
+<div class="outline-text-3" id="text-8-2">
+
+</div>
+
+</div>
+
+<div id="outline-container-8-3" class="outline-3">
+<h3 id="sec-8-3"><span class="section-number-3">8.3</span> <span class="todo TODO">TODO</span> java webservice</h3>
+<div class="outline-text-3" id="text-8-3">
+
+</div>
+
+</div>
+
+<div id="outline-container-8-4" class="outline-3">
+<h3 id="sec-8-4"><span class="section-number-3">8.4</span> <span class="todo TODO">TODO</span> Delvik虚拟机和Java虚拟机的区别 Android技术内幕</h3>
+<div class="outline-text-3" id="text-8-4">
+
+</div>
+
+</div>
+
+<div id="outline-container-8-5" class="outline-3">
+<h3 id="sec-8-5"><span class="section-number-3">8.5</span> <span class="todo TODO">TODO</span> 一致性哈希表 布隆过滤器</h3>
+<div class="outline-text-3" id="text-8-5">
+
+</div>
+
+</div>
+
+<div id="outline-container-8-6" class="outline-3">
+<h3 id="sec-8-6"><span class="section-number-3">8.6</span> <span class="todo TODO">TODO</span> source . exec的区别</h3>
+<div class="outline-text-3" id="text-8-6">
 
 
 <div id="footnotes">
@@ -2246,7 +2639,7 @@ bash-completion包
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-10-30 19:35:24 中国标准时间</p>
+<p class="date">Date: 2012-10-31 20:04:54 中国标准时间</p>
 <p class="author">Author: </p>
 <p class="creator">Org version 7.8.11 with Emacs version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>

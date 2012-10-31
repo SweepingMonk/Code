@@ -135,6 +135,7 @@ list
 常见的do操作
 (do ((i 0 (+ 1 i))) ((> i 10)) (print i))
 
+
 ** 学习笔记
 *** java编程
 **** 面向对象的三个基本特征
@@ -567,7 +568,6 @@ public class Test_1 {
 }
 #+END_EXAMPLE
 
-
 *** c编程
 **** 类型提升 不怎么准 在ANSI C中已经取消了
 整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类
@@ -831,6 +831,7 @@ Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文
 2. 去掉'\r', 用命令sed -i 's/\r//' test.file
 ok!!
 
+
 ** 面试经验收集
 *** 面试资料
 v_july_v整理的面试题 http://blog.csdn.net/v_july_v
@@ -1033,7 +1034,10 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
   
 同时，在同一家公司，不同部门间的待遇、发展空间亦可能巨大。找工作只关注公司不关注部门和将来做的工作，犹如考研只关注学院和专业方向不关注报考导师一般，真没啥意义。上过研的能理解吧！ 
   
-选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
+选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决
+于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
+
+
 * 各种有趣问题
 ** 哈希表的尴尬
 由于cache命中率的原因，哈希表的性能通常好于红黑树。即使只有32个元素，
@@ -1276,6 +1280,7 @@ int main()
 ** poj1503 简单求大整数的和
 当输入字符串为0时表示输入结束
 错误点：最后验证字符串输入结束的标志是s[0]='0' && s[1]=0
+
 * 一些热点信息收集
 ** redis
 *** redis备忘录
@@ -1299,7 +1304,10 @@ redis是一个很有潜力的存储系统。目前最大的缺点是尚未有重
 那么目前对待redis的最好态度是什么呢？静观其变，看谁先吃螃蟹。这是“死道友莫死贫道”的意思。
 
 mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需求。
+
+
 * 图形子系统
+
 * Android编译框架
 ** 编译框架基本概念
 Android编译系统是通过各种.mk文件和shell脚本建立的一个编译框架，这个框
@@ -1319,6 +1327,9 @@ mm：用来编译当前目录下的所有子项目
 mmm： 用来编译指定目录下的所有子项目
 
 =======
+
+
+
 * 图形子系统
   在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处
   理中使用到, 在对Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对
@@ -1477,10 +1488,10 @@ onDraw(canvas);
      …
      // Step 5, draw the fade effect and restore layers
      if (drawTop) {  
-         matrix.setScale(1, fadeHeight * topFadeStrength);  
-         matrix.postTranslate(left, top);  
-         fade.setLocalMatrix(matrix);  
-         canvas.drawRect(left, top, right, top + length, p);  
+         matrix.setScale(1, fadeHeight * topFadeStrength);
+         matrix.postTranslate(left, top);
+         fade.setLocalMatrix(matrix);
+         canvas.drawRect(left, top, right, top + length, p);
      }  
      …
      // Step 6, draw decorations (scrollbars)
@@ -1526,16 +1537,31 @@ Transformation。 Interpolator是一个接口，接口中定义了一个唯一�
 getInterpolation(), 对这个函数的实现可以在不同的时间段使用不同的加速曲
 线，从而达到特别的动画效果。Transformation保存了Animation中的动画参数。
 
+*** 窗口动画
+*** 视图动画
+视图动画是在ViewGroup类中的drawChild()函数中完成的。 函数原型如下
+drawChild(Canvas canvas, View child, long drawingTime)在该函数中首先调
+用child.getAnimation()获取Animation对象，判断如果Animation不为null,则利用
+Animantion中的动画参数对该视图进行变换，然后把变换后的图像绘制到canvas
+中，主要流程包括：
+1. 查看动画对象是否已经初始化，如果没有则先调用a.initialize()初始化该
+   动画对象，初始化的参数中包含了子视图
+
+*** 布局动画
 
 
-* 收集
-bind -m emacs '"\C-o": menu-complete'
-bash-completion包
+* 兴趣收集
+** 电影
+我如何度过这个夏天
+** 读书
+
+** 音乐
+
+
 * 工作计划
-*** TODO 后缀树
-*** TODO 后缀数组
-*** TODO java webservice
-<<<<<<< HEAD
-*** TODO Delvik虚拟机和Java虚拟机的区别  Android技术内幕
-*** TODO 一致性哈希表
-*** TODO source . exec的区别
+** TODO 后缀树
+** TODO 后缀数组
+** TODO java webservice
+** TODO Delvik虚拟机和Java虚拟机的区别 Android技术内幕
+** TODO 一致性哈希表 布隆过滤器
+** TODO source . exec的区别

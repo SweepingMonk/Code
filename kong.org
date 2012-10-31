@@ -1320,13 +1320,208 @@ mmm： 用来编译指定目录下的所有子项目
 
 =======
 * 图形子系统
-  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处理中使用到.在对
-Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对Surface处理在双缓冲技术则不同.
->>>>>>> 23d57b91fb1b3ef574112f2d46aa55d4e5a7676c
+  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处
+  理中使用到, 在对Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对
+  Surface处理在双缓冲技术则不同.
 
 
+** 视图的绘制
+Android UI界面由以下树形结构组成, 从图中可以看出, UI界面是由View与
+ViewGroup两大类控件组成，其中ViewGroup继承自android.view.View, 并实现
+了android.view.ViewParent和android.view.ViewManager两个接口, 赋予其装
+载子控件和管理子控件的能力。作为一个容器，它可以装载其它由View派生出来
+的元素(View和ViewGroup)。常见的控件Button,TextView是从View派生出来的，
+容器如FrameLayout, linearLayout是从ViewGroup派生出来的。
+[[file:pic/ViewTree.png]]
+在android.view下边有一个ViewRoot类，其在performTraversals()方法中完成对View树的遍历。
+#+BEGIN_EXAMPLE
+private void performTraversals() {
+    final View  host = mView;  
+    ...  
+    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);  
+    ...  
+    host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());  
+    ...  
+draw(fullRedrawNeeded);
+…
+}
+#+END_EXAMPLE
+在这里mView是PhoneWindow.DecorView类型,它继承自FrameLayout，DecorView
+是Window的最顶层View，称之为主View，DecorView会缺省的attach到Activity
+的主窗口中。
+[[file:pic/draw.jpg]]
+由上边代码可以知道绘制工作分为三步：判断是否需要重新计算大小(measure),是否需要重新安置视图的位置(layout),以及是否需要重绘(draw)。其中measure()和layout()是直接调用mView的measure()和layout()方法，而draw()调用的是 ViewRootImpl内部的draw(boolean fullRedrawNeeded)函数，再由draw(boolean fullRedrawNeeded)函数来调用mView.draw()函数，draw(boolean fullRedrawNeeded)包含draw过程的一些前期处理。
+由此可见meassure(),layout()和draw()三个过程均是调用自mView。由于mView是DecorView类型,而DecorView继承自FrameLayout,FrameLayout继承自ViewGroup, ViewGroup继承自View,因此最终的工作是在ViewGroup和View中完成的。
+它们间的继承关系如下：
+DecorView-> FrameLayout-> ViewGroup-> View
+由于ViewGroup继承自View，因此ViewGroup类及其子类从本质上看也都是View，但为了下边描述方便，严格区分View和ViewGroup类型。
 
+整个过程涉及到一些方法，分别列出：
+View
+| 函数               | 描述                                                                            |
+|--------------------+---------------------------------------------------------------------------------|
+| measure()          | 计算窗口大小                                                                    |
+| onMeasure()        | 被measure()调用                                                                 |
+| layout()           | 计算控件布局                                                                    |
+| setFrame()         | 判断是否发生改变，被layout()调用                                                |
+| onLayout()         | 这里是空方法，View类型的控件这里不用做处理，被layout()方法调用                  |
+| draw()             | 绘制控件                                                                        |
+| onDraw()           | 绘制View本身，自定义View往往会重载该函数来绘制View本身的内容。 被draw()方法调用 |
+| dispatchDraw()     | View中的dispatchDraw默认是空实现，ViewGroup中覆写了该函数。被draw()方法调用     |
+| onDrawScrollBars() | 绘制装饰,被draw()方法调用                                                       |
 
+ViewGroup
+| 函数                | 描述                                                                                                                           |
+|---------------------+--------------------------------------------------------------------------------------------------------------------------------|
+| layout()            | 功能主要由View中的layout()方法实现                                                                                             |
+| abstract onLayout() | 抽象方法                                                                                                                       |
+| dispatchDraw()      | 覆盖父类中的方法                                                                                                               |
+| drawChild()         | 遍历，对于ViewGroup类型则继续调用dispatchDraw()方法，对于View类型则调用draw()方法。此方法被ViewGroup中的dispatchDraw()方法调用 |
+
+FrameLayout
+| 函数        | 描述                              |
+|-------------+-----------------------------------|
+| onMeasure() | 遍历调用每个子View的measure()方法 |
+| onLayout()  | 实现ViewGroup中的抽象方法         |
+| draw()      | 实际功能由View的draw()方法实现                                  |
+
+DecorView
+| 函数        | 描述                                   |
+|-------------+----------------------------------------|
+| onMeasure() | 实际由FrameLayout的onMeasure()方法实现 |
+| setFrame()  | 实际由View的setFrame()方法实现         |
+| draw()      | 实际功能由View的draw()方法实现                                       |
+前边说过，窗口绘制的三个过程measure, layout, draw都是从DecorView调用开始的。
+下面对三个过程一一说明：
+meassure方法: 实际调用的是View中的measure()方法
+1.	判断是否需要重新计算大小
+2.	调用onMeasure()方法，实际调用的是FrameLayout的onMeasure()方法,遍历调用所有子控件的measure()方法，求出子控件的大小
+3.	调用setMeasuredDimension(int, int)确定自身大小
+
+由于第二步会调用子控件的measure()方法，也会经历上边几步，直到整个View树遍历完，所有控件的大小都确定。控件的大小是由父控件和自身决定的，主要取决在于父控件， 控件自身只提供参考值， 这是因为控件的measure方法是由父控件调用的, 而父控件大小有限，可能不完全按照你的申请要求给出。
+
+layout方法: 实际调用的是View类中的layout()方法
+1.	设置自身相对父控件的位置并判断是否需要重新布局，使用setFrame(left, top, right, bottom);
+2.	调用onLayout()布局子控件，如果是ViewGroup类型则会调用子控件的
+        layout()方法
+
+#+BEGIN_EXAMPLE
+public void layout(int l, int t, int r, int b) {
+   boolean changed = setFrame(l, t, r, b);
+   …
+   onLayout(changed, l, t, r, b);
+…
+}
+
+protected boolean setFrame(int left, int top, int right, int bottom) {
+        boolean changed = false;
+        …
+        if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
+            changed = true;
+        …
+return changed;
+}
+//View中onLayout方法为空，表明View类型视图不需要做操作
+protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+}
+
+//FrameLayout中onLayout方法, 对子控件进行遍历，调用它们的layout()方法
+protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+  …
+	 for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            ...
+            child.layout(childLeft, childTop, childLeft + width, childTop + height);
+         }
+         ... 
+}
+#+END_EXAMPLE
+由于FrameLayout会遍历调用子视图的layout()方法，这样保证所有子视图都会
+调用各自的layout()方法，布局结束。
+
+draw()方法：实际调用的是View中的draw()方法
+1 绘制背景  background.draw(canvas)
+2 保存画布的层次
+3 调用onDraw()绘制控件内容
+4 调用dispatchDraw()绘制子控件。View中dispatchDraw()默认为空实现，因为
+其不包含子视图，而ViewGroup重载了dispatchDraw()来对其子视图进行绘制，
+通常应用程序不应该对dispatchDraw()进行重载，其默认实现体现了View系统绘
+制的流程。因此DecorView会调用ViewGroup中的dispatchDraw()方法，在此方法
+中会调用drawChild()方法,在drawChild()方法中，会对每个子控件重新调用
+dispatchDraw()方法，对于ViewGroup类型会继续遍历，对于View类型对象则调用自身的draw()方法。
+5 绘制渐变边界并恢复层次
+fade.setLocalMatrix(matrix);
+canvas.drawRect(right - length, top, right, bottom, p);
+6 调用onDrawScrollBars(canvas)绘制装饰, 比如滑动条
+View中的draw()方法:
+#+BEGIN_EXAMPLE
+public void draw(Canvas canvas) {
+ …
+ // Step 1, draw the background, if needed
+background.draw(canvas);
+…
+// Step 2, save the canvas' layers
+if (solidColor == 0) {
+   final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
+
+   if (drawTop) {
+     canvas.saveLayer(left, top, right, top + length, null, flags);
+   }
+}
+…
+// Step 3, draw the content
+if (!dirtyOpaque) 
+onDraw(canvas);
+     // Step 4, draw the children
+     dispatchDraw(canvas);
+     …
+     // Step 5, draw the fade effect and restore layers
+     if (drawTop) {  
+         matrix.setScale(1, fadeHeight * topFadeStrength);  
+         matrix.postTranslate(left, top);  
+         fade.setLocalMatrix(matrix);  
+         canvas.drawRect(left, top, right, top + length, p);  
+     }  
+     …
+     // Step 6, draw decorations (scrollbars)
+     onDrawScrollBars(canvas);
+
+#+END_EXAMPLE
+View中的dispatchDraw()方法是个空方法，View对象不需要做任何操作。
+ViewGroup重载了dispatchGroup()方法，它的核心功能就是通过for循环调用
+drawChild()对ViewGroup的每个子视图进行绘制。如果
+FLAG_USE_CHILD_DRAWING_ORDER为true，则子视图的绘制顺序通过
+getChildDrawingOrder来决定，默认的绘制顺序即是子视图加入ViewGroup的顺
+序，而我们可以重载getChildDrawingOrder函数来更改默认的绘制顺序，这会影
+响到子视图之间的重叠关系。
+
+** 动画的绘制
+Android中的动画类似于电影的胶片，通过不断在荧屏上绘制不同的静态图像，
+从而达到动画的效果。在前边视图的绘制那里讲到，真正的绘制工作最后是在
+View类的draw()函数中完成的，在该函数中会判断当前视图是否包含动画，
+如果包含，就根据动画参数对当前图像进行相应的变换，并重新绘制到屏幕上，
+绘制结束后会再发起一个重绘消息，这样连续绘制，直到动画参数指示动画结束。
+View系统中的动画分为三类，分别是窗口动画、视图动画、布局动画。
+
+窗口动画：窗口动画一般定义了窗口在显示、消失时的动画.
+视图动画：View对象在显示和消失时的动画.
+布局动画：指ViewGroup对象包含的动画。其本质是根据布局动画为子视图分别
+设置不同的动画，从而使得整体上看来像是一个布局文件的效果。
+
+Android中View系统仅支持基本的五种动画，分别为平移、缩放、旋转、扭曲及
+颜色阿尔法通道变化，这称之为"动画参数"或"动画类型"，应用程序将这五种基
+本动画进行组合产生新的动画。
+
+动画的设计思想: 首先要有一个动画主体，实际上就是一个View对象，然后可以
+为该View对象指定一个动画，动画使用一个Animation类来表示，当View开始绘
+制的时候，从Animation类获取动画的参数，并根据参数对View进行图形变换，
+然后将变换后的图形绘制到屏幕上。
+
+Animation中保存了动画的开始时间和结束时间，在不同时间返回不同的动画参
+数，View系统不断从Animation中读取动画参数并进行变换，给用户的感觉就是一个连续
+的动画。
+
+* 收集
 bind -m emacs '"\C-o": menu-complete'
 bash-completion包
 * 工作计划

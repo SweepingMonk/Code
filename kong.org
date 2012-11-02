@@ -1,4 +1,4 @@
-* 笔记
+* 1.笔记
 ** 个人笔记
 *** 配置emacs
 **** emacs快捷键
@@ -645,7 +645,6 @@ DES：data encryption standard
 DES的算法是对称的，既可用于加密又可用于解密,是一个密码长度为56位的古老
 的分组密码，DES算法现在已经过时了，因为可以用穷举法破解。
 
-
 **** java虚拟机和delvik虚拟机的区别
 
 | java虚拟机             | Dalvik                             |
@@ -728,6 +727,83 @@ JDK将Java源程序编程成标准的Java字节码文件（.class文件），而
 式）组合成一个应用程序包（APK）。应用程序包可以被发布到手机上运行。
 [[file:pic/AndroidPackage.jpg]]
 
+**** RMI远程方法调用技术
+RMI是EJB之间通信时所使用协议，EJB是服务端架构
+RMI的开发步骤
+
+1. 先创建远程接口及声明远程方法，注意这是实现双方通讯的接口，需要继承Remote
+2. 开发一个类来实现远程接口及远程方法，值得注意的是实现类需要继承
+   UnicastRemoteObject, 由于每个方法都要抛出RemoteException异常，所以
+   需要显示声明构造函数
+
+3. 通过javac命令编译文件，通过java -server 命令注册服务，启动远程对象
+4. 最后客户端查找远程对象，并调用远程方法
+
+注意: 当你创建一个扩展自UnicastRemoteObject的类的对象时，将会启动一个
+单独的线程，它将保持该程序无限地存活下去。
+在虚拟机之间传递值有两种机制：
+1. 实现了Remote接口的类的对象将作为远程引用传递。
+2. 实现了Serializable接口，但是没有实现Remote接口的类的对象将使用序列
+   化进行复制。
+
+#+BEGIN_EXAMPLE
+# 接口
+public interface Hello extends Remote{
+	public String say() throws RemoteException;
+}
+# 接口实现 并启动服务
+public class HelloServer extends UnicastRemoteObject implements Hello{
+
+	private static final long serialVersionUID = 1L;
+
+	private String message;
+
+	protected HelloServer(String message) throws RemoteException {
+		this.message = message;
+	}
+
+	public String say() throws RemoteException {
+		System.out.println("Called by HelloClient");
+		return message;
+	}
+
+
+	public static void main(String args[]){
+		try {
+                        //本地主机上的远程对象注册表Registry的实例，并指定端口，这一步必不可少（Java默认端口是1099），必不可缺的一步，缺少注册表创建，则无法绑定对象到远程注册表上
+			Registry registry = LocateRegistry.createRegistry(1099);
+			Hello hello = new HelloServer("你好啊");
+                        //把远程对象注册到RMI注册服务器上，并命名为hello
+                        //绑定的URL标准格式为：rmi://host:port/name(其中协议名可以省略，下面两种写法都是正确的）
+			Naming.rebind("hello", hello);
+			//Naming.rebind("rmi://192.168.56.1:1099/hello",hello);
+	                //Naming.rebind("//192.168.56.1:1099/hello", hello);
+			System.out.println("server is ready");
+		} catch (Exception e) {
+			System.out.println("Hello Server failed: " + e);
+		}
+	}
+}
+
+public class HelloClient {
+
+	public static void main(String args[]){
+		try {
+			Hello hello = (Hello)Naming.lookup("rmi://192.168.56.1:1099/hello");
+			System.out.println(hello.say());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+	}
+}
+#+END_EXAMPLE
+
+
+**** CORBA通用对象请求代理架构
 
 *** c编程
 **** 类型提升 不怎么准 在ANSI C中已经取消了
@@ -1199,7 +1275,7 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
 于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
 
 
-* 各种有趣问题
+* 2. 各种有趣问题
 ** 哈希表的尴尬
 由于cache命中率的原因，哈希表的性能通常好于红黑树。即使只有32个元素，
 也要进行5次随机内存访问。随机内存访问对cpu cache是不友好的。
@@ -1443,7 +1519,7 @@ int main()
 错误点：最后验证字符串输入结束的标志是s[0]='0' && s[1]=0
 
 
-* 一些热点信息收集
+* 3. 一些热点信息收集
 ** redis
 *** redis备忘录
 redis是一个带持久化的高速key-value存储系统。
@@ -1472,7 +1548,8 @@ SSL是为网络通信提供安全及数据完整性的一种安全协议，TLS�
 网络连接进行加密。
 SSL使用RSA加密
 
-* Android编译框架
+
+* 4. Android编译框架
 ** 编译框架基本概念
 Android编译系统是通过各种.mk文件和shell脚本建立的一个编译框架，这个框
 架基于基本的make概念。换句话说Android并没有建立新的编译脚本，而是建立
@@ -1494,11 +1571,10 @@ mmm： 用来编译指定目录下的所有子项目
 
 
 
-* 图形子系统
+* 5. 图形子系统
   在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处
   理中使用到, 在对Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对
   Surface处理在双缓冲技术则不同.
-
 
 ** 视图的绘制
 Android UI界面由以下树形结构组成, 从图中可以看出, UI界面是由View与
@@ -1714,7 +1790,7 @@ Animantion中的动画参数对该视图进行变换，然后把变换后的图�
 *** 布局动画
 
 
-* 兴趣收集
+* 6. 兴趣收集
 ** 电影
 <<我如何度过这个夏天>>
 ** 读书
@@ -1722,10 +1798,13 @@ Animantion中的动画参数对该视图进行变换，然后把变换后的图�
 ** 音乐
 
 
-* 工作计划
+* 7. 工作计划
 ** TODO 后缀树
 ** TODO 后缀数组
 ** TODO java webservice
 ** TODO Delvik虚拟机和Java虚拟机的区别 Android技术内幕
 ** TODO 一致性哈希表 布隆过滤器
 ** TODO source . exec的区
+** TODO select 和 poll有什么区别
+** TODO RMI远程方法调用 SOAP简单对象访问协议 CORBA通用对象请求代理架构
+** TODO JNDI java命名目录服务接口

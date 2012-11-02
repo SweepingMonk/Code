@@ -802,7 +802,6 @@ public class HelloClient {
 }
 #+END_EXAMPLE
 
-
 **** CORBA通用对象请求代理架构
 
 *** c编程

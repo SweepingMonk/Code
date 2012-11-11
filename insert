@@ -15,3 +15,50 @@ ref:
 1. pacman-key
 
 https://wiki.archlinux.org/index.php/Pacman-key#Master_keys
+
+
+
+SQL注入
+一、 SQL注入简介
+
+
+SQL注入是比较常见的网络攻击方式之一，它不是利用操作系统的BUG来实现攻击，而是针对程序员编程时的疏忽，通过SQL语句，实现无帐号登录，甚至篡改数据库。
+===========================================
+
+二、 SQL注入攻击的总体思路
+
+1.寻找到SQL注入的位置
+2.判断服务器类型和后台数据库类型
+3.针对不通的服务器和数据库特点进行SQL注入攻击
+===========================================
+
+三、SQL注入攻击实例
+
+比如在一个登录界面，要求输入用户名和密码：
+
+可以这样输入实现免帐号登录：
+
+用户名： ‘ or 1 = 1 –
+密 码：
+
+点登陆,如若没有做特殊处理,那么这个非法用户就很得意的登陆进去了.(当然现在的有些语言的数据库API已经处理了这些问题)
+
+这是为什么呢? 下面我们分析一下：
+
+从理论上说，后台认证程序中会有如下的SQL语句：
+
+String sql = "select * from user_table where username=
+' "+userName+" ' and password=' "+password+" '";
+当输入了上面的用户名和密码，上面的SQL语句变成：
+
+SELECT * FROM user_table WHERE username=
+'’or 1 = 1 -- and password='’
+分析SQL语句：
+条件后面 username=” or 1=1 用户名等于 ” 或 1=1 那么这个条件一定会成功；
+然后后面加两个-，这意味着注释，它将后面的语句注释，让他们不起作用，这样语句永远都能正确执行，用户轻易骗过系统，获取合法身份。
+
+这还是比较温柔的，如果是执行
+
+SELECT * FROM user_table WHERE
+username='' ;DROP DATABASE (DB Name) --' and password=''
+….其后果可想而知…

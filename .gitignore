@@ -6,3 +6,4 @@ in
 .gitignore
 /.git/
 !kong.org
+!insert.org

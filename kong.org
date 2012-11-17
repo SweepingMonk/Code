@@ -804,6 +804,51 @@ public class HelloClient {
 
 **** CORBA通用对象请求代理架构
 
+**** sql注入技术
+SQL注入
+一、 SQL注入简介
+
+
+SQL注入是比较常见的网络攻击方式之一，它不是利用操作系统的BUG来实现攻击，而是针对程序员编程时的疏忽，通过SQL语句，实现无帐号登录，甚至篡改数据库。
+===========================================
+
+二、 SQL注入攻击的总体思路
+
+1.寻找到SQL注入的位置
+2.判断服务器类型和后台数据库类型
+3.针对不通的服务器和数据库特点进行SQL注入攻击
+===========================================
+
+三、SQL注入攻击实例
+
+比如在一个登录界面，要求输入用户名和密码：
+
+可以这样输入实现免帐号登录：
+
+用户名： ‘ or 1 = 1 –
+密 码：
+
+点登陆,如若没有做特殊处理,那么这个非法用户就很得意的登陆进去了.(当然现在的有些语言的数据库API已经处理了这些问题)
+
+这是为什么呢? 下面我们分析一下：
+
+从理论上说，后台认证程序中会有如下的SQL语句：
+
+String sql = "select * from user_table where username=
+' "+userName+" ' and password=' "+password+" '";
+当输入了上面的用户名和密码，上面的SQL语句变成：
+
+SELECT * FROM user_table WHERE username=
+'’or 1 = 1 -- and password='’
+分析SQL语句：
+条件后面 username=” or 1=1 用户名等于 ” 或 1=1 那么这个条件一定会成功；
+然后后面加两个-，这意味着注释，它将后面的语句注释，让他们不起作用，这样语句永远都能正确执行，用户轻易骗过系统，获取合法身份。
+
+这还是比较温柔的，如果是执行
+
+SELECT * FROM user_table WHERE
+username='' ;DROP DATABASE (DB Name) --' and password=''
+….其后果可想而知…
 *** c编程
 **** 类型提升 不怎么准 在ANSI C中已经取消了
 整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类
@@ -816,15 +861,46 @@ unsigined int。float将被转换为double类型，任何数组将被转换为�
 先声明的大小。
 **** fgets()函数
 fgets(s, n, stdin); 函数最多接收n-1个字符，并自动在字符串最后加上结束
-符号，如果输入字符个 数少于n-1，会接收回车符，然后在后边加上字符串结束
-标志，所以如果输入字 符个数少于n-1的时候，后边多了一个回车符号，注意手
-动去除. s[strlen(s)-1]=0
+符号
 **** swap交换两个元素 注意情况
 *a ^= *b;
 *b ^= *a;
 *a ^= *b;
 当a,b指向同一个元素时，该元素最后会被置为0，如果不是同一个元素，可以正
 常交换
+
+**** 结构体位段
+首先位段的成员必须声明为int、signed int或unsigned int类型。其次，在成
+员名的后面是一个冒号和一个整数，这个整数必须制定该位段所占用的位的数目。
+#+BEGIN_EXAMPLE
+struct CHAR{
+    unsinged ch   : 7;
+    unsigned font : 6;
+    unsigned size : 19;
+};
+#+END_EXAMPLE
+在上边的结构体中，如果在32位机器上运行，可能的一种内存分配方式是，7、6、
+19，总共占用32位，注意每一个变量占用的长度不能超过一个整形长度，所以如
+果在16机器上运行，可能编译不通过。
+这个例子说明了一个使用位段的好理由，能够把长度为奇数的数据包装在一起，
+节省存储空间。
+**** malloc
+使用malloc动态分配内存时，1-12字节的记录需要消耗48字节的内存空间，
+13-28字节的记录需要消耗64字节的内存空间, 这个因编译器而异。
+另外malloc分配的内存空间通常比申请的要大，多出来的部分用来记录对内存的
+管理。
+**** malloc calloc和realloc
+calloc也用来分配内存，malloc和calloc的主要区别是calloc在返回指向内存的
+指针前把它初始化为0，另一个就是请求内存数量的方式并不相同，calloc有两
+个参数，一个是所要分配的元素个数，第二个是每个元素的大小。
+realloc函数用于修改一个原来已经分配的内存大小，使用这个函数你可以使一
+个内存扩大或者缩小。扩大内存时，新增的内存添加到原先的内存后边，新内不
+能并未初始化，如果原先的内存块无法改变大小，realloc将分配一块正确大小
+的内存，并把原先那块内存的内容复制到新内存上，因此在使用realloc函数后，
+不能使用原来指向旧内存的指针，应该使用realloc所返回的指针。
+**** 字符串常量
+"xyz"  字符串常量的值是个指针常量
+"xyz" + 1 的结果是个指针，指向字符y
 
 *** 系统编程
 **** 可执行文件的内存布局
@@ -1066,6 +1142,25 @@ Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文
 1. 命令dos2unix test.file
 2. 去掉'\r', 用命令sed -i 's/\r//' test.file
 ok!!
+
+**** archlinux签名错误
+error: GPGME error: No data
+
+最近archlinux　yaourt的时候, 老是遇到＂GPGME error: No data＂的错误…
+翻遍了论坛, 试着重新更新pacman-key, 删除/et/pacman.d/gnupg; /var/lib/pacman/sync/*db.sig*　等均不管用;
+
+(1) 修改/etc/pacman.conf
+设置全局SigLevel = Never
+这个方案可以解决问题, 但是禁用了签名验证, 不推荐. 至少我的版本是在某次升级后, networkmanager挂掉了. = =!
+
+(2) 或者修改mirrorlist
+后来将mirrorlist用官方原始的那份覆盖过来了下, 问题解决了..
+估计是之前配置的国内哪个源签名的问题. = =!
+
+ref:
+1. pacman-key
+
+https://wiki.archlinux.org/index.php/Pacman-key#Master_keys
 
 
 ** 面试经验收集
@@ -1427,6 +1522,133 @@ for J:=N-M+1 to N do
        insert J in S after T
 #+END_EXAMPLE
 
+** 0-1背包问题                                                                 :动态规划:
+给定一个整数K和n个不同大小的物品，第i个物品的大小为整数Ki，寻找一个物
+品的子集，它们的大小之和为K，或者确定不存在这样的子集。
+
+解题思路：对于n个物品判断是否有几个物品的大小之和为k，如果前n-1个物品
+中可以找到几个物品的大小之和为k,则n个物品必然也满足条件，如果前n-1个物
+品中不存在几个物品的大小之和为k，假设先把第n个物品放入，则如果前n-1个
+物品中可以找到几个物品大小之和为K-Kn，那么也满足条件。
+
+用一个结构体记录，q[i][j]表示当有i个物品的时候，是否可以找到物品的大小
+之和为j，同时记录当前物品是否存在于结果中。
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <string.h>
+
+struct node
+{
+    int exist;
+    int belong;
+}q[20][50];
+
+int s[20];
+
+void manager(int n,int k)
+{
+    /* init */
+    q[0][0].exist=1;
+    for(int i=1;i<=k;i++)
+        q[0][i].exist=0;        #初始化
+    for(int i=1;i<=n;i++)
+        for(int j=0;j<=k;j++) {
+            if(q[i-1][j].exist) {
+                q[i][j].exist=1;
+                q[i][j].belong=0;
+            } else if(j>=s[i]) {
+                if(q[i-1][j-s[i]].exist) {
+                    q[i][j].exist=1;
+                    q[i][j].belong=1;
+                }
+            }
+        }
+}
+
+int main()
+{
+    int n,k;
+    freopen("plank.in","r",stdin);
+    scanf("%d%d",&n,&k);
+    for(int i=1;i<=n;i++)
+        scanf("%d",&s[i]);
+    memset(q,0,sizeof(q));
+    manager(n,k);
+    if(q[n][k].exist)
+        printf("exist\n");
+    else
+        printf("not exist\n");
+}
+return 0;
+}
+#+END_EXAMPLE
+
+** 乘法操作 以及用移位实现的乘法操作
+解题思路： 对于两个整数97 * 61, 61的二进制形式是0111101
+97 * 61 = 97 * （32 + 16 + 8 + 4 + 1）
+#+BEGIN_EXAMPLE
+#include <iostream>
+using namespace std;
+
+int multiple(int a, int b)
+{
+    int d=0;
+    int c=0;                    #代表移位的位数
+    while(b){
+        if(b%2)                 #判断最低位是0还是1
+            d+=a<<c;
+        b=b>>1;
+        c++;
+    }
+    return d;
+}
+
+int main()
+{
+    int in, out;
+    cin>>in>>out;
+    cout<<multiple(in, out)<<endl;
+    return 1;
+}
+#+END_EXAMPLE
+** N次方问题，当N很大时，把N转换为二进制
+2的N次方问题：当N很大时，由31 = 16 + 8 + 4 + 2 + 1可以得到启发，2 ^ 31
+= 2 ^ 16 * 2 ^ 8 * 2 ^ 4 * 2 ^ 2 * 2 ^ 1.
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+
+int main()
+{
+    long N;
+    long result = 1;
+    long temp = 2;
+    int s[128];
+    int t = 0;
+    scanf("%ld", &N);
+    while(N) {
+        s[t++]=N%2;
+        N/=2;
+    }
+    for(int i=0;i<t;i++) {
+        if(s[i])
+            result *= temp;
+        temp = temp * temp;
+    }
+    printf("%ld\n", result);
+    return 0;
+}
+#+END_EXAMPLE
+** 最大连续和
+有四种方法：
+1. 遍历数组，记录区间i,j之间的数的总和，找到其中的最大值时间复杂度为
+   o(n^2)
+2. 把区间分成两个部分，分别求出左右两个部分中的最大连续和，然后再求出
+   端点分别在两个区间中的最大连续和，这三个中的最大值就是整个区间的最
+   大连续和，时间复杂度为o(nlogn)
+3. 遍历序列，记录从序列开头到每一个位置的和，并记录这些和中的最大最小
+   值，以及它们的差值，整个序列的最大连续和，就是这些差值中最大的，时
+   间复杂度为o(n)
+4. 
 ** 求平方根 求多维空间中两个点间的距离
 1. K维空间中有两个点A和B，求它们间的距离
 2. 其中最重要的是求平方根操作，使用牛顿迭代可以减小开方操作的时间
@@ -1478,13 +1700,52 @@ int main()
     return 0;
 }
 #+END_EXAMPLE
-** 检测链表中是否存在循环 前提是链表中所有结点元素都不相同
-思路：
-1. 用两个指针p1和p2,p1指向链表第一个元素，p2指向链表第三个元素
-2. 比较p1和p2所指向元素是否相同，如果相同则存在循环
+** 检测链表中是否存在环，并找到相遇点
+
+1. 用两个指针p1和p2都指向链表第一个元素
+2. p1向后移动一个元素,p2向后移动两个元素，比较两者是否相等，如果相等表
+   明存在环，两个指针相遇
 3. p1和p2有一个为NULL则停止
-4. p1向后移动一个元素,p2向后移动两个元素
 如果存在循环最后肯定能找到，如果不存在最后p2为NULL停止
+
+p1移动距离为s，p2移动距离为2s，链表长度为L，假设相遇点到环入口点距离为
+x，链表头到环入口点距离为a，环长度为r，则满足
+# 2s = s + nr           s = nr
+# a + x = s = nr = (n-1)r + L - a
+# a = (n-1)r + L - a -x
+# L - a - x 表示相遇点到环入口的距离
+# 用两个指针b1 , b2, b1指向链表头， b2指向相遇点，同时开始移动，每次移
+# 动一步，最后两个指针必然相遇，并且相遇点就是环的入口点
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <math.h>
+
+void FindLoop(list * head)
+{
+    list * p1, * p2;
+    p1 = p2 = head;
+    while(p2 && p2 -> next){
+        p1 = p1->next;
+        p2 = p2->next->next;
+        if(p1 == p2) break;
+    }
+    if(p2 == NULL || p2->next == NULL)
+        return;
+    list * t = head;
+    while(t != p2){
+        t= t->next;
+        p2 = p2->next;
+    }
+    return t;
+}
+#+END_EXAMPLE
+** 检测两个链表是否相交
+方法一：将其中一个链表的首位相连，判断另外一个链表是否有环，如果有则两
+个链表相交，否则不想交
+方法二： 如果预先知道两个链表的长度n和m，如果两个链表相交，则它们的最
+后一部分肯定是相同的，让长度比较长的链表先移动n-m步，然后两个链表再同
+时移动，当两部分相同时，表明到了相交点。
+
 ** 如何判断一个变量时有符号数还是无符号数
 #define ISUNSIGNED(a) (a>=0 && ~a>=0)
 如果宏的参数是一个类型，其中一个方法是使用类型转换
@@ -1516,6 +1777,411 @@ int main()
 ** poj1503 简单求大整数的和
 当输入字符串为0时表示输入结束
 错误点：最后验证字符串输入结束的标志是s[0]='0' && s[1]=0
+
+** B·ellman_ford算法
+Bellman-ford算法用来求解最短路径，还可以检测是否存在负环，算法的核心思想是：对每一条边进行n-1次松弛操作，时间复杂度是O(NE),其中N是顶点的个数，E是边的个数。最后检测每一条边是否还可以松弛，如果可以就表明存在负环，否则已经求出了最短路径。
+#+BEGIN_EXAMPLE
+/**
+ * @file   acm.c
+ * @author  <kong@kong>
+ * @date   Sun Aug 26 22:05:07 2012
+ *
+ * @brief   Bellman-ford算法 spfa是用队列优化的Bellman-ford算法
+ * 对所有边进行n-1次松弛
+ *
+ */
+#include <stdio.h>
+
+int s[10][10];
+int dis[20];
+
+struct vedge
+{
+    int u,v,w;
+}vt[20];
+
+int main()
+{
+    int n,m;
+    struct vedge temp;
+    int b,t;
+    int MAX=1000;
+    int point=0;
+    freopen("plank.in","r",stdin);
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=n;i++)
+        for(int j=1;j<=n;j++)
+            s[i][j]=MAX;
+    for(int i=0;i<m;i++)
+    {
+        scanf("%d%d%d", &temp.u,&temp.v,&temp.w);
+        s[temp.u][temp.v]=temp.w;
+        vt[point++]=temp;
+    }
+    scanf("%d%d",&b,&t);
+    for(int i=1;i<=n;i++)
+        dis[i]=s[b][i];
+    for(int i=0;i<n-1;i++)
+        for(int j=0;j<m;j++){
+            temp=vt[j];
+            if(dis[temp.v]>dis[temp.u]+s[temp.u][temp.v])
+                dis[temp.v]=dis[temp.u]+s[temp.u][temp.v];
+        }
+    /* 检验是否存在负环 */
+    for(int j=0;j<m;j++)
+    {
+        temp=vt[j];
+        if(dis[temp.v]>dis[temp.u]+s[temp.u][temp.v])
+        {
+            printf("false\n");
+            break;
+        }
+    }
+    /* for(int i=1;i<=n;i++) */
+    /*     printf("%d ", dis[i]); */
+    /* printf("\n"); */
+    return 0;
+}
+#+END_EXAMPLE
+** Spfa算法
+spfa算法是用队列优化过的Bellman_ford算法，在Bellman_ford算法中对每一
+条边都进行了n-1次松弛，时间复杂度是O(NE), 而spfa算法的时间复杂度通常是
+O(KE)，通常情况下k<=2,但是spfa算法的稳定性较差，对于稀疏图和稠密图，时
+间复杂度变化较大，还有注意spfa算法检测负环的方法是判断是否有顶点进队列
+次数超过N次
+http://blog.csdn.net/v_july_v/article/details/6181485
+#+BEGIN_EXAMPLE
+/**
+ * @file   spfa.c
+ * @author  <kong@kong>
+ * @date   Fri Sep 14 23:39:55 2012
+ *
+ * @brief  spfa算法是用队列优化的Bellman-ford算法,时间复杂度为O(KE)其中K通常不大于2,Bellman-ford算法的时间复杂度为O(VE)
+ * Bellman-ford判断是否有负环:  对于每一条边,如果dis[v]>dis[u]+c[u][v]则有负环
+ * spfa判断是否有负环的方法是,记录每个顶点进队次数,超过顶点个数V表示有负环,  注意:有负环存在时,spfa算法没法正常结束,因为边距不断在收敛,顶点不停进队
+ */
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+#define MAX 1000
+int s[101][101];
+int dis[101];
+int n,b,t;
+int exis[101];
+int vect[101];
+
+void spfa()
+{
+    int head,tail;
+    for(int i=0;i<101;i++)
+    {
+        exis[i]=0;
+        vect[i]=0;
+        dis[i]=MAX;
+    }
+    head=0;
+    tail=1;
+    vect[tail]=b;
+    exis[b]=1;
+    dis[b]=0;
+    while(head!=tail)
+    {
+        head=(head+1)%(n+1);
+        /* 出队列 */
+        exis[head]=0;
+        for(int i=1;i<=n;i++)
+        {
+            if(dis[i]>dis[vect[head]]+s[vect[head]][i])
+            {
+                dis[i]=dis[vect[head]]+s[vect[head]][i];
+                if(!exis[i])
+                {
+                    tail=(tail+1)%(n+1);
+                    vect[tail]=i;
+                    exis[i]=1;
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    ifstream in("plank.in");
+    in>>n;
+    for(int i=1;i<=n;i++)
+        for(int j=1;j<=n;j++)
+            in>>s[i][j];
+    in>>b>>t;
+    spfa();
+    for(int i=1;i<=n;i++)
+        cout<<dis[i]<<endl;
+    return 0;
+}
+#+END_EXAMPLE
+** 汇率转换问题，判断是否能赚到更多的钱
+poj 1806
+题意：已知有n种货币，编号为1~n，以及它们之间的瑞换比例。现在Nick有第fir种货币meney元，问你Nick能不能通过这些货币的瑞换规则，使自己拿到更多的fir货币。
+
+思路：bellman_ford。判断有没有正环，有的话Nick就可以无限次使用这个正环使自己的货币增值。
+#+BEGIN_EXAMPLE
+/**
+ * @file   code.c
+ * @author  <kong@KONG-PC>
+ * @date   Sun Nov 04 21:54:40 2012
+ *
+ * @brief  求汇率转换问题
+ *         采用Bellman_ford算法求是否存在正环，和求最短路径相反，这里
+ *         要求最长路径，可以和典型的Bellman_ford一样，对每条边进行V-1
+ *         次松弛，然后判断是否存在正环，如果存在则表明可以增加钱数。
+ *         这里做了改进，当对每一条边进行V-1次松弛后，所得的钱数不一定
+ *         满足要求，所以需要不断松弛，结束条件有两个
+ *         1. 所有边都不能再松弛了，表明不存在正环，判断钱数是否满足条
+ *         件，返回
+ *         2. 经过不断的松弛，满足要求后，返回。
+ */
+#include <stdio.h>
+#include <string.h>
+struct{
+    int beg, end;
+    double r, c;
+}edge[204];
+
+int money, m, t;
+double value;
+double dis[104];
+
+int bell_man()
+{
+    memset(dis, 0, sizeof(dis));
+    dis[t] = value;
+    while(dis[t] <= value){
+        int change=0;
+        for(int i=0;i< 2 * m; i++){
+            if(dis[edge[i].end] < (dis[edge[i].beg] - edge[i].c) * edge[i].r){
+                dis[edge[i].end] = (dis[edge[i].beg] - edge[i].c) * edge[i].r;
+                change=1;
+            }
+        }
+        if(!change)
+            return dis[t] > value;
+    }
+    return 1;
+}
+
+int main()
+{
+    freopen("in", "r", stdin);
+    int begin, end;
+    double rn, cn, rern, recn;
+    int p=0;
+    while(scanf("%d%d%d%lf", &money, &m, &t, &value) != -1){
+        for(int i=1;i<=m;i++){
+            scanf("%d%d%lf%lf%lf%lf", &begin, &end, &rn, &cn, &rern, &recn);
+            edge[p].beg=begin;
+            edge[p].end=end;
+            edge[p].r=rn;
+            edge[p++].c=cn;
+            edge[p].beg=end;
+            edge[p].end=begin;
+            edge[p].r=rern;
+            edge[p++].c=recn;
+        }
+        if(!bell_man())
+            printf("NO\n");
+        else
+            printf("YES\n");
+    }
+    return 0;
+}
+#+END_EXAMPLE
+
+** DP动态规划问题
+1. 转移方程
+2. 初始值
+** 动态规划求RMQ(区间最值问题Range Minimum/Maximum Query) 有点小问题，代码中注释之处
+求RMQ最简单的方法是遍历区间，时间复杂度O(n), 但是当查询次数很多的时候，
+时间效率并不高。可以用线段树把算法优化到O(logn) (在线段树中保存线段的
+最值)，不过sparse_table算法是较好的，用O(nlogn)的时间进行预处理，然后
+用O(1)时间进行查询。
+预处理:
+预处理使用DP的思想，f(i, j)表示[i, i+2^j - 1]区间中的最小值，我们可以开辟一个数组专门来保存f(i, j)的值。
+例如，f(0, 0)表示[0,0]之间的最小值,就是num[0], f(0, 2)表示[0, 3]之间的最小值, f(2, 4)表示[2, 17]之间的最小值
+注意, 因为f(i, j)可以由f(i, j - 1)和f(i+2^(j-1), j-1)导出, 而递推的初值(所有的f(i, 0) = i)都是已知的
+所以我们可以采用自底向上的算法递推地给出所有符合条件的f(i, j)的值。
+查询:
+假设要查询从m到n这一段的最小值, 那么我们先求出一个最大的k, 使得k满足2^k <= (n - m + 1).
+于是我们就可以把[m, n]分成两个(部分重叠的)长度为2^k的区间: [m, m+2^k-1], [n-2^k+1, n];
+而我们之前已经求出了f(m, k)为[m, m+2^k-1]的最小值, f(n-2^k+1, k)为[n-2^k+1, n]的最小值
+我们只要返回其中更小的那个, 就是我们想要的答案, 这个算法的时间复杂度是O(1)的.
+例如, rmq(0, 11) = min(f(0, 3), f(4, 3))
+注意：这里空间复杂度为 O(n * n),可以采用动态数组的方法，只用两列.
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#define max(a,b) ((a)>(b)?(a):(b))
+
+int map[100][100];
+/**
+ * 花费O(nlogn)的时间进行预处理 递推公式
+ * f[i,j]=max(f[i, j-1], f[i + 2^(j-1), j-1])
+ * @param m 存储数值的数组
+ * @param n 数组长度
+ */
+void pre_handle(int * m , int n)
+{
+    memset(map, 0, sizeof(map));
+    for(int i=0;i<n;i++)
+        map[i][0]=m[i];
+    int k = (int)(log(n) / log(2));
+    for(int i=1;i<=k;i++)       /* i表示列，j表示行, 每一列的结果只依赖于前一列 */
+        for(int j = 0; j + pow(2,i-1) < n; j++)
+            /* 注意因为每列都限制j + pow(2,i-1) < n，而除了第一列以外
+             * 其它都不到n-1，所有每一行的最后一个数有可能是不对的，但
+             * 是不影响最后结果 */
+            map[j][i]=max(map[j][i-1], map[j+(int)pow(2, i-1)][i-1]);
+}
+
+int RMQ(int a, int b)
+{
+    int k = (int)(log(b-a+1)/log(2)); /* 区间长度为b-a+1 */
+    /* 两个区间之间有重合 */
+    return max(map[a][k], map[b-1-(int)pow(2, k)][k]);
+}
+
+int main()
+{
+    freopen("in", "r", stdin);
+    int n;
+    int m[100];
+    scanf("%d", &n);
+    for(int i=0;i<n;i++)
+        scanf("%d", &m[i]);
+    pre_handle(m, n);
+    printf("%d\n", RMQ(2, 10));
+    printf("%d\n", RMQ(20, 30));
+    return 0;
+}
+#+END_EXAMPLE
+** 树的公共祖先问题LCA
+树的公共祖先问题可以分为在线法和离线法,在线法就是来一个请求就处理一次，
+离线法就是收集所有请求然后统一给出回复。
+
+*** 1. 在线法。LCA可以转换为RMQ
+1） 对树进行dfs，访问每个节点时要记录节点的层次，同时要记录每个节点第一次出现的位置，对于节点个数为n的树，最后会形成一个2n-1长度的序列
+2） 如果要查询节点a和节点b的公共祖先，只需找出a和b节点在在序列中第一次
+出现的位置，形成了一个从a到b的子序列， 对应序列中层数最小的节点即为公
+共祖先。
+3） 因此把LCA转化为RMQ问题。对于给定序列求出指定区间中的最小值
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <malloc.h>
+
+#define max(a,b) ((a)>(b)?(a):(b))
+#define min(a,b) ((a)>(b)?(b):(a))
+
+struct tree{
+    int n;
+    int left, right;
+}p[100];
+
+int first[9];
+int sequence[20];
+int dep[20];
+int point=0;
+int deep=0;
+
+/* 建树 */
+int createTree()
+{
+    int temp[8]={1,2,7,3,4,8,5,6};
+    for(int i=0;i<8;i++)
+        p[i].n=temp[i];
+    p[0].left=1;p[0].right=2;
+    p[1].left=3;p[1].right=4;
+    p[2].left=-1;p[2].right=5;
+    p[3].left=-1;p[3].right=-1;
+    p[4].left=6;p[4].right=7;
+    p[5].left=-1;p[5].right=-1;
+    p[6].left=-1;p[6].right=-1;
+    p[7].left=-1;p[7].right=-1;
+    return 0;
+}
+
+/* 结点访问顺序是: 1 2 3 2 4 5 4 6 4 2 1 7 8 7 1 共2n-1个值 */
+/* 结点对应深度是: 0 1 2 1 2 3 2 3 2 1 0 1 2 1 0 */
+void dfs(int root)
+{
+    if(p[root].n < 0)
+        return;
+    sequence[point]=p[root].n;
+    dep[point]=deep;
+    if(first[p[root].n] < 0)
+        first[p[root].n]=point;
+    point++;
+    if(p[root].left > 0){
+        deep++;
+        dfs(p[root].left);
+        deep--;
+        sequence[point]=p[root].n;
+        dep[point]=deep;
+        point++;
+    }
+    if(p[root].right > 0){
+        deep++;
+        dfs(p[root].right);
+        deep--;
+        sequence[point]=p[root].n;
+        dep[point]=deep;
+        point++;
+    }
+}
+
+int map[100][100];
+/**
+ * 花费O(nlogn)的时间进行预处理 递推公式
+ * f[i,j]=max(f[i, j-1], f[i + 2^(j-1), j-1])
+ * @param m 存储数值的数组
+ * @param n 数组长度
+ */
+void pre_handle(int * m , int n)
+{
+    memset(map, 0, sizeof(map));
+    for(int i=0;i<n;i++)
+        map[i][0]=dep[i];
+    int k = (int)(log(n) / log(2));
+    for(int i=1;i<=k;i++)       /* i表示列，j表示行, 每一列的结果只依赖于前一列 */
+        for(int j = 0; j + pow(2,i-1) < n; j++)
+            /* 注意因为每列都限制j + pow(2,i-1) < n，而除了第一列以外
+             * 其它都不到n-1，所有每一行的最后一个数有可能是不对的，但
+             * 是不影响最后结果 */
+            map[j][i]=min(map[j][i-1], map[j+(int)pow(2, i-1)][i-1]);
+}
+
+int RMQ(int a, int b)
+{
+    /* 注意log(8)/log(2) 结果为2 所以在b-a+1后边多加了一个1*/
+    int k = (int)(log(b-a+1 + 1)/log(2)); /* 区间长度为b-a+1 */
+    /* 两个区间之间有重合 */
+    return min(map[a][k], map[b-1-(int)pow(2, k)][k]);
+}
+
+
+int main()
+{
+    int root = createTree();
+    memset(first, -1, sizeof(first));
+    dfs(root);
+    pre_handle(sequence, point);
+    printf("%d\n", RMQ(4, 11));
+    return 0;
+}
+#+END_EXAMPLE
+*** 2. 离线法。Tarjan
 
 
 * 3. 一些热点信息收集
@@ -1566,235 +2232,24 @@ make：最常规的编译，通常用来编译整个Android源码
 mm：用来编译当前目录下的所有子项目
 mmm： 用来编译指定目录下的所有子项目
 
-=======
 
-
-
-* 5. 图形子系统
-  在Android平台中,双缓冲技术分别用在Surface的处理和底层Framebuffer的处
-  理中使用到, 在对Framebuffer处理的双缓冲技术根据OpenGL的标准实现,而对
-  Surface处理在双缓冲技术则不同.
-
-** 视图的绘制
-Android UI界面由以下树形结构组成, 从图中可以看出, UI界面是由View与
-ViewGroup两大类控件组成，其中ViewGroup继承自android.view.View, 并实现
-了android.view.ViewParent和android.view.ViewManager两个接口, 赋予其装
-载子控件和管理子控件的能力。作为一个容器，它可以装载其它由View派生出来
-的元素(View和ViewGroup)。常见的控件Button,TextView是从View派生出来的，
-容器如FrameLayout, linearLayout是从ViewGroup派生出来的。
-[[file:pic/ViewTree.png]]
-在android.view下边有一个ViewRoot类，其在performTraversals()方法中完成对View树的遍历。
-#+BEGIN_EXAMPLE
-private void performTraversals() {
-    final View  host = mView;  
-    ...  
-    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);  
-    ...  
-    host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());  
-    ...  
-draw(fullRedrawNeeded);
-…
-}
-#+END_EXAMPLE
-在这里mView是PhoneWindow.DecorView类型,它继承自FrameLayout，DecorView
-是Window的最顶层View，称之为主View，DecorView会缺省的attach到Activity
-的主窗口中。
-[[file:pic/draw.jpg]]
-由上边代码可以知道绘制工作分为三步：判断是否需要重新计算大小(measure),是否需要重新安置视图的位置(layout),以及是否需要重绘(draw)。其中measure()和layout()是直接调用mView的measure()和layout()方法，而draw()调用的是 ViewRootImpl内部的draw(boolean fullRedrawNeeded)函数，再由draw(boolean fullRedrawNeeded)函数来调用mView.draw()函数，draw(boolean fullRedrawNeeded)包含draw过程的一些前期处理。
-由此可见meassure(),layout()和draw()三个过程均是调用自mView。由于mView是DecorView类型,而DecorView继承自FrameLayout,FrameLayout继承自ViewGroup, ViewGroup继承自View,因此最终的工作是在ViewGroup和View中完成的。
-它们间的继承关系如下：
-DecorView-> FrameLayout-> ViewGroup-> View
-由于ViewGroup继承自View，因此ViewGroup类及其子类从本质上看也都是View，但为了下边描述方便，严格区分View和ViewGroup类型。
-
-整个过程涉及到一些方法，分别列出：
-View
-| 函数               | 描述                                                                            |
-|--------------------+---------------------------------------------------------------------------------|
-| measure()          | 计算窗口大小                                                                    |
-| onMeasure()        | 被measure()调用                                                                 |
-| layout()           | 计算控件布局                                                                    |
-| setFrame()         | 判断是否发生改变，被layout()调用                                                |
-| onLayout()         | 这里是空方法，View类型的控件这里不用做处理，被layout()方法调用                  |
-| draw()             | 绘制控件                                                                        |
-| onDraw()           | 绘制View本身，自定义View往往会重载该函数来绘制View本身的内容。 被draw()方法调用 |
-| dispatchDraw()     | View中的dispatchDraw默认是空实现，ViewGroup中覆写了该函数。被draw()方法调用     |
-| onDrawScrollBars() | 绘制装饰,被draw()方法调用                                                       |
-
-ViewGroup
-| 函数                | 描述                                                                                                                           |
-|---------------------+--------------------------------------------------------------------------------------------------------------------------------|
-| layout()            | 功能主要由View中的layout()方法实现                                                                                             |
-| abstract onLayout() | 抽象方法                                                                                                                       |
-| dispatchDraw()      | 覆盖父类中的方法                                                                                                               |
-| drawChild()         | 遍历，对于ViewGroup类型则继续调用dispatchDraw()方法，对于View类型则调用draw()方法。此方法被ViewGroup中的dispatchDraw()方法调用 |
-
-FrameLayout
-| 函数        | 描述                              |
-|-------------+-----------------------------------|
-| onMeasure() | 遍历调用每个子View的measure()方法 |
-| onLayout()  | 实现ViewGroup中的抽象方法         |
-| draw()      | 实际功能由View的draw()方法实现                                  |
-
-DecorView
-| 函数        | 描述                                   |
-|-------------+----------------------------------------|
-| onMeasure() | 实际由FrameLayout的onMeasure()方法实现 |
-| setFrame()  | 实际由View的setFrame()方法实现         |
-| draw()      | 实际功能由View的draw()方法实现                                       |
-前边说过，窗口绘制的三个过程measure, layout, draw都是从DecorView调用开始的。
-下面对三个过程一一说明：
-meassure方法: 实际调用的是View中的measure()方法
-1.	判断是否需要重新计算大小
-2.	调用onMeasure()方法，实际调用的是FrameLayout的onMeasure()方法,遍历调用所有子控件的measure()方法，求出子控件的大小
-3.	调用setMeasuredDimension(int, int)确定自身大小
-
-由于第二步会调用子控件的measure()方法，也会经历上边几步，直到整个View树遍历完，所有控件的大小都确定。控件的大小是由父控件和自身决定的，主要取决在于父控件， 控件自身只提供参考值， 这是因为控件的measure方法是由父控件调用的, 而父控件大小有限，可能不完全按照你的申请要求给出。
-
-layout方法: 实际调用的是View类中的layout()方法
-1.	设置自身相对父控件的位置并判断是否需要重新布局，使用setFrame(left, top, right, bottom);
-2.	调用onLayout()布局子控件，如果是ViewGroup类型则会调用子控件的
-        layout()方法
-
-#+BEGIN_EXAMPLE
-public void layout(int l, int t, int r, int b) {
-   boolean changed = setFrame(l, t, r, b);
-   …
-   onLayout(changed, l, t, r, b);
-…
-}
-
-protected boolean setFrame(int left, int top, int right, int bottom) {
-        boolean changed = false;
-        …
-        if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
-            changed = true;
-        …
-return changed;
-}
-//View中onLayout方法为空，表明View类型视图不需要做操作
-protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-}
-
-//FrameLayout中onLayout方法, 对子控件进行遍历，调用它们的layout()方法
-protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-  …
-	 for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            ...
-            child.layout(childLeft, childTop, childLeft + width, childTop + height);
-         }
-         ... 
-}
-#+END_EXAMPLE
-由于FrameLayout会遍历调用子视图的layout()方法，这样保证所有子视图都会
-调用各自的layout()方法，布局结束。
-
-draw()方法：实际调用的是View中的draw()方法
-1 绘制背景  background.draw(canvas)
-2 保存画布的层次
-3 调用onDraw()绘制控件内容
-4 调用dispatchDraw()绘制子控件。View中dispatchDraw()默认为空实现，因为
-其不包含子视图，而ViewGroup重载了dispatchDraw()来对其子视图进行绘制，
-通常应用程序不应该对dispatchDraw()进行重载，其默认实现体现了View系统绘
-制的流程。因此DecorView会调用ViewGroup中的dispatchDraw()方法，在此方法
-中会调用drawChild()方法,在drawChild()方法中，会对每个子控件重新调用
-dispatchDraw()方法，对于ViewGroup类型会继续遍历，对于View类型对象则调用自身的draw()方法。
-5 绘制渐变边界并恢复层次
-fade.setLocalMatrix(matrix);
-canvas.drawRect(right - length, top, right, bottom, p);
-6 调用onDrawScrollBars(canvas)绘制装饰, 比如滑动条
-View中的draw()方法:
-#+BEGIN_EXAMPLE
-public void draw(Canvas canvas) {
- …
- // Step 1, draw the background, if needed
-background.draw(canvas);
-…
-// Step 2, save the canvas' layers
-if (solidColor == 0) {
-   final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
-
-   if (drawTop) {
-     canvas.saveLayer(left, top, right, top + length, null, flags);
-   }
-}
-…
-// Step 3, draw the content
-if (!dirtyOpaque) 
-onDraw(canvas);
-     // Step 4, draw the children
-     dispatchDraw(canvas);
-     …
-     // Step 5, draw the fade effect and restore layers
-     if (drawTop) {  
-         matrix.setScale(1, fadeHeight * topFadeStrength);
-         matrix.postTranslate(left, top);
-         fade.setLocalMatrix(matrix);
-         canvas.drawRect(left, top, right, top + length, p);
-     }  
-     …
-     // Step 6, draw decorations (scrollbars)
-     onDrawScrollBars(canvas);
-
-#+END_EXAMPLE
-View中的dispatchDraw()方法是个空方法，View对象不需要做任何操作。
-ViewGroup重载了dispatchGroup()方法，它的核心功能就是通过for循环调用
-drawChild()对ViewGroup的每个子视图进行绘制。如果
-FLAG_USE_CHILD_DRAWING_ORDER为true，则子视图的绘制顺序通过
-getChildDrawingOrder来决定，默认的绘制顺序即是子视图加入ViewGroup的顺
-序，而我们可以重载getChildDrawingOrder函数来更改默认的绘制顺序，这会影
-响到子视图之间的重叠关系。
-
-** 动画的绘制
-Android中的动画类似于电影的胶片，通过不断在荧屏上绘制不同的静态图像，
-从而达到动画的效果。在前边视图的绘制那里讲到，真正的绘制工作最后是在
-View类的draw()函数中完成的，在该函数中会判断当前视图是否包含动画，
-如果包含，就根据动画参数对当前图像进行相应的变换，并重新绘制到屏幕上，
-绘制结束后会再发起一个重绘消息，这样连续绘制，直到动画参数指示动画结束。
-View系统中的动画分为三类，分别是窗口动画、视图动画、布局动画。
-
-窗口动画：窗口动画一般定义了窗口在显示、消失时的动画.
-视图动画：View对象在显示和消失时的动画.
-布局动画：指ViewGroup对象包含的动画。其本质是根据布局动画为子视图分别
-设置不同的动画，从而使得整体上看来像是一个布局文件的效果。
-
-Android中View系统仅支持基本的五种动画，分别为平移、缩放、旋转、扭曲及
-颜色阿尔法通道变化，这称之为"动画参数"或"动画类型"，应用程序将这五种基
-本动画进行组合产生新的动画。
-
-动画的设计思想: 首先要有一个动画主体，实际上就是一个View对象，然后可以
-为该View对象指定一个动画，动画使用一个Animation类来表示，当View开始绘
-制的时候，从Animation类获取动画的参数，并根据参数对View进行图形变换，
-然后将变换后的图形绘制到屏幕上。
-
-Animation中保存了动画的开始时间和结束时间，在不同时间返回不同的动画参
-数，View系统不断从Animation中读取动画参数并进行变换，给用户的感觉就是一个连续
-的动画。
-
-除了Animation类外，与动画相关的重要类还有Interpolator和
-Transformation。 Interpolator是一个接口，接口中定义了一个唯一的函数
-getInterpolation(), 对这个函数的实现可以在不同的时间段使用不同的加速曲
-线，从而达到特别的动画效果。Transformation保存了Animation中的动画参数。
-
-*** 窗口动画
-*** 视图动画
-视图动画是在ViewGroup类中的drawChild()函数中完成的。 函数原型如下
-drawChild(Canvas canvas, View child, long drawingTime)在该函数中首先调
-用child.getAnimation()获取Animation对象，判断如果Animation不为null,则利用
-Animantion中的动画参数对该视图进行变换，然后把变换后的图像绘制到canvas
-中，主要流程包括：
-1. 查看动画对象是否已经初始化，如果没有则先调用a.initialize()初始化该
-   动画对象，初始化的参数中包含了子视图
-
-*** 布局动画
-
-
-* 6. 兴趣收集
+* 5. 兴趣收集
 ** 电影
 <<我如何度过这个夏天>>
 ** 读书
 
 ** 音乐
+
+
+* 6. 零碎笔记
+char  一个字节
+int   四个字节
+long  四个字节
+long long 八个字节
+
+简单的把较小的浮点数和较大的浮点数相加可能会丢失精度。一种较好的算法是把集合中最小的两个数相加，类似于构建哈夫曼码的算法。
+
+printf("%.*s\n", len, s); 这里len限制了要输出的字符长度。
 
 
 * 7. 工作计划
@@ -1807,3 +2262,7 @@ Animantion中的动画参数对该视图进行变换，然后把变换后的图�
 ** TODO select 和 poll有什么区别
 ** TODO RMI远程方法调用 SOAP简单对象访问协议 CORBA通用对象请求代理架构
 ** TODO JNDI java命名目录服务接口
+** TODO AIDL
+** TODO 迷宫生成算法http://maskray.me/posts/2012-11-02-perfect-maze-generation.html
+http://bbs.byr.cn/#!article/ACM_ICPC/23147
+** TODO trie树

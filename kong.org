@@ -1344,6 +1344,42 @@ FILE * fp = fdopen(fd, "r") 根据文件描述符加上访问模式可以得到�
 ':='和平时使用的赋值符号相同，'='则不同，使用'='时，函数和变量参考会留
 在那儿，改变一个变量的值会导致其它变量的值也被改变，类似于指针。
 
+**** Unix高级环境高级编程
+所有操作系统都需要向它们运行在程序提供各种服务.包括执行新程序,打开文件,读
+文件,分配存储区等.在严格意义上,可将操作系统定义为一种软件，它控制计算
+机硬件资源，提供程序运行环境。一般而言我们称这种软件为内核，它相对较小，
+位于环境的中心。UNIX的体系结构从内到外是内核、系统调用、shell 库函数、
+应用软件。内核的接口被称为系统调用，公用函数库建立在系统调用之上，应用
+软件可以使用库函数也可以使用系统调用。shell是一种特殊的应用程序，它为
+运行其它软件提供了一种接口。
+
+**** APUE源码编译与使用
+UNIX环境高级编程（第二版）/ APUE 源码编译与使用
+
+为了用APUE的源码折腾了一下，网上很多方法都不能用，或者有小问题，特此记录。
+
+注意，不同环境的编译提示有所不同，如果你的环境和我的相似，那么应该没问题。
+
+环境
+
+Linux mypad 2.6.38-ARCH #1 SMP PREEMPT Tue May 3 06:04:40 UTC 2011 i686 Intel(R) Core(TM)2 Duo CPU T6570 @ 2.10GHz GenuineIntel GNU/Linux
+
+确保你已经安装了gcc和gawk。
+
+步骤
+
+到www.apuebook.com下载源码
+tar解包，cd apue.2e
+vi Make.defines.linux 修改变量WKDIR，指向你的apue源码的位置，我的是/home/huangz/code/apue.2e，所以 WKDIR=/home/huangz/code/apue.2e
+vi include/apue.h 增加一个常量ARG_MAX，这是threadctl/getenv1.c和threadctl/getenv3.c要用到的；4096这个值是参考里给的，如果有问题，自己修改吧。
+vi threadctl/getenv1.c 增加
+vi threadctl/getenv3.c 增加
+vi threads/badexit2.c 修改第31行，将pthread_self()的返回值转换为int类型。 printf(“thread 2: ID is %d\n”, (int)pthread_self());
+vi std/linux.mk 将两个nawk改为gawk
+make
+sudo cp include/apue.h /usr/include sudo cp lib/libapue.a /usr/lib
+好了，测试一下，记得要用-lapue命令让编译器链接apue库 gcc main.c -lapue
+
 *** Linux常见问题
 **** /etc/shadow文件被覆盖 su故障
 重启电脑在root账户下执行passwd kong重新生成账户密码, 执行 sudo passwd root重新生成ro

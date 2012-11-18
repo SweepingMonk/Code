@@ -1,9 +1,0 @@
-*.*
-Makefile
-README
-TAGS
-in
-.gitignore
-/.git/
-!kong.org
-!insert.org

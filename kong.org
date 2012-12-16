@@ -1,1628 +1,431 @@
-* 1.笔记
-** 个人笔记
-*** 配置emacs
-**** emacs快捷键
- | 命令类型                           | 快捷键          | 快捷键描述                             |
- |------------------------------------+-----------------+----------------------------------------|
- | 查找命令                               | C-s C-w         | 在查找模式下，查找光标指定位置处的单词 |
- | 指定目录下查找文件                 | find-name-dired |                                        |
- | 指定目录下查找只包含指定内容的文件 | find-grep-dired |                                        |
- | 与上边两个类似但自由度最高         | find-dired      | gre                                    |
-**** 10.16 ecb 和 全屏显示 
-配置ecb   darkroom 和 win32fullscreen
-其中darkroom和win32fullscreen都可以实现全屏显示
-主要用到了四个文件w32-fullscreen.el w32toggletitle.exe
-darkroom-mode.el frame-local-vars.el
-将w32toggletitle.exe放在path目录中，其它三个el文件都配置在init.el文件
-中
-**** 10.17 sr-speedbar
-新增sr-speedbar功能，使speedbar可以在同一个frame中显示，不用重新开启一
-个frame
-下载sr-speedbar.el文件，在init.el文件中添加 (require 'sr-speedbar)
-**** 10.17 查看历史打开文件 和历史编辑记录
-recentf-open-files命令  C-c o按键
-goto-last-change        C-c k 查看立即编辑记录
-**** 10.17 查看历史编辑记录
-使用goto-last-change命令回到上次编辑的位置，快捷键是C-c k   快捷键C-c
-h被ecb占用
-**** 10.17 用iexp命令在org模式插入括号
-C-x p  you may try.
-**** 10.18 emacs打开文件的字符编码问题
-使用命令revert-buffer-with-coding-system手动选择打开文件的字符编码，
-在保存的时候还可以指定文件的保存编码，使用命令
-set-buffer-file-coding-system
-**** 10.18 emacs配置etags
-find -name "*.[chCH]" -print | etags - 命令用来生成TAGS
-visit-tags-table 用来查找指定的TAGS
-成功配置etags 
-f5可以查找TAG，f6可以查找当前TAG,C-f6可以回跳
-**** 10.28 emacs显示图片
-参考博文： http://www.cnblogs.com/tianyuhuo/archive/2012/09/12/2012-9-12-1.html
-window中的emacs默认不能显示图片，而是一堆乱码，根本原因是缺少解析图片
-所需要的dll，只要下载好指定图片对应的dll就可以了。
-
-两个下载地址：
-地址1：GnuWin Packages
-
-地址2：winterTTr's github
-
-然后按M-x iimage-mode RET就可以了
-
-要在org-mode里启用iimage-mode需要把一下代码加入emacs配置文件中
-#+BEGIN_EXAMPLE
-(defun org-toggle-iimage-in-org () 
-
-　　"display images in your org file"
-
-　　(interactive) 
-
-　　(if (face-underline-p 'org-link) 
-
-　　　　(set-face-underline-p 'org-link nil)
-
-　　　　(set-face-underline-p 'org-link t)) 
-
-　　　　(iimage-mode)) 
-#+END_EXAMPLE
-以后你只要输入M-x org-toggle-iimage-in-org RET或M-x iimage-mode RET就
-可以了
-
-*** 学习Lisp
-**** List命令
-| 关键字 | 简介                                 |
-|--------+--------------------------------------|
-| first  | 返回列表的第一个元素                 |
-| rest   | 返回列表中除了第一个元素外的其它元素 |
-| car    | 作用同first，区别不详                |
-| cdr    | 作用同rest，区别不详                 |
-| cons   | 构造函数，两个参数                   |
-| append | 连接两个列表                         |
-| List   | 返回一个由所有参数组成的列表         |
-**** Lisp推荐书籍
-SICP 麻省理工的本科教材，实例以schema表示
-On Lisp 是迄今为止讲Lisp的书籍里最深的一本，适合有一定基础的人看，有一
-定难度。
-Successful Lisp 适合做入门教材
-Practical Common Lisp 提供了很多面向对象的实例，但不推荐
-**** Lisp特性
-自动内存回收 显示类型 闭包
-Lisp凌驾于面向对象程序设计 动态的面向对象语言
-**** 学习Lisp 基本操作符
-Lisp 的 7 个公理（基本操作符）
-操作符一： quote
-(quote x) 返回x
-操作符二： atom
-(atom x) 当 x 是一个原子或者空表时返回原子 t，否则返回NIL
-操作符三： eq
-(eq x y) 当 x 和y 指向相同的对象的时候返回t，否则返回NIL，值得注意的是
-在Common Lisp中，原子对象在内存中只会有一份拷贝，所以(eq 'a 'a)返回t
-操作符四： car
-(car x) 要求 x 是一个表，它返回 x 中的第一个元素
-操作符五： cdr
-(cdr x) 同样要求 x 是一个表，它返回x中除第一个元素之外的所有元素组成的
-表
-操作符六： cons
-(cons x y) 返回一个cons cell (x y)，如果y不是一个list，将会一dotted
-pair形式展现这个cons cell
-
-*多重的cons cell就构成了表*
-(cons 'a (cons 'b (cons 'c ())))
-(a b c)
-
-操作符七： cond
-(cond (p1 e1) ...(pn en)) 的求值规则如下. 对“条件表达式p”依次求值直
-到有一个返回t. 如果能找到这样的p表达式,相应的“结果表达式e”的值作为整
-个cond表达式的返回值.
-(cond ((eq 'a 'b) 'first)  ((atom 'a)  'second))
-
-**** Lisp高级属性
-*构造函数*
-cons
-(cons 'lions '(tigers bears)) cons带有两个参数，一个原子和一个列表，
-cons将原子作为第一个原子添加到该列表中。
-append
-(append '(lisons) '(tigers bears)) append连接两个列表
-list
-(list 'lions 'tigers 'bears) list包含一个有所有参数组成的列表
-
-使用cons和first rest可以构建任何列表或者列表片段
-
-*循环操作*
-数循环
-(dotimes (i 10) (print i))
-打印列表
-(dolist (i '(0 1 2 3 3 4 5 6)) (print i))
-常见的do操作
-(do ((i 0 (+ 1 i))) ((> i 10)) (print i))
-
-
-** 学习笔记
-*** java编程
-**** 面向对象的三个基本特征
-封装、继承和多态
-封装：把客观的数据和操作封装成抽象的类，只暴露一些对外的接口，具体实现
-对外不可见。
-继承：通过继承，它可以使用现有类的所有功能，并在无需重新编写原来的类的情况下对这
-些功能进行扩展。
-多态：对于同一个调用，父类的不同子类执行不同的操作。
-多态的实现方式有两种，覆盖和重载。覆盖就是覆盖父类中的同名函数，参数
-列表和返回值都必须相同。重载就是存在多个同名函数，参数列表不同，包括参
-数个数不同或者参数类型不同，或者两者都不同，返回值随意。
-**** 网络通信
-***** java获取本机地址的方式
-InetAddress.getByName("localhost") #结果总是127.0.0.1
-InetAddress.getLocalHost();     #得到本机的有效网络地址
-***** java中创建socke超时的解决办法
-Socket s = new Socket("time....", 13); #创建一个Socket连接
-s.setSoTimeOut(1000);                  #设置socket获取信息的超时时间
-
-这里有一个问题，创建socket也有一个时间，如果连接不到服务器就会一直阻塞，
-这里哟一个办法，先创建一个未连接的套接字，然后把该套接字连接到给定的地
-址。
-Socket s = new Socket();   #设置创建socket的超时时间
-s.connect(new InetSocketAddress("time...", 13), 1000);
-s.setSoTimeOut(1000;        #设置获取信息的超时时间
-**** 数据库操作
-***** 数据库连接
-注意在使用mysql时，要首先加载mysql驱动程序类
-Class.forName("com.mysql.jdbc.Driver");
-或者使用System.setProperty("jdbc.drivers", "com.mysql.jdbc.Driver");
-***** 数据库设计自增操作
-如果要在某一列上设置自增操作，该列绝大多数时间必须是主键
-#+BEGIN_EXAMPLE
-create table student(id int(4) primary key auto_increment,name
-varchar(20), age int)
-创建一个student表，并且设置主键自增
-
-对于自增字段插入时，如果指定要插入的列则不需要特殊处理，否则自增的列插
-入null即可
-insert into student values(null, 'xiaoming', 20)
-#+END_EXAMPLE
-
-***** 存储过程
-sql语句执行的时候要先编译，然后执行。存储过程（Stored Procedure）是一
-组为了完成特定功能的SQL语句集，经编译后存储在数据库中。用户通过指定存
-储过程的名字并给出参数（如果该存储过程带有参数）来执行它。
-
-数据库存储过程的实质就是部署在数据库端的一组定义代码以及SQL。
-
-mysql存储过程实现过程
-（1）MySQL存储过程是在“命令提示符”下创建的，所以首先应该打开“命令提示符”窗口。
-（2）进入“命令提示符”窗口后，首先应该登录MySQL数据库服务器，在“命令提示符”下输入如下命令：
-mysql –u用户名 –p用户密码
-（3）更改语句结束符号，本实例将语句结束符更改为“//”。代码如下：
-delimiter //
-说明:存储过程用以;作为结束符，而;又是命令行下sql语句的结束符，所以要进
-行更改
-（4）创建存储过程前应首先选择某个数据库。代码如下：
-use 数据库名
-（5）delimiter ;
-（6）创建存储过程。
-（7）通过call语句调用存储过程。
-
-存储过程示例:
-#+BEGIN_EXAMPLE
-create procedure pr_add
-(
-a int,
-b int
-)
-begin
-declare c int;
--- 用来声明局部变量
--- DECLARE仅被用在BEGIN ... END复合语句里，并且必须在复合语句的开头，在任何其它语句之前。
-if a is null then
-set a = 0;
-end if;
-if b is null then
-set b = 0;
-end if;
-set c = a + b;
-select c as sum;
-/*
-return c;
-不能在 MySQL 存储过程中使用。return 只能出现在函数中。
-*/
-end;
-
-#执行：
-set @a = 10;
-set @b = 20;
-call pr_add(@a, @b);
-
-create procedure pro_sort(a int)
-begin
-if a=0
-then
-select * from student order by age desc;   -- 降序排列
-else
-select * from student order by age asc;    -- 升序排列
-end if;
-end;
-
-#创建 MySQL 存储过程的简单语法为：
-
-create procedure 存储过程名字()
-(
-[in|out|inout] 参数 datatype
-)
-begin
-MySQL 语句;
-end;
-#+END_EXAMPLE
-删除存储过程
-DROP PROCEDURE  IF  EXISTS存储过程名
-不能在一个存储过程中删除另一个存储过程，只能调用另一个存储过程
-
-***** 存储过程参数的三种形态
-见示例
-http://www.exampledepot.com/egs/java.sql/CallProcedure.html
-***** 数据库一些不常见概念
-CachedRowSet 被缓存的行集：允许与用户的整个交互过程中，断开连接，并且
-可以将修改的部分同步到数据库
-数据库元数据 DatabaseMetaData:可以获取数据库的一些信息，比如表格
-结果集元数据 RestltSetMetaData: 可以获取结果集的总列数，列名，列的宽度
-可滚动的结果集
-**** jndi java命名与目录接口
-java命名与目录接口，是java平台的一个标准扩展，提供一组接口、类和关于命
-名空间的概念。如同其它很多java技术一样，JDNI是provider-based的技术，暴
-露一个API和一个服务供应接口(SPI)。这意味着任何基于名字的技术都能通过
-JNDI而提供服务，只要JNDI支持这项技术。
-jdbc1.0使用DriverManager类来产生一个对数据源的连接，jdbc2.0使用
-DataSource对象代表了一个真正的数据源。根据DataSource的实现方法，数据源
-既可以是从关系数据库，也可以是电子表格，还可以是一个表格形式的文件，当
-一个DataSource对象注册到名字服务中，应用程序就可以通过名字服务获得
-DataSource对象并用它来产生一个与DataSource代表的数据源之间的连接。
-命名服务：提供名称-对象的映射
-目录服务：提供有关对象的信息，并提供定位这些对象所需的搜索工具。有许多
-命名和目录服务的实现并且到它们的接口是不同的。
-
-**** URL和URI
-URI: A uniform resource identifier (URI) is a compact sequence of
-characters that identifier an abstract or physical resource.
-
-Uniform, 统一。统一可以使不同类型的资源标志在同一个上下文中使用，即使
-对这些资源的访问方式可能是不同的。
-Resource， 资源。自理的资源可以是任何东西，比如电子表格，图片，邮件服
-务等。
-identifier, 标志符。标识符用来唯一标志Web中的资源，可以使用名称来作为
-标志符，也可以用资源的地址作为标识符，前者称为URN(统一资源名称)，后者
-称为URL(统一资源定位符)，所以URN和URL是URI的子集。
-
-URL和URI的区别： URI确定一个资源，URL不但确定一个资源，也指定了资源的
-地址。
-比如下面的统一资源标志符确定因特网工程工作组RFC1738，但并没有说出在哪里才找得到这份资料
-urn:ietf:rfc:1738
-
-**** Http Get/Post请求区别
-1. HTTP请求格式：
-   <request line>
-   <headers>
-   <blank line>
-   [<request body>]
-   在HTTP请求中，第一行是一个请求行，用来说请求的方式，要访问的资源，
-   HTTP版本。然后是首部小节header，用来说明服务器要使用的附加信息。首
-   部之后是一个空行，然后是请求主体。
-2. GET和POST
-   HTTP定义了与服务器交互的不同方法，最基本的方法是POST和GET。HTTP-GET
-   和HTTP-POST是使用HTTP的标准协议动词，用于编码和传送变量名/变量值对
-   参数，如果请求成功则返回应答。URL字符串中如果含有中文字符则用base64
-   加密。
-
-   POST方式，变量名/变量值不作为URL的一部分传送，而是放在实际的HTTP请
-   求消息内部被传送
-
-   浏览器请求时，默认是GET方式
-   GET一般用于获取/查询 资源信息，而POST一般用于更新 资源信息
-   #根据HTTP规范，GET用于信息获取，而且应该是安全的和幂等的。
-   1.所谓安全的意味着该操作用于获取信息而非修改信息。换句话说，GET请求一般不应产生副作用。就是说，它仅仅是获取资源信息，就像数据库查询一样，不会修改，增加数据，不会影响资源的状态。
-
-　　* 注意：这里安全的含义仅仅是指是非修改信息。
-
-　　2.幂等的意味着对同一URL的多个请求应该返回同样的结果。
-
-   #根据HTTP规范，POST表示可能修改变服务器上的资源的请求。
-   | get                                                 | post                                 |
-   |-----------------------------------------------------+--------------------------------------|
-   | 从服务器上获取数据                                  | 向服务器传送数据                     |
-   | 在客户端，通过URL提交数据                           | 数据放在HTML HEADER内提交            |
-   | 服务器端用Request.QueryString获取变量的值           | 服务器端用Request.Form获取提交的数据 |
-   | 提交的数据受到URL长度的限制，如IE限制长度为2083字节 | 没有限制                             |
-   | 参数显示在地址栏，不安全                            | 安全                                 |
-
-示例代码
-#+BEGIN_EXAMPLE
-<!-分别通过get和post方式提交表单--> 
-<FORM ACTION="getpost.asp" METHOD="get"> 
-<INPUT TYPE="text" NAME="Text" VALUE="http://wxf0701.cnblogs.com//> 
-<INPUT TYPE="submit" VALUE="Get方式"></INPUT> 
-</FORM> 
-<BR> 
-<FORM ACTION="getpost.asp" METHOD="post"> 
-<INPUT TYPE="text" NAME="Text" VALUE="http://wxf0701.cnblogs.com/> 
-<INPUT TYPE="submit" VALUE="Post方式"></INPUT> 
-</FORM> 
-<BR>
-
-<% If Request.QueryString("Text") <> "" Then %> 
-通过get方式传递的字符串是： "<B><%= Request.QueryString("Text") %></B>"<BR> 
-<% End If %>
-
-<% If Request.Form("Text") <> "" Then %> 
-通过Post方式传递的字符串是： "<B><%= Request.Form("Text") %></B>"<BR> 
-<% End If %>
-#+END_EXAMPLE
-
-*HTTP响应实例*
-#+BEGIN_EXAMPLE
-HTTP响应实例
-
-HTTP/1.1 200 OK
-Date: Sat, 31 Dec 2005 23:59:59 GMT
-Content-Type: text/html;charset=ISO-8859-1
-Content-Length: 122
-＜html＞
-＜head＞
-＜title＞Wrox Homepage＜/title＞
-＜/head＞
-＜body＞
-＜!-- body goes here --＞
-＜/body＞
-＜/html＞
-2．最常用的状态码有：
-
-◆200 (OK): 找到了该资源，并且一切正常。
-◆304 (NOT MODIFIED): 该资源在上次请求之后没有任何修改。这通常用于浏览器的缓存机制。
-◆401 (UNAUTHORIZED): 客户端无权访问该资源。这通常会使得浏览器要求用户输入用户名和密码，以登录到服务器。
-◆403 (FORBIDDEN): 客户端未能获得授权。这通常是在401之后输入了不正确的用户名或密码。
-◆404 (NOT FOUND): 在指定的位置不存在所申请的资源。
-#+END_EXAMPLE
-
-#+begin_example
-#+begin_src ditaa :file helloworld.png :cmdline -r -s 1.5 -e UTF-8
-+-----------+
-| cBLU      |
-| 你好        |
-|    +------+
-|    |cPNK  |
-|    |世界    |
-+----+------+
-#+end_src  
-#+end_example
-
-**** javabean 和 Enterprise JavaBean的区别和联系
-javabean是一种java语言编写的可重用组件。javabean的类必须是具体的和公开的，并且具有无参数构造器，javabean通过提供符合一致性设计模式(这和通常的设计模式不同，只是一种理念)的公共方法暴露内部域成员变量，通常是get/set方法
-
-JavaBean 和 Server Bean（通常称为 Enterprise JavaBean (EJB)）有一些基本相同之处。它们都是用一组特性创建，以执行其特定任务的对象，获得其它特性的能力。这使得 bean 的行为根据特定任务和所在环境的不同而有所不同。
-
-| javabean                             | Enterprise JavaBean                  |
-|--------------------------------------+--------------------------------------|
-| 使用java.beans包开发            | 使用javax.ejb包开发             |
-| beans包是java2标准的一部分   | ejb包是标准JDK的扩展          |
-| 一台机器上同一个地址空间中运行的组件 | 在多台机器上跨几个地址空间运行的组件 |
-| javabean是进程内组件           | ejb是进程间组件                |
-| 通常用作GUI窗口小部件       | 用作分布式商业对象                   |
-
-javabean存在与四种范围：页面(page)，请求(request)，对话(sessin)，应用(application)。
-
-对话范围：
-对话范围的JavaBean 主要应用与跨多个页面和时间段： 例如填充用户信息。 添加信息并且接受回馈，保存用户最近执行页面的轨迹。对话范围JavaBean保留一些和用户对话 ID 相关的信息。这些信息来自临时的对话cookie，并在当用户关闭浏览器时，这个cookie将从客户端和服务器删除。
-页面/请求范围：
-页面和请求范围的JavaBean有时类似表单 的bean ， 这是因为他们大都用于处理表单。表单需要很长的时间来处理用户的输入??外页面和请求范围的bean可以用于减少大型站点服务器上的负载，如果使用对话bean，耽搁的处理就可能会消耗掉很多资源。
-应用：
-应用范围通常应用于服务器的部件，例如 JDBC连接池、应用监视、用户计数和
-其他参与用户行为的类。
-
-javaBean持久化是指以流的形式，用JavaBean的属性来保存bean，并在以后的某
-个时候或者在另一个虚拟机中再将它们读回来，和对象的序列化有点类似，然而
-它们有一个非常重要的区别，javabean持久化适合于长期存储。
-
-当一个对象被序列化存储以后，如果类的实现发生了变化，则把对象重新读出来
-的时候就要在新旧数据表现之间进行转化。因此对象序列化仅适合于短期存储或
-者应用程序之间的RMI。
-
-JavaBean的持久化可以考虑三种方式：数据库、XML文件、二进制流
-第一种方式可以使用O/R Mapping技术将一个JavaBean映射到关系数据库中的表；
-第二种方式可以使用JAVA1.4 的
-java.beans.XMLDecoder/java.beans.XMLEncoder将Bean映射到一个XML文件中；
-第三种方式要求Bean实现Java的Serializable接口；
-**** 类加载器
-***** 基本概念
-一般来说，java虚拟机使用一个类的方式如下：java源程序在经过java编译器编译之后就被转换成java字节码文件.class，虚拟机加载字节码文件被转换为
-java.lang.Class的一个实例，每个这样的实例代表一个java类，然后通过这个实例的newInstance()方法生成一个对象。基本上所有类加载器都是java.lang.ClassLoader的实例。
-
-***** java.lang.ClassLoader类介绍
-java.lang.ClassLoader的主要作用是根据一个给定类的名字，查找该类的字节码文件，并生成一个class实例，它同时也加载java类所需要的一些资源如图像和配置文件。
-
-java.lang.ClassLoader与加载类有关的方法
-| 方法                                                 | 说明                                                  |
-|------------------------------------------------------+-------------------------------------------------------|
-| getParent()                                          | 返回该类加载器的父加载器                              |
-| loadClass(String name)                               | 加载名称为name的类，返回结果是java.lang.Class的实例   |
-| findClass(String name)                               | 查找名称为name的类，返回结果是java.lang.Class类的实例 |
-| findLoadedClass(String name)                         | 查找名字为name的已经加载过的类，返回结果同上          |
-| defineClass(String name, byte[] b, int off, int len) | 把字节数组b中的内容转换成java类，返回结果同上         |
-| resolveClass(Class<?> c)                             | 连接指定的java类                                            |
-
-***** 类加载器的树状组织结构
-java中的类加载器分为两种，一种是系统提供的，另一种是由java应用开发人员
-编写的。
-
-java中系统提供的类加载器有三种：
-•引导类加载器（bootstrap class loader）：它用来加载 Java 的核心库，加载系统类(通常从jar文件rt.jar中进行加载)，它是虚拟机整体中的一部分，通常用原生代码C来实现的，并不继承自java.lang.ClassLoader，使用String.class.getClassLoader()将返回null。
-•扩展类加载器（extensions class loader）：它用来加载 Java 的扩展库。Java 虚拟机的实现会提供一个扩展库目录(jre/lib/ext)。该类加载器在此目录里面查找并加载 Java 类。
-•系统类加载器（system class loader）：它根据 Java 应用的类路径（CLASSPATH）来加载 Java 类。一般来说，Java 应用的类都是由它来完成加载的。可以通过 ClassLoader.getSystemClassLoader()来获取它。
-
-扩展类加载器和系统类加载器通常都是由java实现的，它们都是URLClassLoader类的实例。
-Class.forName()是使用系统类加载器加载的。
-
-除了引导类加载器外，每个类加载器都有一个父类加载器， 通过getParent()方
-法可以得到，类加载器会为它的父类加载器提供一个机会，以便加载任何给定类，
-只有在其父类加载器加载失败时，它才会加载给定类。
-
-类加载器树状组织结构示意图
-
-[[file:pic/ClassLoaderTree.jpg]]
-
-***** 类加载器的代理模式
-
-在介绍代理模式背后的动机之前，首先需要说明一下 Java 虚拟机是如何判定两
-个 Java 类是相同的。Java 虚拟机不仅要看类的全名是否相同，还要看加载此
-类的类加载器是否一样。只有两者都相同的情况，才为两个类是相同的。即便是
-同样的字节代码，被不同的类加载器加载之后所得到的类，也是不同的。比如一
-个 Java 类 com.example.Sample，编译之后生成了字节代码文件Sample.class。
-两个不同的类加载器 ClassLoaderA和 ClassLoaderB分别读取了这个
-Sample.class文件，并定义出两个 java.lang.Class类的实例来表示这个类。这
-两个实例是不相同的。对于 Java 虚拟机来说，它们是不同的类。试图对这两个
-类的对象进行相互赋值，会抛出运行时异常 ClassCastException。
-
-了解了这一点之后，就可以理解代理模式的设计动机了。代理模式是为了保证 Java 核心库的类型安全。所有 Java 应用都至少需要引用 java.lang.Object类，也就是说在运行的时候，java.lang.Object这个类需要被加载到 Java 虚拟机中。如果这个加载过程由 Java 应用自己的类加载器来完成的话，很可能就存在多个版本的 java.lang.Object类，而且这些类之间是不兼容的。通过代理模式，对于 Java 核心库的类的加载工作由引导类加载器来统一完成，保证了 Java 应用所使用的都是同一个版本的 Java 核心库的类，是互相兼容的。
-
-***** 网络类加载器
-Java 字节代码（.class）文件存放在服务器上，客户端通过网络的方式获取字节代码并执行。当有版本更新的时候，只需要替换掉服务器上保存的文件即可。通过类加载器可以比较简单的实现这种需求。
-类 NetworkClassLoader负责通过网络下载 Java 类字节代码并定义出 Java 类。
-它的实现与 FileSystemClassLoader类似。在通过 NetworkClassLoader加载了
-某个版本的类之后，一般有两种做法来使用它。第一种做法是使用 Java 反射
-API。另外一种做法是使用接口。
-
-需要注意的是，并不能直接在客户端代码中引用从服务器上下载的类，因为客户端代码的类加载器找不到这些类。使用 Java 反射 API 可以直接调用 Java 类的方法。而使用接口的做法则是把接口的类放在客户端中，从服务器上加载实现此接口的不同版本的类。在客户端通过相同的接口来使用这些实现类。
-
-**** JNI见参考文档
-
-**** java注解
-Annotation(注释)是JDK5.0及以后版本引入的,它可以用于创建文档，跟踪代码
-中的依赖性，甚至执行基本编译时检查。注释是以‘@注释名’在代码中存在的，
-根据注释参数的个数，我们可以将注释分为：标记注释、单值注释、完整注释三
-类。它们都不会直接影响到程序的语义.只是作为注释（标识）存在。
-
-***** 用于编译的注解
-@Deprecated注解可以被添加到任何不在鼓励使用的项上
-@SuppressWarnings注解会告知编译器阻止特殊类型的警告信息，例如：
-@SuppressWarnings("unchecked")
-@Override这种注解只能应用到方法上，编译器会阻止具有这种注解的方法去覆
-盖一个来自于超类的方法。
-@Generated注解的目的是供代码生成工具来使用。任何生成的源代码都可以使用，
-用来区分程序员写的代码。
-***** 用于管理资源的注解
-@PostConstruct和@PreDestroy注解用于控制对象生命周期的环境中，标记了这
-些注解的方法应该在对象被构建之后，或者在对象被移除之前，紧接着调用。
-
-@Resurce注解用于资源注入，例如，数据库访问信息不应该被硬编码到web应用
-中，而是应该让web容器提供某种用户接口，以便设置连接参数和数据库资源
-JNDI名字，在web应用中，可以像下面这样引用数据源：
-@Resource(name="jdbc/mydb")
-private DataSource source;这样由容器给DataSource对象赋值
-
-***** 元注解@Target
-@Target元注解可以应用于一个注解，以限制该注解可以应用的范围，例如：
-@Target({ElementType.TYPE, ElementType.METHOD})
-public @interface BugReport
-表明注解BugReport只可以应用在类，接口和方法上。
-
-#+BEGIN_EXAMPLE
-public @interface Test {
-    public int id();
-    public String description() default "no description";
-}
-package Test_annotation;
-
-import java.lang.reflect.Method;
-
-public class Test_1 {
-    /*
-     * 被注解的三个方法
-     */
-    @Test(id = 1, description = "hello method_1")
-    public void method_1() {
-    }
-
-    @Test(id = 2)
-    public void method_2() {
-    }
-
-    @Test(id = 3, description = "last method")
-    public void method_3() {
-    }
-
-    /*
-     * 解析注解，将Test_1类 所有被注解方法 的信息打印出来
-     */
-    public static void main(String[] args) {
-        Method[] methods = Test_1.class.getDeclaredMethods();
-        for (Method method : methods) {
-            /*
-             * 判断方法中是否有指定注解类型的注解
-             */
-            boolean hasAnnotation = method.isAnnotationPresent(Test.class);
-            if (hasAnnotation) {
-                /*
-                 * 根据注解类型返回方法的指定类型注解
-                 */
-                Test annotation = method.getAnnotation(Test.class);
-                System.out.println("Test( method = " + method.getName()
-                        + " , id = " + annotation.id() + " , description = "
-                        + annotation.description() + " )");
-            }
-        }
-    }
-}
-#+END_EXAMPLE
-
-**** java安全机制
-各种加密实现
-http://www.blogjava.net/stone2083/archive/2012/09/02/168113.html
-
-
-java->类加载器->文件校验器->安全管理器
-简述：
-校验器的作用：校验类文件是否完整
-安全管理器： 负责控制某个操作是否被允许
-用户认证
-数字签名
-加密
-数字签名更多是用来校验信息有没有被修改过，而加密可以彻底杜绝防止别人看
-到信息内容
-
-1. 语言层次安全性
-最初的Java(JDK1.2)平台采用沙箱安全模型,基本安全模型由三部分来承担,这三
-部分构成Java运行环境的三个安全组件,分别是:类加载器,文件校验器,安全管理
-器。
-1.1 类加载器是Java安全机制的重要组成部分,可以将类加载器主要分为四类,即,启动类加载器、标准扩展类加载器、路径加载器和网络类加载器。
-1.1.1采用“双亲委派链模式”
-1.1.2类加载器为加载的类提供了不同的命名空间
-1.1.3类加载器提供了类型检查的功能模块。类加载器在程序的执行周期中还进
-行语义、类型匹配、类型转换和抛出异常等相关检查,保证了程序的健壮性。
-1.2 类文件校验器的校验类文件校验器负责检查那些无法执行的明显有破坏性的
-操作
-1.3 安全管理器是一个负责控制某个操作是否允许执行的类,
-
-2企业层次的安全特性
-
-***** SHA-1 和 MD5算法
-严格说来它们不算是加密算法，只能说是摘要算法。
-SHA-1算法：Security Hash Algorithm 安全哈希算法， 它可以把长度不超过2
-的64次方位的信息转换成160位(20字节)长的散列值
-
-MD5算法：Message Digest 信息摘要算法， 散列长度是128位，16个字节。它对
-输入以512位分组，输出是4个32位字的级联。
-
-CRC算法：循环冗余校验，碰撞几率比较高
-
-| 比较类型       | SHA-1    | MD5     |
-|----------------+----------+---------|
-| 分组长度       | 512比特  | 512比特 |
-| 摘要长度       | 160比特  | 128比特 |
-| 循环中的步骤   | 80       | 60      |
-| 报文的最大长度 | 2^64 - 1 | 无穷大  |
-| 基本逻辑函数   | 4        | 4       |
-| 结构形式       | 大端     | 小端      |
-
-由于MD5 与SHA-1均是从MD4 发展而来，它们的结构和强度等特性有很多相似之处，表（1）是对MD5与SHA-1 的结构比较。SHA-1与MD5 的最大区别在于其摘要比MD5 摘要长 32 比特。对于强行攻击，产生任何一个报文使之摘要等于给定报文摘要的难度：MD5 是2^128 数量级的操作，SHA-1 是2^160 数量级的操作。产生具有相同摘要的两个报文的难度：MD5是 2^64 是数量级的操作，SHA-1 是2^80 数量级的操作。因而,SHA-1 对强行攻击的强度更大。但由于SHA-1 的循环步骤比MD5 多（80:64）且要处理的缓存大（160 比特:128 比特），SHA-1 的运行速度比MD5 慢。
-
-MD5 和SHA-1 是单项散列函数的典型代表
-
-***** DSA(Data signature Algorithm数字签名)
-生成一对公钥和私钥，把公钥发送给需要获取消息的人。将所要发送的消息用自
-己的私钥加密，然后发送给接收者，接受者得到文件之后用公钥验证.主要作用
-是验证发送者的身份和信息的完整性。
-它是数字签名算法，一种标准的 DSS（数字签名标准），严格来说不算加密算法
-
-***** RSA公钥密码体制
-RSA公钥加密算法
-RSA算法基于一个十分简单的数论事实：将两个大素数相乘十分容易，但那时想
-要对其乘积进行因式分解却极其困难，因此可以将乘积公开作为加密密钥。
-
-RSA是第一个既能用于数据加密也能用于数字签名的算法。RSA的安全性依赖于大
-数分解，但是否等同于大数分解不得而知。
-
-由于进行的都是大数计算，使得RSA最快的情况也比DES慢上倍，无论是软件还是
-硬件实现。速度一直是RSA的缺陷。一般来说只用于少量数据加密。
-
-是一个支持变长密钥的公共密钥算法，需要加密的文件块的长度也是可变的，非对称算法
-
-***** DES和AES 单密钥算法 对称加密算法
-DES：data encryption standard
-DES的算法是对称的，既可用于加密又可用于解密,是一个密码长度为56位的古老
-的分组密码，DES算法现在已经过时了，因为可以用穷举法破解。
-
-**** java虚拟机和delvik虚拟机的区别
-
-| java虚拟机             | Dalvik                             |
-|------------------------+------------------------------------|
-| 基于堆栈               | 基于寄存器                         |
-|                        | 透过zygote预加载类完成虚拟机的启动 |
-| 运行java字节码         | 运行dex字节码                      |
-| 有218个机器指令        | 有200中机器指令                    |
-| 每个类中都有一个常量池 | 只有一个统一的常量池               |
-
-Dalvik虚拟机主要是完成对象生命周期的管理，堆栈的管理，线程管理，安全和
-异常的管理，以及垃圾回收等等重要功能。
-
-Dalvik适用于那些内存容量和数据处理能力比较小的机器，因此适合移动终端。
-由于delvik虚拟机指令都大多数都包含寄存器的地址，所以它的指令通常比java
-虚拟机的指令更长。
-一般而言基于栈的机器需要更多指令，而基于寄存器的机器指令更长.
-
-Dalvik虚拟机的主要特征
-*专有的DEX文件格式*
-1. 一个应用中会定义很多类，编译完成后会形成很多的class文件，class文件
-   之间有不少冗余信息，而dex文件格式会把所有的class文件全都整合到一块。
-   这样除了减少了文件大小，便利I/O操作外，也加快了查找速度。
-   原来每个类文件中都存在一个常量池，在dex文件中由一个常量池来管理。见
-   上图
-2. 增加了新的操作码的支持
-3. 文件结构尽量简洁，使用等长的指令，提高解析速度
-4. 尽量扩大只读结构的大小，借以提高进程的数据共享
-5. 如何生成dex文件呢
-
-[[file:pic/JVM_vs_DVM.jpg]]
-[[file:pic/DVM_Convert.jpg]]
-java字节码文件由多个.class文件组成，在运行期间虚拟机会从相应的.class文
-件中加载相应类，而Dalvik字节码只由一个.dex文件组成，它包括了应用的所有
-类。
-.dex文件形成的过程： java编译器编译java源文件形成.class字节码文件，
-Dalvik dx编译器删除所有的.class文件，并把它们重新编译成Dalvik字节码文
-件，之后dx编译器把它们合成一个.dex文件。
-
-原来每个类文件中都存在一个常量池，在dex文件中由一个常量池来管理。
-
-*DEX优化*
-1. 调整所有字段的字节序和对其结构中的每一个域
-2. 验证DEX文件中的所有类
-3. 对一些特定的类进行优化，对方法里的操作码进行优化
-由于dex文件的结构是紧凑的，所有优化之后文件的大小会有所增减，大概是原来文件的1-4倍。
-
-优化发生的时机有两个：对于预置应用，可以在系统编译后，生成优化文件，以ODEX结尾。这样在发布时除APK文件（不包含DEX）以外，还有一个相应的ODEX文件；对于非预置应用，包含在APK文件里的DEX文件会在运行时被优化，优化后的文件将被保存在缓存中。
-
-*指令集基于寄存器*
-基于堆栈虚拟机实现，基于寄存器的虚拟机实现虽然在硬件通用性上要差一些，
-但是它在代码的执行效率却更胜一筹，虚拟机中指令的解释时间主要花在下面三
-个： 分发指令、访问运算数、执行运算， 其中分发指令这个环节对性能的影响
-最大。在基于寄存器的虚拟机里，可以更为有效的减少冗余指令的分发和减少内
-存的读写访问。
-
-*一个应用，一个虚拟机实例，一个进程*
-每一个Android应用都运行在一个Dalvik虚拟机实例里，而每一个虚拟机实例都
-是一个独立的进程空间。虚拟机的线程机制，内存分配和管理，Mutex等等都是
-依赖底层操作系统而实现的。所有Android应用的线程都对应一个Linux线程，虚
-拟机因而可以更多的依赖操作系统的线程调度和管理机制
-
-不同的应用在不同的进程空间里运行，加之对不同来源的应用都使用不同的Linux用户来运行，可以最大程度的保护应用的安全和独立运行
-
-Zygote是一个虚拟机进程，同时也是一个虚拟机实例的孵化器，每当系统要求执
-行一个Android应用程序，Zygote就会FORK出一个子进程来执行该应用程序。这
-样做的好处显而易见：Zygote进程是在系统启动时产生的，它会完成虚拟机的初
-始化，库的加载，预置类库的加载和初始化等等操作，而在系统需要一个新的虚
-拟机实例时，Zygote通过复制自身，最快速的提供给系统。另外，对于一些只读的系统库，所有虚拟机实例都和Zygote共享一块内存区域，大大节省了内存开销。
-
-应用程序包被发布到手机上后，运行前会对其中的dex文件进行优化，优化后的
-文件被保存在缓冲区（优化后的格式被称为dey），虚拟机会直接执行该文件，
-如果应用包文件不发生变化，dey文件不会被重新生成。
-[[file:pic/DalvikOptimize.jpg]]
-
-Android应用所使用的编程语言是Java语言，和Java SE一样，编译时使用Sun
-JDK将Java源程序编程成标准的Java字节码文件（.class文件），而后通过工具
-软件DX把所有的字节码文件转成DEX文件（classes.dex）。最后使用Android打
-包工具（aapt）将DEX文件，资源文件以及AndroidManifest.xml文件（二进制格
-式）组合成一个应用程序包（APK）。应用程序包可以被发布到手机上运行。
-[[file:pic/AndroidPackage.jpg]]
-
-**** RMI远程方法调用技术
-RMI是EJB之间通信时所使用协议，EJB是服务端架构
-RMI的开发步骤
-
-1. 先创建远程接口及声明远程方法，注意这是实现双方通讯的接口，需要继承Remote
-2. 开发一个类来实现远程接口及远程方法，值得注意的是实现类需要继承
-   UnicastRemoteObject, 由于每个方法都要抛出RemoteException异常，所以
-   需要显示声明构造函数
-
-3. 通过javac命令编译文件，通过java -server 命令注册服务，启动远程对象
-4. 最后客户端查找远程对象，并调用远程方法
-
-注意: 当你创建一个扩展自UnicastRemoteObject的类的对象时，将会启动一个
-单独的线程，它将保持该程序无限地存活下去。
-在虚拟机之间传递值有两种机制：
-1. 实现了Remote接口的类的对象将作为远程引用传递。
-2. 实现了Serializable接口，但是没有实现Remote接口的类的对象将使用序列
-   化进行复制。
-
-#+BEGIN_EXAMPLE
-# 接口
-public interface Hello extends Remote{
-	public String say() throws RemoteException;
-}
-# 接口实现 并启动服务
-public class HelloServer extends UnicastRemoteObject implements Hello{
-
-	private static final long serialVersionUID = 1L;
-
-	private String message;
-
-	protected HelloServer(String message) throws RemoteException {
-		this.message = message;
-	}
-
-	public String say() throws RemoteException {
-		System.out.println("Called by HelloClient");
-		return message;
-	}
-
-
-	public static void main(String args[]){
-		try {
-                        //本地主机上的远程对象注册表Registry的实例，并指定端口，这一步必不可少（Java默认端口是1099），必不可缺的一步，缺少注册表创建，则无法绑定对象到远程注册表上
-			Registry registry = LocateRegistry.createRegistry(1099);
-			Hello hello = new HelloServer("你好啊");
-                        //把远程对象注册到RMI注册服务器上，并命名为hello
-                        //绑定的URL标准格式为：rmi://host:port/name(其中协议名可以省略，下面两种写法都是正确的）
-			Naming.rebind("hello", hello);
-			//Naming.rebind("rmi://192.168.56.1:1099/hello",hello);
-	                //Naming.rebind("//192.168.56.1:1099/hello", hello);
-			System.out.println("server is ready");
-		} catch (Exception e) {
-			System.out.println("Hello Server failed: " + e);
-		}
-	}
-}
-
-public class HelloClient {
-
-	public static void main(String args[]){
-		try {
-			Hello hello = (Hello)Naming.lookup("rmi://192.168.56.1:1099/hello");
-			System.out.println(hello.say());
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			e.printStackTrace();
-		}
-	}
-}
-#+END_EXAMPLE
-
-**** CORBA通用对象请求代理架构
-
-**** sql注入技术
-SQL注入
-一、 SQL注入简介
-
-
-SQL注入是比较常见的网络攻击方式之一，它不是利用操作系统的BUG来实现攻击，而是针对程序员编程时的疏忽，通过SQL语句，实现无帐号登录，甚至篡改数据库。
-===========================================
-
-二、 SQL注入攻击的总体思路
-
-1.寻找到SQL注入的位置
-2.判断服务器类型和后台数据库类型
-3.针对不通的服务器和数据库特点进行SQL注入攻击
-===========================================
-
-三、SQL注入攻击实例
-
-比如在一个登录界面，要求输入用户名和密码：
-
-可以这样输入实现免帐号登录：
-
-用户名： ‘ or 1 = 1 –
-密 码：
-
-点登陆,如若没有做特殊处理,那么这个非法用户就很得意的登陆进去了.(当然现在的有些语言的数据库API已经处理了这些问题)
-
-这是为什么呢? 下面我们分析一下：
-
-从理论上说，后台认证程序中会有如下的SQL语句：
-
-String sql = "select * from user_table where username=
-' "+userName+" ' and password=' "+password+" '";
-当输入了上面的用户名和密码，上面的SQL语句变成：
-
-SELECT * FROM user_table WHERE username=
-'’or 1 = 1 -- and password='’
-分析SQL语句：
-条件后面 username=” or 1=1 用户名等于 ” 或 1=1 那么这个条件一定会成功；
-然后后面加两个-，这意味着注释，它将后面的语句注释，让他们不起作用，这样语句永远都能正确执行，用户轻易骗过系统，获取合法身份。
-
-这还是比较温柔的，如果是执行
-
-SELECT * FROM user_table WHERE
-username='' ;DROP DATABASE (DB Name) --' and password=''
-….其后果可想而知…
-*** c编程
-**** 类型提升 不怎么准 在ANSI C中已经取消了
-整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类
-型将被提升为int，前提是int能够完整的容纳原先的数据，否则将被转换为
-unsigined int。float将被转换为double类型，任何数组将被转换为相应类型的
-指针。 char c1,c2; c1 = c1 + c2; 运算的时候，把每个变量的值提升为int的
-长度，然后对int执行加法，然后对运 算结果进行裁剪。 试试sizeof('c')的值
-注意：另一个会发生隐式类型转换的地方就是参数传递，由于函数的参数也是表
-达式，所以也会发生类型提升，在被调用函数的内部，提升后的参数被裁剪为原
-先声明的大小。
-**** fgets()函数
-fgets(s, n, stdin); 函数最多接收n-1个字符，并自动在字符串最后加上结束
-符号
-**** swap交换两个元素 注意情况
-*a ^= *b;
-*b ^= *a;
-*a ^= *b;
-当a,b指向同一个元素时，该元素最后会被置为0，如果不是同一个元素，可以正
-常交换
-
-**** 结构体位段
-首先位段的成员必须声明为int、signed int或unsigned int类型。其次，在成
-员名的后面是一个冒号和一个整数，这个整数必须制定该位段所占用的位的数目。
-#+BEGIN_EXAMPLE
-struct CHAR{
-    unsinged ch   : 7;
-    unsigned font : 6;
-    unsigned size : 19;
-};
-#+END_EXAMPLE
-在上边的结构体中，如果在32位机器上运行，可能的一种内存分配方式是，7、6、
-19，总共占用32位，注意每一个变量占用的长度不能超过一个整形长度，所以如
-果在16机器上运行，可能编译不通过。
-这个例子说明了一个使用位段的好理由，能够把长度为奇数的数据包装在一起，
-节省存储空间。
-**** malloc
-使用malloc动态分配内存时，1-12字节的记录需要消耗48字节的内存空间，
-13-28字节的记录需要消耗64字节的内存空间, 这个因编译器而异。
-另外malloc分配的内存空间通常比申请的要大，多出来的部分用来记录对内存的
-管理。
-**** malloc calloc和realloc
-calloc也用来分配内存，malloc和calloc的主要区别是calloc在返回指向内存的
-指针前把它初始化为0，另一个就是请求内存数量的方式并不相同，calloc有两
-个参数，一个是所要分配的元素个数，第二个是每个元素的大小。
-realloc函数用于修改一个原来已经分配的内存大小，使用这个函数你可以使一
-个内存扩大或者缩小。扩大内存时，新增的内存添加到原先的内存后边，新内不
-能并未初始化，如果原先的内存块无法改变大小，realloc将分配一块正确大小
-的内存，并把原先那块内存的内容复制到新内存上，因此在使用realloc函数后，
-不能使用原来指向旧内存的指针，应该使用realloc所返回的指针。
-**** 字符串常量
-"xyz"  字符串常量的值是个指针常量
-"xyz" + 1 的结果是个指针，指向字符y
-
-**** 文本文件、二进制文件 EOF
-判断文件是否结束 EOF 和 feof(FILE * fp)
-#define  EOF  (-1)
-#define  _IOEOF  0x0010
-#define  feof(_stream)  ((_stream)->_flag & _IOEOF)
-在文本文件中EOF作为结束符号，在屏幕上不显示。但是在二进制文件中，信息都
-是以数值方式存在的。EOF的值可能就是所要处理的二进制文件中的信息，为了
-解决这个问题，提供了一个feof()函数，可以用它来判断文件是否结束。
-#+BEGIN_EXAMPLE
-while(!feof(pfile))
-{
-    ch = fgetc(pfile);
-    putchar(ch);
-}
-#+END_EXAMPLE
-
-**** 函数和宏
-宏在执行时间上效率稍高，省去了函数调用的消耗，而函数在程序的长度方面更
-胜一筹
-
-**** fseek rewind fsetpos函数用来指针定位
-**** c语言中return, exit的区别
-C语言中的return,exit,break,continue。前两个函数使用的同时通常都会带上程序退出时的状态码，标准C中有EXIT_SUCCESS和EXIT_FAILURE两个宏，位于/usr/include/stdlib.h中。
-是这样定义的的：
-#define EXIT_FAILURE 1
-#define EXIT_SUCCESS 0
-一.exit函数的作用及其与_exit()函数的区别。
-有库文件中的定义可知：exit是一个库函数，exit(1）表示发生错误后退出程序，exit(0)表示正常退出。
-在stdlib.h中exit函数是这样子定义的：void exit(int status);
-这个系统调用是用来终止一个进程的，无论在程序中的什么位置，只要执行exit，进程就会从终止进程的运行。
-讲到exit这个系统调用，就要提及另外一个系统调用，_exit,_exit()函数位于unistd.h中，相比于exit()，_exit()函数的功能最为简单，直接终止进程的运行，释放其所使用的内存空间，并销毁在内存中的数据结构，而exit()在于在进程退出之前要检查文件的状态，将文件缓冲区中的内容写回文件。
-下面我们通过于printf这个操作缓冲区的函数结合来说明上面的情况：1.exit终止进程。
-#+BEGIN_EXAMPLE
-#include <stdlib.h>
-#include <stdio.h>
-main()
-{
-printf("output begin\n");
-exit(0);
-printf("output end\n");
-}
-#+END_EXAMPLE
-
-执行gcc -o exit1 exit1.c生成exit1,执行，只会打印出output begin.
-2. exit将缓冲区内容写回文件。
-对应每一个打开的文件，在内存中都有一片缓冲区，每次读文件时，会多读出若干条记录，这样下次读文件时就可以直接从内存的缓冲区中读取，每次写文件的时候，也仅仅是写入内存中的缓冲区，等满足了一定的条件（达到一定数量，遇到特定字符（如换行符\n和文件结束符EOF）），再将缓冲区中的内容一次性写入文件，我们知道
-void exit(int status);
-exit()用来正常终结目前进程的执行，并把参数status返回给父进程，而进程所
-有的缓冲区数据会自动写回并关闭未关闭的文件。
-#+BEGIN_EXAMPLE
-#include <stdlib.h>
-#include <stdio.h>
-main()
-{
-printf("output begin\n");
-printf("content in buffer");
-exit(0);
-}
-$ ./exit1
-output begin
-content in buffer
-printf()会根据参数format字符串来转换并格式化数据，然后将结果写出到标准输出设备，直到出现字符串结束('\0')为止。可见，exit将未出现换行符的语句保存到标注输出文件。
-3._exit()不会执行清理I/O缓冲的操作。
-_exit()用来立刻结束目前进程的执行，并把参数status返回给父进程，并关闭未关闭的文件。此函数调用后不会返回，并且会传递SIGCHLD信号给父进程，父进程可以由wait函数取得子进程结束状态。
-#include <stdio.h>
-#include <unistd.h>
-main()
-{
-printf("output begin\n");
-printf("content in buffer\n");
-_exit(0);
-}
-#+END_EXAMPLE
-$ ./exit2
-output begin
-实际上因为第二条printf语句没有满足特定的条件，它们还只是保存在缓冲区内，这时我们用_exit()函数直接将进程关闭，缓冲区中的数据就会丢失，
-和exit比较，return主要用于提供函数返回值，continue,break语句则大多数情况下用于循环中。许多朋友可能会将这三条语句与exit搞混，并且对这三个语句区分不清楚。
-二.exit和return的区别与联系。
-当然，在进程操作中，我们需要来区分一下exit和return。
-1.exit()结束当前进程/当前程序/，在整个程序中，只要调用exit就结束（当前进程或者在main时候为整个程序）
-2.return()是当前函数返回，当然如果是在主函数main, 自然也就结束当前进程了，如果不是，那就是退回上一层调用。在多个进程时.如果有时要检测上进程是否正常退出的.就要用到上个进程的返回值，依次类推。
-进程环境与进程控制(1): 进程的开始与终止
-exit可以返回小于256的任何整数。返回的不同数值主要是给调用者作不同处理的。
-单独的进程是返回给操作系统的。如果是多进程，是返回给父进程的。父进程里面调用waitpid()等函数得到子进程退出的状态，以便作不同处理。根据相应的返回值来让调用者作出相应的处理.总的说来，exit（）就是当前进程把控制权返回给调用该程序的程序,括号里的是返回值,告诉调用程序该程序的运行状态。
-进程终止:
-C程序的终止分为两种: 正常终止和异常终止.
-正常终止分为: return, exit, _exit, _Exit, pthreade_exit
-异常中指分为: abort, SIGNAL, 线程响应取消
-主要说一下正常终止的前4种, 即exit系列函数。
-return函数exit函数区别：
-1，exit用于在程序运行的过程中随时结束程序，exit的参数是返回给OS的。main函数结束时也会隐式地调用 exit函数。exit函数运行时首先会执行由atexit()函数登记的函数，然后会做一些自身的清理工作，同时刷新所有输出流、关闭所有打开的流并且关闭通过标准I/O函数tmpfile()创建的临时文件。exit是结束一个进程，它将删除进程使用的内存空间，同时把错误信息返回父进程,而 return是返回函数值并退出函数
-2，return是语言级别的，它表示了调用堆栈的返回；而exit是系统调用级别的，它表示了一个进程的结束。
-3.在有返回值的函数中，return语句的作用是提供整个函数的返回值，并结束当前函数返回到调用它的地方。在没有返回值的函数中也可以使用return语句，例如当检查到一个错误时提前结束当前函数的执行并返回。一般程序执行到 main() 的结束就完成了, 如果想在程序结束时做一些事情, 可以尝试着用这个函数.
-example:
-#+BEGIN_EXAMPLE
-void test1(void)
-{
-printf("exit test1\n");
-}
-void test2(void)
-{
-printf("exit test2\n");
-}
-int main()
-{
-atexit(test1);
-atexit(test2);
-printf("exit main\n");
-return 0;
-}
- 
-#+END_EXAMPLE 
-函数名称：exit
-头文件：<stdlib.h>
-函数原型：void exit(int state)
-函数用途：程序中止执行，返回调用过程
-输入参数：state 0-正常中止，非0-非正常中止
-1，exit用于在程序运行的过程中随时结束程序，exit的参数是返回给OS的。main函数结束时也会隐式地调用exit函数。exit函数运行时首先会执行由atexit()函数登记的函数，然后会做一些自身的清理工作，同时刷新所有输出流、关闭所有打开的流并且关闭通过标准I/O函数tmpfile()创建的临时文件。
-2，exit是结束一个进程，它将删除进程使用的内存空间，同时把错误信息返回父进程,而return是返回函数值并退出函数。
-3，return是语言级别的，它表示了调用堆栈的返回；而exit是系统调用级别的，它表示了一个进程的结束。exit函数是退出应用程序，并将应用程序的一个状态返回给OS，这个状态标识了应用程序的一些运行信息。
-4，atexit()函数的参数是一个函数指针，函数指针指向一个没有参数也没有返回值的函数。atexit()的函数原型是：int atexit (void (*)(void));在一个程序中最多可以用atexit()注册32个处理函数，这些处理函数的调用顺序与其注册的顺序相反，也即最先注册的最后调用，最后注册的最先调用。
-5，return是从A城市中的x小区到y小区，exit—走出A城
-在main函数里面return(0)和exit(0)是一样的，子函数用return返回；而子进程用exit退出，调用exit时要调用一段终止处理程序，然后关闭所有I/O流。
-6，exit本身不是系统调用，而是一个C标准库的函数而已，在stdlib里面，系统调用是exit内部实现去完成的。exit()通常是用在子程序中用来终结程序用的，使用后程序自动结束跳会操作系统。
-但在如果把exit用在main内的时候无论main是否定义成void返回的值都是有效的，并且exit不需要考虑类型，exit(1)等价于return (1)
-引用地址:http://wangxmin2005.blog.163.com/blog/static/130407131200992432348514/
- 
- 
-exit() 结束当前进程/当前程序/，在整个程序中，只要调用 exit ，就结束
-　　return() 是当前函数返回，当然如果是在主函数main, 自然也就结束当前进程了，如果不是，那就是退回上一层调用。在多个进程时.如果有时要检测上进程是否正常退出的.就要用到上个进程的返回值..
-　　exit(1)表示进程正常退出. 返回 1;
-　　exit(0)表示进程非正常退出. 返回 0.
-　　进程环境与进程控制(1): 进程的开始与终止
- 
- 
-1. 进程的开始:
-　　C程序是从main函数开始执行, 原型如下:
-　　int main(int argc, char *argv[]);
-　　通常main的返回值是int型, 正确返回0.
-　　如果main的返回值为void或者无, 某些编译器会给出警告, 此时main的返回值通常是0.
-　　关于main的命令行参数不做过多解释, 以下面的程序展示一下:
- 
-以下是代码片段：
-#+BEGIN_EXAMPLE
-　　#include 
-　　int main(int argc, char *argv[]) 
-　　{ 
-　　int i; 
-　　for (i = 0; i < argc; i++) 
-　　printf("argv[%d]: %s\n", i, argv[i]); 
-　　return 0; 
-　　}
-#+END_EXAMPLE 
-　　2. 进程终止:
-　　C程序的终止分为两种: 正常终止和异常终止.
-　　正常终止分为: return, exit, _exit, _Exit, pthreade_exit
-　　异常中指分为: abort, SIGNAL, 线程响应取消
-　　主要说一下正常终止的前4种, 即exit系列函数.
- 
-以下是代码片段：
-#+BEGIN_EXAMPLE
-    #include  
-　　void exit(int status); 
-　　void _Exit(int status); 
-　　#include  
-　　void _exit(int status);
-#+END_EXAMPLE 
-　　以上3个函数的区别是:
-　　exit()(或return 0)会调用终止处理程序和用户空间的标准I/O清理程序(如fclose), _exit和_Exit不调用而直接由内核接管进行清
-　　理.
-　　因此, 在main函数中exit(0)等价于return 0.
-　　3. atexit终止处理程序:
-　　ISO C规定, 一个进程最对可登记32个终止处理函数, 这些函数由exit按登记相反的顺序自动调用. 如果同一函数登记多次, 也会被
-　　调用多次.
-　　原型如下:
-　　#include
-　　int atexit(void (*func)(void));
-　　其中参数是一个函数指针, 指向终止处理函数, 该函数无参无返回值.
-　　以下面的程序为例:
- 
-以下是代码片段：
-#+BEGIN_EXAMPLE
-　#include 
-　　static void myexit1() 
-　　{ 
-　　printf("first exit handler\n"); 
-　　} 
-　　static void myexit2() 
-　　{ 
-　　printf("second exit handler\n"); 
-　　} 
-　　int main() 
-　　{ 
-　　if (atexit(my_exit2) != 0) 
-　　printf("can't register my_exit2\n"); 
-　　if (atexit(my_exit1) != 0) 
-　　printf("can't register my_exit1\n"); 
-　　if (atexit(my_exit1) != 0) 
-　　printf("can't register my_exit1\n"); 
-　　printf("main is done\n"); 
-　　return 0; 
-　　}
-#+END_EXAMPLE 
-　　运行结果:
- 
-以下是代码片段：
-  　$ ./a.out 
-　　main is done 
-　　first exit handler 
-　　first exit handler 
-　　second exit handler运行结果: 
-　　$./a.out arg1 arg2 arg3 
-　　argv[0]: ./a.out 
-　　argv[1]: arg1 
-　　argv[2]: arg2 
-　　argv[3]: arg3
-*** 系统编程
-**** 可执行文件的内存布局
-可执行文件内部主要包括文本端text，数据段data，和BSS段，用size命令可以
-查看可执行文件a.out的大小。
-数据段主要放置的是经过初始化的全局变量和静态变量，注意是经过初始化的，
-如果没有被初始化则会放在BSS段，文本段主要放置可执行程序的指令。
-局部变量并不进入a.out，它们在运行时创建。
-
-**** 进程的地址空间
-注意：进程的地址空间和可执行程序的内存空间不太一样。
-它除了包括上边的文本段，数据段和BSS段之外，还需要保存堆栈段，用于保存
-局部与函数的数据。
-同时，注意虚拟地址空间的最低部分未被映射，它位于进程的地址空间中，但并未赋予
-物理地址，所有对它的引用都是非法的，在典型情况下，它是地址零开始的几K
-字节，用于捕获使用空指针和小整形值的指针引用内存的情况。
-堆栈段占据进程空间的最高地址，并向下增长。
-**** 段错误和BUS错误
-常见的段错误和BUS错误，BUS错误通常是由于数据在内存中不对齐引起的
-#+BEGIN_EXAMPLE
-union{ char a[10];
-       int i;
-}u;
-int * p = (int *)&(u.a[1]);
-*p = 17;
-#+END_EXAMPLE
-在实例中，数组a在共用体中是和int对齐的，所以a[1]必然不和int对齐，然后
-在这个地方放入一个4字节的数据会引发BUS错误。
-
-段错误比较常见，通常是
-1. 坏指针值错误。在指针赋值前就用它来引用内存，指针释放后再将它置为空
-   值。
-2. 改写错误。 数组越界。
-3. 释放链表出错。
-**** 捕捉信号signal
-使用头文件signal.h,使用句柄函数signal(SIGSGEV, handler)
-常见的错误信号值SIGBUS,SIGSGEV,SIGILL
-**** unix系统中逐字符输入的两种实现
-一种是把I/O设置为raw状态，可以实现阻塞式读入，如果终端没有字符输入，进
-程就一直等待，直到有字符输入为止。
-#+BEGIN_EXAMPLE
-#include <stdio.h>
-#include <stdlib.h>
-
-int main()
-{
-    int c;
-    /* 中断驱动原来处于普通的一次一行模式*/
-    /* 把终端设置为raw状态可以实现阻塞式读入*/
-    system("stty raw");
-    while(1){
-        /*现在驱动处于一次一字符的模式*/
-        c=getchar();
-        putchar(c);
-        if(c=='q')
-            break;
-    }
-    /* 终端驱动又处于一次一字符的方式 */
-    system("stty cooked");
-    return 0;
-}
-#+END_EXAMPLE
-
-另外一种方式是使用ioctl(),这样只有当一个字符等待被读入时，进程才进行读
-取，这种类型的I/O被称为轮询，就好像你不断地询问设备的状态，看看它是否
-有字符要传给你。
-
-#+BEGIN_EXAMPLE
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-
-int kbhit()
-{
-    int i;
-    /* 设置I/O轮询 */
-    ioctl(0, FIONREAD, &i);
-    return i;
-}
-
-int main()
-{
-    int i=0;
-    int c=' ';
-    system("stty raw -echo");
-    printf("enter 'q' to quit \n");
-    for(;c!='q';i++){
-        if(kbhit()){
-            c=getchar();
-            printf("\n got %c, on iteration %d", c, i);
-        }
-    }
-    system("stty cooked echo");
-}
-#+END_EXAMPLE
-**** 函数库调用和系统调用的区别
-system是一个库函数 strlen并不调用任何系统调用
-函数库调用是语言或应用程序的一部分，而系统调用是操作系统的一部分
-系统调用时用户程序和内核交互的接口
-| 函数库调用                                  | 系统调用                                     |
-|---------------------------------------------+----------------------------------------------|
-| 在所有的ansi c编译器版本中，c库函数是相同的 | 各个操作系统的系统调用时不同的               |
-| 它调用函数库中的一个程序                    | 它调用系统内核的服务                         |
-| 与用户程序相联系           important        | 是操作系统的一个入口点                       |
-| 在用户地址空间执行         important        | 在内核地址空间执行                           |
-| 它的运行时间属于用户时间    important       | 它的运行时间属于系统时间                     |
-| 属于过程调用，开销较小      important             | 需要切换到内核上下文环境然后再切换回来开销大 |
-| 在C函数库libc中有大约300个程序              | 在unix中有大约90个系统调用(MS-DOS)中少一些   |
-
-自己总结
-| 函数库调用             | 系统调用             |
-|------------------------+----------------------|
-| 通常提供比较复杂的功能 | 通常提供一种最小界面 |
-
-#+BEGIN_EXAMPLE
-int main()
-
-{
-    int fd = create("filename",0666);
-
-    exit(0);
-}
-#+END_EXAMPLE
-在执行main函数时，是在user mode下执行，当遇到create函数时，继续在user
-mode下执行，然后将filename和0666两个参数压入栈中寄存器，接着调用库函数
-create，系统仍然处于user mode。
-这里的库函数create实际上调用了内核的系统调用create，执行到这里后，系统将create系统调用的unique number压入寄
-存器，然后执行指令trap使系统进入kernel mode(执行int $0x80产生中断)。
-这时系统意识到要进行系统调用的invoke，于是从刚才的寄存器中取出create系统调用的unique number，从系统调用表中得知要invoke的系统调用是create，然后执行。执行完毕返回库函数create的调用，库函数负责检查系统调用的执行情况(检查某些寄存器的值)，
-然后库函数create根据检查的结果返回响应的值。
-
-这里trap指令类似于一个系统中断并且是软中断，而系统调用create类似于一个中断处理函数
-所有的系统调用都与上边的情况类似，靠中断机制切换到内核模式实现。
-
-系统调用通常比库函数要慢，因为要把上下文环境切换到内核模式
-
-**** 内核开发的特点
-+ 内核编程时不能访问C库，也不能访问标准的C头文件
-+ 内核编程时必须使用GNU C
-+ 内核编程时缺少像用户空间那样的内存保护机制
-  内核中的内存都是不分页的，每用掉一个字节，物理内存就减少一个字节。
-+ 内核编程时难以执行浮点运算
-  不要轻易在内核中使用浮点数
-+ 内核给每个进程只有一个很小的定长堆栈
-  内核栈的大小是两页，32位机的内核栈是8KB，而64位机是16KB，固定不变，
-  每个处理器都有自己的栈。用户空间的栈比较大，而且通常可以动态增长，
-  DOS不可以。
-+ 内核支持异步终端，抢占和SMP，因此必须时刻注意同步和并发
-  同步和并发
-  内核很容易产生竞争。和单线程的用户空间程序不同，内核的许多特性都要求
-  能够并发地访问共享数据。
-  + Linux是抢占式多任务操作系统
-  + Linux支持对称多处理器系统
-  + 中断是异步到来的
-    中断异步到来，完全不顾及当前正在执行的代码。如果不加以适当的保护，
-    中断完全有可能在代码访问资源的时候到来，这样中断处理程序就有可能访
-    问同一资源
-  + Linux内核可以抢占。所以如果不加以适当保护，内核中一段正在执行的代
-    码可能会被另外一段代码抢占，从而有可能导致几段代码同时访问相同的资
-    源。
-
-    常用的解决竞争的方法是自旋锁和信号量。
-
-**** 文件描述符和文件指针的区别
-在linux系统中把设备和普通文件也都看做是文件，要对文件进行操作就必须先打开文件，
-打开文件后会得到一个文件描述符，它是一个很小的正整数，是一个索引值。
-
-内核会为每一个运行中的进程在进程控制块pcb中维护一个打开文件的记录表，
-每一个表项都有一个指针指向打开的文件，上边的索引值是记录表的索引值。
-
-文件描述符的优点：兼容POSIX标准，许多系统调用都依赖于它；缺点是不能移
-植到unix之外的系统上去。
-
-文件指针：c语言中使用的是文件指针而不是文件描述符来作为I/O的句柄，文件
-指针指向进程的用户空间中一个FILE结构的数据结构，FILE结构里主要包括一个
-I/O缓冲区和一个文件描述符，而文件描述符值是文件描述符表中的一个索引，
-从某种意义上将文件指针就是句柄的句柄(在Window中文件描述符被称为文件句
-柄)。
-
-文件指针的优点：是c语言中的通用格式，便于移植。
-
-既然FILE结构中含有文件描述符，那么可以使用fopen来获得文件指针，然后从
-文件指针获取文件描述符，文件描述符应该是唯一的，而文件指针却不是唯一的，
-但指向的对象是唯一的。
-
-C语言文件指针域文件描述符之间可以相互转换
-int fileno(FILE * stream)
-FILE * fdopen(int fd, const char * mode)
-
-open和fopen的区别
-
-| open                      | fopen                       |
-|---------------------------+-----------------------------|
-| open返回一个文件描述符    | 返回FILE *                  |
-| 无缓冲                    | 有缓冲                      |
-| 与write()和read()配合使用 | 与fwrite()和fread()配合使用 |
-
-
-FILE的结构
-#+BEGIN_EXAMPLE
-struct _iobuf {
-        char *_ptr;          //缓冲区当前指针
-        int   _cnt;
-        char *_base;         //缓冲区基址
-        int   _flag;         //文件读写模式
-        int   _file;         //文件描述符
-        int   _charbuf;      //缓冲区剩余自己个数
-        int   _bufsiz;       //缓冲区大小
-        char *_tmpfname;
-        };
-typedef struct _iobuf FILE;
-
-int fd = open("TAGS", O_RDONLY);
-FILE * fp = fopen("TAGS", "r");
-printf("%d %d\n", fd, fp->_file);
-可以从文件指针中获取文件描述符
-
-fileno(fp) 和fp->_file效果是一样的
-FILE * fp = fdopen(fd, "r") 根据文件描述符加上访问模式可以得到文件指针
-#+END_EXAMPLE
-
-**** makefile规则
-***** ':='和'='的区别
-':='和平时使用的赋值符号相同，'='则不同，使用'='时，函数和变量参考会留
-在那儿，改变一个变量的值会导致其它变量的值也被改变，类似于指针。
-
-**** Unix高级环境高级编程
-所有操作系统都需要向它们运行在程序提供各种服务.包括执行新程序,打开文件,读
-文件,分配存储区等.在严格意义上,可将操作系统定义为一种软件，它控制计算
-机硬件资源，提供程序运行环境。一般而言我们称这种软件为内核，它相对较小，
-位于环境的中心。UNIX的体系结构从内到外是内核、系统调用、shell 库函数、
-应用软件。内核的接口被称为系统调用，公用函数库建立在系统调用之上，应用
-软件可以使用库函数也可以使用系统调用。shell是一种特殊的应用程序，它为
-运行其它软件提供了一种接口。
-
-**** APUE源码编译与使用
-UNIX环境高级编程（第二版）/ APUE 源码编译与使用
-
-为了用APUE的源码折腾了一下，网上很多方法都不能用，或者有小问题，特此记录。
-
-注意，不同环境的编译提示有所不同，如果你的环境和我的相似，那么应该没问题。
-
-环境
-
-Linux mypad 2.6.38-ARCH #1 SMP PREEMPT Tue May 3 06:04:40 UTC 2011 i686 Intel(R) Core(TM)2 Duo CPU T6570 @ 2.10GHz GenuineIntel GNU/Linux
-
-确保你已经安装了gcc和gawk。
-
-步骤
-
-到www.apuebook.com下载源码
-tar解包，cd apue.2e
-vi Make.defines.linux 修改变量WKDIR，指向你的apue源码的位置，我的是/home/huangz/code/apue.2e，所以 WKDIR=/home/huangz/code/apue.2e
-vi include/apue.h 增加一个常量ARG_MAX，这是threadctl/getenv1.c和threadctl/getenv3.c要用到的；4096这个值是参考里给的，如果有问题，自己修改吧。
-vi threadctl/getenv1.c 增加
-vi threadctl/getenv3.c 增加
-vi threads/badexit2.c 修改第31行，将pthread_self()的返回值转换为int类型。 printf(“thread 2: ID is %d\n”, (int)pthread_self());
-vi std/linux.mk 将两个nawk改为gawk
-make
-sudo cp include/apue.h /usr/include sudo cp lib/libapue.a /usr/lib
-好了，测试一下，记得要用-lapue命令让编译器链接apue库 gcc main.c -lapue
-
-*** Linux常见问题
-**** /etc/shadow文件被覆盖 su故障
-重启电脑在root账户下执行passwd kong重新生成账户密码, 执行 sudo passwd root重新生成ro
-ot的密码,然后su就可以恢复工作
-**** 文件的每一行后边多一个^M
-这个问题是由于Unix和Window的换行符不一样造成的Unix中是以\n作为换行，
-Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文件在Window中
-打开都是一行，Window下的文件在Unix下打开的话在 每行的结尾可能会多出一
-个^M符号
-
-在Unix下转换Window下文件的两种方式：
-1. 命令dos2unix test.file
-2. 去掉'\r', 用命令sed -i 's/\r//' test.file
-ok!!
-
-**** archlinux签名错误
-error: GPGME error: No data
-
-最近archlinux　yaourt的时候, 老是遇到＂GPGME error: No data＂的错误…
-翻遍了论坛, 试着重新更新pacman-key, 删除/et/pacman.d/gnupg; /var/lib/pacman/sync/*db.sig*　等均不管用;
-
-(1) 修改/etc/pacman.conf
-设置全局SigLevel = Never
-这个方案可以解决问题, 但是禁用了签名验证, 不推荐. 至少我的版本是在某次升级后, networkmanager挂掉了. = =!
-
-(2) 或者修改mirrorlist
-后来将mirrorlist用官方原始的那份覆盖过来了下, 问题解决了..
-估计是之前配置的国内哪个源签名的问题. = =!
-
-ref:
-1. pacman-key
-
-https://wiki.archlinux.org/index.php/Pacman-key#Master_keys
-
-
-** 面试经验收集
-*** 面试资料
-v_july_v整理的面试题 http://blog.csdn.net/v_july_v
-程序员面试题精选100题-何海涛
-
+* 1. 面试试题
+** 面试心得
 *** 2012百度某部门 java研发
-研一小硕一枚，本科我邮计算机，玩了四年，在论坛上看到百度忘记哪个部门招java实习生，就投了简历凑了凑热闹 
-先是电面，问了几个比较基础的问题，比如.equals()和==的区别，Spring中IOC和AOP什么意思，还有java中collection框架的架构..然后有人通知面试，这勉强算第一面 
-下午到百度，然后先做了一个小时的笔试题，大概能做出来一半吧..发现他们问的题都很底层，比如SSH，不会问你怎么用，而是问你怎么理解它的设计思想的..貌似有个Hibernate中的懒加载..就果断不会了...Java也是很底层的，印象比较深的有个问什么叫unchecked Exception和checked Exception....当时只知道有RuntimeException...就随便写了写.还有设计模式的东西，面java肯定要问设计模式的..后来感觉笔试仅仅是给你一个表现自己的机会，有个题不会也不要紧，把与题目相关的东西，知道多少就写多少... 
-交完卷子等了半个小时然后来了个美女mm来二面...先是讲了项目上的东西，问了很多关于SSH和Flex里面的东西..看到我项目里面用过Ibatis/Mybatis..然后巴拉巴拉讨论了很多，比如Ibatis/Hibernate的区别以及Ibatis/Mybatis的区别，还有使用时的细节...然后又问了很多java基础的知识..设计模式的时候问了个单例模式，之前在一本书上看过单例模式有线程安全和线程不安全的两种写法，就巴拉巴拉讲了一大堆..还问了很多线程方面的知道。数据库方面先出了一个题让我写一个SQL语句，然后让我自己写一个我能想到最复杂的Sql语句..我的项目里面有涉及到数据库设计的，又讨论了很多.. 
-二面结束了让我在原地等着..后来来了一个看着就像大牛的员工来三面..三面问的东西各种发散各种宽广..差不多五分钟一道题问了一个小时....印象比较深的是HashMap/HashSet的内部实现原理，还好之前看过它们的源码..这个问题不要简简单单的回答散列表...看看源码就会知道里面还有好多重要知识...还有+号和append的区别..线程的实现方式以及优缺点..以及我对java中collection框架的看法..还有很多SSH方面的问题..具体的忘了...算法问了一个全排列的递归和非递归，编程之美上面有的..还有一个二分查找 
-三面完了让我在那里等..一般实习生最多就是三面..我就在那里等结果..出来一个HR姐姐对我说项目头儿想面我..让我明天下午来..当时我就凌乱了..我是下午一点半开始笔试的...面到五点半.. 
-第二天下午四面，面试官问的知识更发散了..有个问题是让我自己设计一套jdk我该怎么设计...当时我就凌乱了...反正也没正确答案就胡诌了一堆东西..然后问了很多代码优化的东西，问我对自己参与过的项目代码的优化经历以及有什么想法..还有对设计模式的理解和看法..反正问的都是没有正确答案的，要靠自己的经历总结和归纳，当时是能想多少就说多少...我的项目里面涉及到数据库的不少,问了一个内存数据库的问题..就是把数据库放在内存中需要注意哪些问题...问题很发散...和面试官巴拉巴拉聊了两个小时..然后让我回去等消息 
+研一小硕一枚，本科我邮计算机，玩了四年，在论坛上看到百度忘记哪个部门招java实习生，就投了简历凑了凑热闹
+先是电面，问了几个比较基础的问题，比如.equals()和==的区别，Spring中IOC和AOP什么意思，还有java中collection框架的架构..然后有人通知面试，这勉强算第一面
+下午到百度，然后先做了一个小时的笔试题，大概能做出来一半吧..发现他们问的题都很底层，比如SSH，不会问你怎么用，而是问你怎么理解它的设计思想的..貌似有个Hibernate中的懒加载..就果断不会了...Java也是很底层的，印象比较深的有个问什么叫unchecked Exception和checked Exception....当时只知道有RuntimeException...就随便写了写.还有设计模式的东西，面java肯定要问设计模式的..后来感觉笔试仅仅是给你一个表现自己的机会，有个题不会也不要紧，把与题目相关的东西，知道多少就写多少...
+交完卷子等了半个小时然后来了个美女mm来二面...先是讲了项目上的东西，问了很多关于SSH和Flex里面的东西..看到我项目里面用过Ibatis/Mybatis..然后巴拉巴拉讨论了很多，比如Ibatis/Hibernate的区别以及Ibatis/Mybatis的区别，还有使用时的细节...然后又问了很多java基础的知识..设计模式的时候问了个单例模式，之前在一本书上看过单例模式有线程安全和线程不安全的两种写法，就巴拉巴拉讲了一大堆..还问了很多线程方面的知道。数据库方面先出了一个题让我写一个SQL语句，然后让我自己写一个我能想到最复杂的Sql语句..我的项目里面有涉及到数据库设计的，又讨论了很多..
+二面结束了让我在原地等着..后来来了一个看着就像大牛的员工来三面..三面问的东西各种发散各种宽广..差不多五分钟一道题问了一个小时....印象比较深的是HashMap/HashSet的内部实现原理，还好之前看过它们的源码..这个问题不要简简单单的回答散列表...看看源码就会知道里面还有好多重要知识...还有+号和append的区别..线程的实现方式以及优缺点..以及我对java中collection框架的看法..还有很多SSH方面的问题..具体的忘了...算法问了一个全排列的递归和非递归，编程之美上面有的..还有一个二分查找
+三面完了让我在那里等..一般实习生最多就是三面..我就在那里等结果..出来一个HR姐姐对我说项目头儿想面我..让我明天下午来..当时我就凌乱了..我是下午一点半开始笔试的...面到五点半..
+第二天下午四面，面试官问的知识更发散了..有个问题是让我自己设计一套jdk我该怎么设计...当时我就凌乱了...反正也没正确答案就胡诌了一堆东西..然后问了很多代码优化的东西，问我对自己参与过的项目代码的优化经历以及有什么想法..还有对设计模式的理解和看法..反正问的都是没有正确答案的，要靠自己的经历总结和归纳，当时是能想多少就说多少...我的项目里面涉及到数据库的不少,问了一个内存数据库的问题..就是把数据库放在内存中需要注意哪些问题...问题很发散...和面试官巴拉巴拉聊了两个小时..然后让我回去等消息
 在回去的地铁上收到了HR的电话让去报道..
-虽然因为某些原因最终还是没有去百度实习..这次面试获益匪浅啊..一次电面，一次笔试，然后三面.. 
+虽然因为某些原因最终还是没有去百度实习..这次面试获益匪浅啊..一次电面，一次笔试，然后三面..
 java基础方面一定要扎实..能看源码最好看源码..以前学的太漂了..
 框架方面主要理解思想跟设计方法..比较注重于概念..
 数据库设计跟Sql的书写还是挺重要的
 算法这次问的倒不多..估计跟岗位有关系吧..
 
 *** 百度三面
-今天让同学帮查了百度面试结果，倒在三面上，写点东西纪念下吧。 
-百度一直是我最想进的公司。应该是四月份开始吧，就到处寻找百度的实习信息投简历，也让师兄帮忙内推，但每一次都是石沉大海，毫无音讯。直至迎来了暑期实习招聘。当时前两面地挺顺利，但是由于时间太晚，HR就让先回去了。之后等了好久才等来电话三面，直接拿手机做算法题被搞死了。 
-实习招聘结束后，我又开始进入散投的状态。但发现这时百度似乎实习生已经招满了。不过我还是坚持每天投几份。直到某一天收到回信，兴奋地打开邮件，赫然几个大字“你好，你的简历未通过筛选，谢谢。”也许这种行为已经使他们反感了吧，我只得安心去别的地方了。 
-实习的日子果然不出自己所料，做自己不想做的工作是一件很不开心的事，枯燥无味。我能做的只有等待。也怪自己不争气，那段时间没有把握住机会好好学一点东西，否则也不会导致现在的结果。现在想想，实习仅有的收获也许就是那几千块钱工资吧。 
-临近百度校招时，百度实习招聘也渐渐多了起来。当时觉得如果不是实习生去面试会吃亏，所以一有机会就找人内推，只是依然无果。 
-时间过的很快，10月20号转眼就到了。由于时间很近，很多记忆还没有消退。顺便把面经写一下，一来攒RP，二来让各位来指出我的不足之处。 
-一面的时候被HR分配到一个胖子那里。胖子首先让我写个单链表逆置，结果表头没有返回。被他指了出来。也许就是这道题给了他不好的印象，接下来的面试很不顺利，几乎没有说过完整的话，以下的省略号全是被他打断的内容。 
-“自我介绍一下吧。” 
-“我叫XX，北邮计算机专业硕士。研究生期间…” 
-“这个项目你在里面做什么的？”他指着简历说。 
-“负责工作流引擎和一些mapreduce算法的开发”。 
-“mapreduce的运行过程是什么样的？” 
-“比如一个大文件…” 
-“mapreduce分为哪三个阶段？” 
-“map，shuffle，reduce。” 
-“一堆url和一堆site，找出现在url里的site。用mapreduce做，只写reduce。” 
-我有点莫名奇妙，reduce的输入都不知道呢，怎么写啊。说了下，然后他同意先写map，再写reduce。我在纸上画了画。 
-“map以site为key，文件来源为value；reduce端value同时包含两个文件来源的就输出。” 
-“这是什么东西？” 他指着我的纸上问reduce输入问。 
-“相同key的value作为一个iterator输入啊!” 
-“你确定？” 
-“恩。” 
-“你好好回去看一下mapreduce吧。不过你的思路是对的。”说道这里我真不懂了，难道不是iterator吗？ 
-“常用的分类算法有哪些？” 
-“贝叶斯啊，决策树啊…” 
-“两个有什么区别？” 
-“贝叶斯是基于贝叶斯定理，假定属性都是独立的…” 
-“不用说那些，有什么区别？” 
-我想了想，除了都是分类算法，满眼都是区别啊。 
-  “如果输入有十个维度，怎么做” 
-“决策树的话，比如…” 
-“不用比如，怎么做？你这理工科基础要加强，你作为一个硕士生，对吧。你太浮躁了。” 
-“我看你简历里有很多前端的东西啊，以后写简历，这些东西不要写，像个大杂烩。我们不知道招什么人。” 
-“这是什么？”他指着简历问。 
-“是一个预测模型…” 
-“BG是什么，NBD是什么？” 
-“NBD是…” 
-“是NBD，不是MBD”他声音严厉起来。 
-“我念的就是NBD。不过我还真忘了这个缩写的具体含义，我给您说下原理…” 
-“我知道，但是你得对自己的简历负责。” 
-“你这个流失预测的算法是用clementine内置的是吧?” 
-“对，不过…” 
-他示意我不要说话了，然后拿着笔在空中悬了悬，往桌上一拍，在电脑打起字来，边打边说：“你是我面试中见过非常差的，我可以让你过，但是保底的，明白我的意思吧。” 
-我木然的点了点头。 
-“SVM知道吗？” 
-“恩。是个分类算法，就是找到一个超平面…” 
-“所有分类算法都是企图解决这个问题” 
-“脚本语言懂吗？” 
-“会点Python，在贴吧上抓点邮箱，然后…” 
-“一个链表，只给指向该节点的指针，怎么删除？五分钟换题。” 
-“如果不是最后一个节点，直接把后一个赋值给前一个，然后删除后一个节点。否则得重新遍历。” 
-“16瓶药水，一瓶不一样。放在一起发生化学反应。最少用几个试管可检测。还是五分钟。” 
-“4个，用二进制解决。一试管代表一位…” 
-“你看过这道题对吧？” 
-“恩。” 
-“不错，很诚实。” 
-然后他在纸上写着char *s=”abcde”。Sizeof(s)和strlen(s)有什么区别。 
-“strlen会比sizeof小1”。说完我看到他嘴角浮起得意的笑容。我定睛一看，忙说“不对不对，s是指针，sizeof就是4。”可惜的是他嘴角的笑容仍然挂在那，没有消失。回想起之前还在看虚继承内存布局，RTTI这些内容，面试却是这样一个结果。 
-“之前说的reduce输入…” 
-“我面试是考察你的能力，不是跟你探讨问题”他又变得严厉起来。 
-“笔试那道计算字符串相似性的题目你做出来了吗？” 
-“做出来了。” 
-“怎么做的？” 
-“用动态规划。”然后我在纸上把状态转移方程写了出来。 
-“你这个空间复杂度…” 
-“用滚动数组。因为状态i+1只跟i相关…” 
-“好了，怎么计算两个网页的相似性？” 
-“给他们分词，建立向量…” 
-“分词?比如一个div里一堆内容，一个table里一堆内容，两个内容相同，这两个网页是相似的吗？你回去好好想想吧。” 
-一面就这样结束了。二面是自己选的面试官，我特意找了一个长得比较帅的，把简历递给他了。这面比较成功，就不用对话的形式描述了。 
-第一道是给一个循环有序数组，用logn算法求一个数的位置。我就说第一次二分查找临界点，第二次利用临界点位置再二分查找那个数。然后他让我把查找临界点的代码写一下。 
-写好之后，被他找出一个bug，当数组长度为1的时候有问题。 
-接着他让我介绍一个项目。我bla bla说了一通，他很认真的听着，估计也没怎么听懂。实验室的项目就是玩具，只能靠概念忽悠了。 
-第二道题是一堆村庄，输入这些村庄哪几对是可达的，然后查询两个村庄是否可达。我说用并查集。接着把merge的代码写好，find的思路跟他说下，他表示认可。然后又问如果只查询一次该怎么做，我说宽搜或者深搜。把宽搜的思路说下，这个比较简单。 
-第三道题是用mapreduce实现表连接，也比较简单。 
-第四道题是一个人1/2的概率去酒馆，1/2呆家里。酒馆有8个，去的概率都是一样的。另一个人去酒馆找他，发现前7个酒馆都不在，问在第8个酒馆的概率。我想的时间略长，然后他问该怎么做。我说用贝叶斯定理，他说对，就换题了。 
-第五道题是给10亿个数去重，我就说分段用bitmap。他说bitmap怎么做，我就说用STL啊。然后让我自己实现，简单地写了个代码。 
-二面差不多就是这样。离开的时候，我向面试官摆了摆手说再见，他诡异地笑了笑。 
-三面等待的时候，心中忐忑不已。最后实在坐不住了，就主动去三面了。三面的面试官一看就不是好对付的角色，顿时觉得有些紧张。旁边坐着一个女人玩手机，应该是他的妻子。只是他笑着跟我连说了三声Hi，我才轻松下来，找了份简历递给他。 
+今天让同学帮查了百度面试结果，倒在三面上，写点东西纪念下吧。
+百度一直是我最想进的公司。应该是四月份开始吧，就到处寻找百度的实习信息投简历，也让师兄帮忙内推，但每一次都是石沉大海，毫无音讯。直至迎来了暑期实习招聘。当时前两面地挺顺利，但是由于时间太晚，HR就让先回去了。之后等了好久才等来电话三面，直接拿手机做算法题被搞死了。
+实习招聘结束后，我又开始进入散投的状态。但发现这时百度似乎实习生已经招满了。不过我还是坚持每天投几份。直到某一天收到回信，兴奋地打开邮件，赫然几个大字“你好，你的简历未通过筛选，谢谢。”也许这种行为已经使他们反感了吧，我只得安心去别的地方了。
+实习的日子果然不出自己所料，做自己不想做的工作是一件很不开心的事，枯燥无味。我能做的只有等待。也怪自己不争气，那段时间没有把握住机会好好学一点东西，否则也不会导致现在的结果。现在想想，实习仅有的收获也许就是那几千块钱工资吧。
+临近百度校招时，百度实习招聘也渐渐多了起来。当时觉得如果不是实习生去面试会吃亏，所以一有机会就找人内推，只是依然无果。
+时间过的很快，10月20号转眼就到了。由于时间很近，很多记忆还没有消退。顺便把面经写一下，一来攒RP，二来让各位来指出我的不足之处。
+一面的时候被HR分配到一个胖子那里。胖子首先让我写个单链表逆置，结果表头没有返回。被他指了出来。也许就是这道题给了他不好的印象，接下来的面试很不顺利，几乎没有说过完整的话，以下的省略号全是被他打断的内容。
+“自我介绍一下吧。”
+“我叫XX，北邮计算机专业硕士。研究生期间…”
+“这个项目你在里面做什么的？”他指着简历说。
+“负责工作流引擎和一些mapreduce算法的开发”。
+“mapreduce的运行过程是什么样的？”
+“比如一个大文件…”
+“mapreduce分为哪三个阶段？”
+“map，shuffle，reduce。”
+“一堆url和一堆site，找出现在url里的site。用mapreduce做，只写reduce。”
+我有点莫名奇妙，reduce的输入都不知道呢，怎么写啊。说了下，然后他同意先写map，再写reduce。我在纸上画了画。
+“map以site为key，文件来源为value；reduce端value同时包含两个文件来源的就输出。”
+“这是什么东西？” 他指着我的纸上问reduce输入问。
+“相同key的value作为一个iterator输入啊!”
+“你确定？”
+“恩。”
+“你好好回去看一下mapreduce吧。不过你的思路是对的。”说道这里我真不懂了，难道不是iterator吗？
+“常用的分类算法有哪些？”
+“贝叶斯啊，决策树啊…”
+“两个有什么区别？”
+“贝叶斯是基于贝叶斯定理，假定属性都是独立的…”
+“不用说那些，有什么区别？”
+我想了想，除了都是分类算法，满眼都是区别啊。
+“如果输入有十个维度，怎么做”
+“决策树的话，比如…”
+“不用比如，怎么做？你这理工科基础要加强，你作为一个硕士生，对吧。你太浮躁了。”
+“我看你简历里有很多前端的东西啊，以后写简历，这些东西不要写，像个大杂烩。我们不知道招什么人。”
+“这是什么？”他指着简历问。
+“是一个预测模型…”
+“BG是什么，NBD是什么？”
+“NBD是…”
+“是NBD，不是MBD”他声音严厉起来。
+“我念的就是NBD。不过我还真忘了这个缩写的具体含义，我给您说下原理…”
+“我知道，但是你得对自己的简历负责。”
+“你这个流失预测的算法是用clementine内置的是吧?”
+“对，不过…”
+他示意我不要说话了，然后拿着笔在空中悬了悬，往桌上一拍，在电脑打起字来，边打边说：“你是我面试中见过非常差的，我可以让你过，但是保底的，明白我的意思吧。”
+我木然的点了点头。
+“SVM知道吗？”
+“恩。是个分类算法，就是找到一个超平面…”
+“所有分类算法都是企图解决这个问题”
+“脚本语言懂吗？”
+“会点Python，在贴吧上抓点邮箱，然后…”
+“一个链表，只给指向该节点的指针，怎么删除？五分钟换题。”
+“如果不是最后一个节点，直接把后一个赋值给前一个，然后删除后一个节点。否则得重新遍历。”
+“16瓶药水，一瓶不一样。放在一起发生化学反应。最少用几个试管可检测。还是五分钟。”
+“4个，用二进制解决。一试管代表一位…”
+“你看过这道题对吧？”
+“恩。”
+“不错，很诚实。”
+然后他在纸上写着char *s=”abcde”。Sizeof(s)和strlen(s)有什么区别。
+“strlen会比sizeof小1”。说完我看到他嘴角浮起得意的笑容。我定睛一看，忙说“不对不对，s是指针，sizeof就是4。”可惜的是他嘴角的笑容仍然挂在那，没有消失。回想起之前还在看虚继承内存布局，RTTI这些内容，面试却是这样一个结果。
+“之前说的reduce输入…”
+“我面试是考察你的能力，不是跟你探讨问题”他又变得严厉起来。
+“笔试那道计算字符串相似性的题目你做出来了吗？”
+“做出来了。”
+“怎么做的？”
+“用动态规划。”然后我在纸上把状态转移方程写了出来。
+“你这个空间复杂度…”
+“用滚动数组。因为状态i+1只跟i相关…”
+“好了，怎么计算两个网页的相似性？”
+“给他们分词，建立向量…”
+“分词?比如一个div里一堆内容，一个table里一堆内容，两个内容相同，这两个网页是相似的吗？你回去好好想想吧。”
+一面就这样结束了。二面是自己选的面试官，我特意找了一个长得比较帅的，把简历递给他了。这面比较成功，就不用对话的形式描述了。
+第一道是给一个循环有序数组，用logn算法求一个数的位置。我就说第一次二分查找临界点，第二次利用临界点位置再二分查找那个数。然后他让我把查找临界点的代码写一下。
+写好之后，被他找出一个bug，当数组长度为1的时候有问题。
+接着他让我介绍一个项目。我bla bla说了一通，他很认真的听着，估计也没怎么听懂。实验室的项目就是玩具，只能靠概念忽悠了。
+第二道题是一堆村庄，输入这些村庄哪几对是可达的，然后查询两个村庄是否可达。我说用并查集。接着把merge的代码写好，find的思路跟他说下，他表示认可。然后又问如果只查询一次该怎么做，我说宽搜或者深搜。把宽搜的思路说下，这个比较简单。
+第三道题是用mapreduce实现表连接，也比较简单。
+第四道题是一个人1/2的概率去酒馆，1/2呆家里。酒馆有8个，去的概率都是一样的。另一个人去酒馆找他，发现前7个酒馆都不在，问在第8个酒馆的概率。我想的时间略长，然后他问该怎么做。我说用贝叶斯定理，他说对，就换题了。
+第五道题是给10亿个数去重，我就说分段用bitmap。他说bitmap怎么做，我就说用STL啊。然后让我自己实现，简单地写了个代码。
+二面差不多就是这样。离开的时候，我向面试官摆了摆手说再见，他诡异地笑了笑。
+三面等待的时候，心中忐忑不已。最后实在坐不住了，就主动去三面了。三面的面试官一看就不是好对付的角色，顿时觉得有些紧张。旁边坐着一个女人玩手机，应该是他的妻子。只是他笑着跟我连说了三声Hi，我才轻松下来，找了份简历递给他。
 *** 2012微软面试心得
-注：没太多规划便写了，想到哪写到哪，有些乱，望见谅…… 
-注2：上传程序员面试题精选100题-何海涛 电子版~ 
-  
-趁着大多互联网校招的正式面试还没全面开展，分享一些自己找实习/工作的经验心得，也适当给明年找工作的师弟师妹们一些信息，攒攒RP。 
-  
-个人背景简介 
-我邮计算机本科和网研小硕，计算机专业。 
-本科期间，前两年学习成绩中等偏上，主要精力放在学生工作和业余兴趣中。大三之后决意读研，好好学习，然后考研顺利，在网研院交换中心读研。研究生在苏老师组进行项目工作，参与过几个工程项目，基本都是Java Web方面的实践。 
-总体而言，技术上知识面略广，深度一般，有过实际的工程实践经验（虽说做的东西还是粗糙了些），综合素质方面良好但没出众之处或特长。 
-  
-  
-找实习/工作经历 
-  
-简述 
-通过官方途径网申的有腾讯、ADOBE、MS、百度和有道，其中被有道无情BS了。托师兄内推人搜，自己没网申，不知为何连笔试都木有就被BS了。在大街网上也投过AMAZON等，一点消息都没有（大街略不靠谱）。最后拿到MS和百度的实习offer，最后去了MS的SDE intern，放弃了百度的互联网数据处理的offer；然后通过MS的转正面试，之后就没投简历了。 
-  
-笔试流水帐 
-参加过的笔试都顺利通过，从身边朋友们的情况看，也没见笔试刷了多少人。笔试题考得都不深，但面的确挺广的，有些题不懂，比如操作系统和计组的，基本就是忘了。所以适当准备准备即可。主要精力还是放在面试题上好些。 
-  
-面试流水帐 
-腾讯的技术面试一般有3轮。自己一面就跪了，虽说自我感觉面得还行。有些郁闷，但听到一些朋友更加悲催和无语的面试过程，也就释然了。 
-ADOBE的面试一般就一面，的确面得不好，同时面试官挺nice的，所以跪得舒服。得出的经验教训是  1）面外企做好全程英文面试的准备；2）要花些时间回忆和总结过往做过的项目，万一面试官对某个项目的某个细节感兴趣，至少得想得起来。 
-MS面试有两轮，一轮一小时，不多不少。据我所知，只有MS能做到面试不推迟不延长，不由感叹做操作系统的就是不同，对时间片的理解就是深刻些。问的内容偏基础，最后一题都跟大数据处理相关。面完之后，其实感觉并不良好，因为二面有一道操作系统时间片的问题答得不好，最后在面试官的提示下才明白。 
-百度面试经过了三轮，第一轮现场面，后两轮尤其安排不过来，直接来了两轮电话面试。第二轮还是面技术，觉得比现场面试麻烦，比如口述代码。最后一轮，主要就问问具体工作的意向，没什么考验性的问题。 
-MS转正面试，两轮技术面和一轮终面（亦有部分人是三轮技术面，也有直接推免的）。技术面一般就说说研究生做过的项目工作、在微软做的工作，1道简单的编码题和1道左右的大题，可能是智力题，可能是概率题，等等。由于有外藉员工参加面试（包括终面；自己有幸在第二轮遇着了），所以面微软还是做好英文面试技术的准备。终面的面试内容，因面试官而异，有的一直面技术，有的面其他的，自己这边具体说明微软的实习工作，接着回答了一道统计题，之后跟面试官交流些问题就结束了。 
-  
-PS：基本上4月上旬就有投的了，微软、ADOBE、AMAZON等比较早（想走金融IT的注意一下大摩，也很早就能网申了），百度相对晚些。5月初面试多起来，最早拿到offer的也在5月初，比如大摩。6月初大多都能定了。 
-  
-简历之我见 
-觉得简练突出为好。内容简练，无无关内容，关键部分突出。关键部分一般是实习经历、项目经历（非实习期间做的）和技能介绍等。其中实习经历和项目经历要说明清楚工作职责和内容。技能介绍突出自己擅长的即可，一般了解的往后排甚至为了篇幅不写之。其余，比如社会活动、竞赛经历，获奖情况，自我评论，都扼要介绍突出部分。比如获奖情况和社会活动一般都会有好些，根据剩余篇幅挑最重要的几个列一下即可，比如英文简历的社会活动，我就只留下奥残志愿者助理和院会部长，获奖就留优秀研究生、研究生国家一等，奥运会先进个人、校优秀干部，三好学习、优秀团员和其他奖学金没必要提。其实面技术的话，这些信息都不会被问到的。 
-最后提醒一点，简历上任何一点，都必须能详细地给面试官解释，如果解释不了，建议别写。 
-  
-笔试之我见 
-笔试面试题面广，但不深，一般所有内容复习一遍周期太长，至少我没见身边有朋友这样干的。一般在网上或其他途径找些题练练，热热身即可。不过，具体还是得看个人情况，如果对OS，计组，计网基本不了解，那还是去翻翻吧。 
-节省笔试准备时间，其实主要为了腾多些时间准备面试。毕竟，从身边朋友们的情况看，因为笔试成绩被刷掉的概率实在是太小了，大家都答得差不多的烂，被刷掉往往是RP问题（如笔腾讯的时候，大家挨着坐，有位大牛朋友的答案和我们一样被刷了）。 
-  
-面试之我见 
-首先，好好准备面试题，除非你是技术大牛。其中主要精力一般都放在技术题，尤其是算法题。一般大家都是看编程之美，个人觉得也可以看看面试100题（何海涛整理的，或者v_july_v整理的http://blog.csdn.net/v_july_v），听说现在好多面试官看的是剑指offer。时间充实的话甚至可以去oj上刷刷题（http://bbs.byr.cn/#!article/ACM_ICPC/11777 每几天刷刷这里的题，相信你就不怎么怕算法题了。对今年找工作的朋友，也许有些晚了，我找实习的时候也就刷了最前面的水题= =，明年找工作的师弟师妹可以刷了）。 
-其次，对有项目实践经验的朋友，除了简单整理项目做过的内容，个人认为还是应该挖掘更多有价值的问题，比如思考一下当初为什么那样做，换作现在的自己有什么地方可以改进，等等。 
-其次，有一个良好的面试心理状态很关键。个人觉得至少得经历处女面才有可能进入状态。所以对于特别想去的公司，建议提前面面其他公司，找状态。面试过程中，保持谦虚自信为好，别自悲，别骄傲。 
-除此之外，在面试过程中清晰表达自己的思路比直接给出答案更为重要。个人认为有经验的面试官更看重考察面试者的思维。无论是会做的还是不会做的，都要努力简要说明你的思路，让面试官能清楚了解你的思路。比如，被问到一个问题，别急着解答，先把一些没提及的条件问一遍，确保自己真正了解题意。一道好的面试题，往往是能从浅至深的增加难度的，或能从多方向解答的，或考察思考的全面性的题目。比如，考二分比考快排有价值，因为前者变形多，而且能考察面试者对具体场景的边界条件是否考虑周全。有经验的面试官也许还有私人题库，这类题目很多源于实际工程，遇着这类题目也许刚开始找不到方向，但一般面试官会给点思路，以考察面试者的快速学习能力等。 
-做好全面的准备后，剩下的就看RP。面试特别考验RP的，也许遇着的面试官就不喜欢自己，或者面试组织得特别混乱，或者自己面试时被安排得特别晚，面试官都没心思面了。所以，得做好心理准备，凡事处变不惊。 
-  
-最后，总结一下面试各环节最好做到的地方： 
-1）自我介绍。如同简历，简练突出即可。 
-2）项目经验和实习经验；工作内容和个人职责需说清楚，如果有个人创新的地方，建议提一下。 
-3）编码题。个人觉得一般编码题都不难，写出来是基本要求。个人认为让面试官看到良好的代码习惯更重要。 
-4）其他主观技术题，或者智力题、统计题等，思路清晰最关键。 
-  
-面试的内容便大概说到这里。 
-在此一直故意地没具体描述自己遇过的面试题，因为觉得具体说面试题没太大的意义，反而可能有反作用。经常看其他人的解题思路，多少也会剥夺自己的思考过程。比如以前看july博客里的海量数据题，当真正在面试中遇到类似的题，有些在博客上表述不是很清晰的细节部分，往往解释不好。而且，一些大公司二轮往后的面试官都是身经百战的，一般很容易看出你是否见过此题。如果你坦诚看过此题，会换题；如果不坦诚被发现了，那就是诚信问题了。 
-  
-PS：想找面试题，其实去v_july_v的博客就够了，资料多到也许没法看完。 
-  
-工作选择之我见 
-在做出工作选择之前，首先必须权衡自己的需求。比如，你觉得没户口不行，那像百度等基本解决不了户口的就可以pass了，全力向银行IT或国企央企或其他很有机会解决户口的公司努力吧。 
-每个人的情况差别挺大的，所以很难就权衡哪个offer最好，比如有朋友特别喜欢AMAZON，看不上其他offer。再比如我，实在对电信无爱，所以就没考虑过要投运营商或者其他电信行业的公司。同时，对国企央企也没太大的兴趣。而且，GF的工作已经属于稳定型的了，我得去外边努力打拼啊。 
-就本人而言，自己倾向第一份工作是大企业的技术岗；初始待遇中等偏高；在技术能力和岗位晋升方向有较良好的发展空间；做的东西略前沿至少不过时；有学习的欲望，能有户口最好，没对我关系也不大；等等。 
-现在不投简历，一来觉得自己没必要投其他国内互联网公司了，虽说待遇也许会略高些，但除此之外没其他内容能打击自己；而且自己一直对国内互联网有一个偏见——重视具体的skill过于talent，而在具体的skill上，我自认优势不大。二来在MS实习感觉还是挺良好的，环境各种好，同事也nice，主观上便很喜欢这里了，这样奋斗起来应该也会起劲些。 
-从小至今，在方向的选择上自己一直挺明确的，初升高、高考志愿（不包括专业志愿）和考研志愿基本上就一个志愿，一直也挺顺利的，这回继续相信第一感觉了。 
-  
-PS：权衡offer还有许多方法。比如，将自己重视的feature列一下，针对offer每一项打个分，比较总分。如果是pairwise的比较，比如A公司和B公司，有一种粗略的权衡方法是比较去了一家公司后三年踢到另一家公司的机率。 
-  
-关于待遇 
-只计薪酬，应该是比不过人搜C++岗、有道、网易游戏等，但也不算低。具体情况不方便公开，毕竟是保密信息，勿站内咨询。 
-户口，其实像MS、IBM等跟政府关系不错的外企解决率还是挺高的，对于北京生源的研究生以上学历的学生。但HR也透露，现在每年北京市的户口在收紧（昨天一BYR HR也发贴说过此事 http://bbs.byr.cn/#!article/Job/1213249），甚至以后改制，像上海般需要申请，以让户口优先分配给有工作经验或者说对社会做出贡献更大的人。我觉得这个方向挺合理的，虽说对应届生不利。 
-  
-  
-其他 
-对于还有时间好好准备的师弟师妹们，建议平时做好积累。各种计算机理论基础（如http://book.douban.com/doulist/1228111/ 
-）或通用的计算机方法论（如http://book.douban.com/doulist/1584195/ 
-），多学些百利无害。而具体技术至少有一门得有具体的实践经验，哪一门技术便不推荐了，本人也不偏爱任何一种具体的技术。除此之外，有时间建议亦去简单学习 数据挖掘、机器学习等高级领域的基础知识，比如看看公开课什么的。 
-  
-平时关注一些技术博客或技术人员的微博也挺好的，比如： 
-@陈利人 http://www.weibo.com/lirenchen Google工程师，最近特别活跃，每天分享G的面试题和一些技术资料。 
-@左耳朵耗子 http://weibo.com/haoel Amazon工程师，CoolShell的博主，推荐其“职场生涯”相关的博文 http://coolshell.cn/category/career 
-  
-听说在国外，对技术人员的招聘亦逐渐看重面试者在StackOverflow，Github等的贡献。虽说现在在国内还是太geek了，但整体而言应该是一个趋势。有时间关注一下总是好事。 
-  
-找工作的时候多组团，要相信团体的力量远胜于个人的力量。 
-  
-  
-祝每一个BYR都能找到理想的工作！ 
-  
-  
-更新于2012.10.13 
-  
-关于工作抉择的补充 
-  
-在论坛上比较offer，除了户口之外，往往第一关心的因素是入职年薪。而传闻的各种年薪，个人觉得都不尽真实，虽说在当事人心里应该都是真实的。入职待遇，尤其是福利等不在offer写明的内容，每年不一样，同一个公司不同部门也不一样，故不必尽信，大概知道个范围即可。 
-  
-据我听说的和NB的前辈们灌输的观念，大公司间的整体待遇一般相差不大，而且很难量化成一个数值去比较差异，故粗略地用本身可能就不太靠谱的入职年薪去权衡工作间的好坏自然更没什么可信度。 
-  
-入职时待遇差异小，但工作几年之后便开始有显著的差别，主要原因在于发展的差异。所以发展空间是值得考虑亦更重要的一个因素。但这个因素，如果排除人的个性化差异，无法衡量。比如说“私企更锻炼人，肯定比大公司发展空间要好！”，在此“更锻炼人”更准确地说往往是更能全方面地锻炼能力，而得出“发展空间更好”的观点往往是“更全面的人发展前途更好！”。这些观点都带有片面性，在好些场景下往往不成立，比如想往在某个技术领域做专的技术人，也许更全方面的锻炼机会直接剥夺了其投入专业领域的时间。 
-  
-没有一份工作对于所有人都是绝对的好，公司往往也不会考虑针对不同的人提供不同的环境，它只是根据自己的价值观为符合自己公司文化和价值观的员工提供了一个良好的环境。考虑适合不适合，完全是个人的判断，要根据自己本身的情况去考虑，不可一概一论。 
-  
-作为一名保守份子，我认为选择一份适合自己发展而且自己有能力发展好的工作最重要。首先知己——得有自知之明，知道自己有几斤几两，拿得住什么程度的offer。企业不会白给你这么多钱的，给你多少就期望更大地剥夺你多少的剩余价值。其次知彼——尽可能了解能提供的条件，比如绩效和晋升信息、补充的保险、福利、办公环境、等等等等。根据自己的情况判断是否满足自身需求，适合自身发展。 
-  
-同时，在同一家公司，不同部门间的待遇、发展空间亦可能巨大。找工作只关注公司不关注部门和将来做的工作，犹如考研只关注学院和专业方向不关注报考导师一般，真没啥意义。上过研的能理解吧！ 
-  
+注：没太多规划便写了，想到哪写到哪，有些乱，望见谅……
+注2：上传程序员面试题精选100题-何海涛 电子版~
+
+趁着大多互联网校招的正式面试还没全面开展，分享一些自己找实习/工作的经验心得，也适当给明年找工作的师弟师妹们一些信息，攒攒RP。
+
+个人背景简介
+我邮计算机本科和网研小硕，计算机专业。
+本科期间，前两年学习成绩中等偏上，主要精力放在学生工作和业余兴趣中。大三之后决意读研，好好学习，然后考研顺利，在网研院交换中心读研。研究生在苏老师组进行项目工作，参与过几个工程项目，基本都是Java Web方面的实践。
+总体而言，技术上知识面略广，深度一般，有过实际的工程实践经验（虽说做的东西还是粗糙了些），综合素质方面良好但没出众之处或特长。
+
+
+找实习/工作经历
+
+简述
+通过官方途径网申的有腾讯、ADOBE、MS、百度和有道，其中被有道无情BS了。托师兄内推人搜，自己没网申，不知为何连笔试都木有就被BS了。在大街网上也投过AMAZON等，一点消息都没有（大街略不靠谱）。最后拿到MS和百度的实习offer，最后去了MS的SDE intern，放弃了百度的互联网数据处理的offer；然后通过MS的转正面试，之后就没投简历了。
+
+笔试流水帐
+参加过的笔试都顺利通过，从身边朋友们的情况看，也没见笔试刷了多少人。笔试题考得都不深，但面的确挺广的，有些题不懂，比如操作系统和计组的，基本就是忘了。所以适当准备准备即可。主要精力还是放在面试题上好些。
+
+面试流水帐
+腾讯的技术面试一般有3轮。自己一面就跪了，虽说自我感觉面得还行。有些郁闷，但听到一些朋友更加悲催和无语的面试过程，也就释然了。
+ADOBE的面试一般就一面，的确面得不好，同时面试官挺nice的，所以跪得舒服。得出的经验教训是  1）面外企做好全程英文面试的准备；2）要花些时间回忆和总结过往做过的项目，万一面试官对某个项目的某个细节感兴趣，至少得想得起来。
+S面试有两轮，一轮一小时，不多不少。据我所知，只有MS能做到面试不推迟不延长，不由感叹做操作系统的就是不同，对时间片的理解就是深刻些。问的内容偏基础，最后一题都跟大数据处理相关。面完之后，其实感觉并不良好，因为二面有一道操作系统时间片的问题答得不好，最后在面试官的提示下才明白。
+百度面试经过了三轮，第一轮现场面，后两轮尤其安排不过来，直接来了两轮电话面试。第二轮还是面技术，觉得比现场面试麻烦，比如口述代码。最后一轮，主要就问问具体工作的意向，没什么考验性的问题。
+S转正面试，两轮技术面和一轮终面（亦有部分人是三轮技术面，也有直接推免的）。技术面一般就说说研究生做过的项目工作、在微软做的工作，1道简单的编码题和1道左右的大题，可能是智力题，可能是概率题，等等。由于有外藉员工参加面试（包括终面；自己有幸在第二轮遇着了），所以面微软还是做好英文面试技术的准备。终面的面试内容，因面试官而异，有的一直面技术，有的面其他的，自己这边具体说明微软的实习工作，接着回答了一道统计题，之后跟面试官交流些问题就结束了。
+
+PS：基本上4月上旬就有投的了，微软、ADOBE、AMAZON等比较早（想走金融IT的注意一下大摩，也很早就能网申了），百度相对晚些。5月初面试多起来，最早拿到offer的也在5月初，比如大摩。6月初大多都能定了。
+
+简历之我见
+觉得简练突出为好。内容简练，无无关内容，关键部分突出。关键部分一般是实习经历、项目经历（非实习期间做的）和技能介绍等。其中实习经历和项目经历要说明清楚工作职责和内容。技能介绍突出自己擅长的即可，一般了解的往后排甚至为了篇幅不写之。其余，比如社会活动、竞赛经历，获奖情况，自我评论，都扼要介绍突出部分。比如获奖情况和社会活动一般都会有好些，根据剩余篇幅挑最重要的几个列一下即可，比如英文简历的社会活动，我就只留下奥残志愿者助理和院会部长，获奖就留优秀研究生、研究生国家一等，奥运会先进个人、校优秀干部，三好学习、优秀团员和其他奖学金没必要提。其实面技术的话，这些信息都不会被问到的。
+最后提醒一点，简历上任何一点，都必须能详细地给面试官解释，如果解释不了，建议别写。
+
+笔试之我见
+笔试面试题面广，但不深，一般所有内容复习一遍周期太长，至少我没见身边有朋友这样干的。一般在网上或其他途径找些题练练，热热身即可。不过，具体还是得看个人情况，如果对OS，计组，计网基本不了解，那还是去翻翻吧。
+节省笔试准备时间，其实主要为了腾多些时间准备面试。毕竟，从身边朋友们的情况看，因为笔试成绩被刷掉的概率实在是太小了，大家都答得差不多的烂，被刷掉往往是RP问题（如笔腾讯的时候，大家挨着坐，有位大牛朋友的答案和我们一样被刷了）。
+
+面试之我见
+首先，好好准备面试题，除非你是技术大牛。其中主要精力一般都放在技术题，尤其是算法题。一般大家都是看编程之美，个人觉得也可以看看面试100题（何海涛整理的，或者v_july_v整理的http://blog.csdn.net/v_july_v），听说现在好多面试官看的是剑指offer。时间充实的话甚至可以去oj上刷刷题（http://bbs.byr.cn/#!article/ACM_ICPC/11777 每几天刷刷这里的题，相信你就不怎么怕算法题了。对今年找工作的朋友，也许有些晚了，我找实习的时候也就刷了最前面的水题= =，明年找工作的师弟师妹可以刷了）。
+其次，对有项目实践经验的朋友，除了简单整理项目做过的内容，个人认为还是应该挖掘更多有价值的问题，比如思考一下当初为什么那样做，换作现在的自己有什么地方可以改进，等等。
+其次，有一个良好的面试心理状态很关键。个人觉得至少得经历处女面才有可能进入状态。所以对于特别想去的公司，建议提前面面其他公司，找状态。面试过程中，保持谦虚自信为好，别自悲，别骄傲。
+除此之外，在面试过程中清晰表达自己的思路比直接给出答案更为重要。个人认为有经验的面试官更看重考察面试者的思维。无论是会做的还是不会做的，都要努力简要说明你的思路，让面试官能清楚了解你的思路。比如，被问到一个问题，别急着解答，先把一些没提及的条件问一遍，确保自己真正了解题意。一道好的面试题，往往是能从浅至深的增加难度的，或能从多方向解答的，或考察思考的全面性的题目。比如，考二分比考快排有价值，因为前者变形多，而且能考察面试者对具体场景的边界条件是否考虑周全。有经验的面试官也许还有私人题库，这类题目很多源于实际工程，遇着这类题目也许刚开始找不到方向，但一般面试官会给点思路，以考察面试者的快速学习能力等。
+做好全面的准备后，剩下的就看RP。面试特别考验RP的，也许遇着的面试官就不喜欢自己，或者面试组织得特别混乱，或者自己面试时被安排得特别晚，面试官都没心思面了。所以，得做好心理准备，凡事处变不惊。
+
+最后，总结一下面试各环节最好做到的地方：
+1）自我介绍。如同简历，简练突出即可。
+2）项目经验和实习经验；工作内容和个人职责需说清楚，如果有个人创新的地方，建议提一下。
+3）编码题。个人觉得一般编码题都不难，写出来是基本要求。个人认为让面试官看到良好的代码习惯更重要。
+4）其他主观技术题，或者智力题、统计题等，思路清晰最关键。
+
+面试的内容便大概说到这里。
+在此一直故意地没具体描述自己遇过的面试题，因为觉得具体说面试题没太大的意义，反而可能有反作用。经常看其他人的解题思路，多少也会剥夺自己的思考过程。比如以前看july博客里的海量数据题，当真正在面试中遇到类似的题，有些在博客上表述不是很清晰的细节部分，往往解释不好。而且，一些大公司二轮往后的面试官都是身经百战的，一般很容易看出你是否见过此题。如果你坦诚看过此题，会换题；如果不坦诚被发现了，那就是诚信问题了。
+
+PS：想找面试题，其实去v_july_v的博客就够了，资料多到也许没法看完。
+
+工作选择之我见
+在做出工作选择之前，首先必须权衡自己的需求。比如，你觉得没户口不行，那像百度等基本解决不了户口的就可以pass了，全力向银行IT或国企央企或其他很有机会解决户口的公司努力吧。
+每个人的情况差别挺大的，所以很难就权衡哪个offer最好，比如有朋友特别喜欢AMAZON，看不上其他offer。再比如我，实在对电信无爱，所以就没考虑过要投运营商或者其他电信行业的公司。同时，对国企央企也没太大的兴趣。而且，GF的工作已经属于稳定型的了，我得去外边努力打拼啊。
+就本人而言，自己倾向第一份工作是大企业的技术岗；初始待遇中等偏高；在技术能力和岗位晋升方向有较良好的发展空间；做的东西略前沿至少不过时；有学习的欲望，能有户口最好，没对我关系也不大；等等。
+现在不投简历，一来觉得自己没必要投其他国内互联网公司了，虽说待遇也许会略高些，但除此之外没其他内容能打击自己；而且自己一直对国内互联网有一个偏见——重视具体的skill过于talent，而在具体的skill上，我自认优势不大。二来在MS实习感觉还是挺良好的，环境各种好，同事也nice，主观上便很喜欢这里了，这样奋斗起来应该也会起劲些。
+从小至今，在方向的选择上自己一直挺明确的，初升高、高考志愿（不包括专业志愿）和考研志愿基本上就一个志愿，一直也挺顺利的，这回继续相信第一感觉了。
+
+PS：权衡offer还有许多方法。比如，将自己重视的feature列一下，针对offer每一项打个分，比较总分。如果是pairwise的比较，比如A公司和B公司，有一种粗略的权衡方法是比较去了一家公司后三年踢到另一家公司的机率。
+
+关于待遇
+只计薪酬，应该是比不过人搜C++岗、有道、网易游戏等，但也不算低。具体情况不方便公开，毕竟是保密信息，勿站内咨询。
+户口，其实像MS、IBM等跟政府关系不错的外企解决率还是挺高的，对于北京生源的研究生以上学历的学生。但HR也透露，现在每年北京市的户口在收紧（昨天一BYR HR也发贴说过此事 http://bbs.byr.cn/#!article/Job/1213249），甚至以后改制，像上海般需要申请，以让户口优先分配给有工作经验或者说对社会做出贡献更大的人。我觉得这个方向挺合理的，虽说对应届生不利。
+
+
+其他
+对于还有时间好好准备的师弟师妹们，建议平时做好积累。各种计算机理论基础（如http://book.douban.com/doulist/1228111/
+）或通用的计算机方法论（如http://book.douban.com/doulist/1584195/
+），多学些百利无害。而具体技术至少有一门得有具体的实践经验，哪一门技术便不推荐了，本人也不偏爱任何一种具体的技术。除此之外，有时间建议亦去简单学习 数据挖掘、机器学习等高级领域的基础知识，比如看看公开课什么的。
+
+平时关注一些技术博客或技术人员的微博也挺好的，比如：
+@陈利人 http://www.weibo.com/lirenchen Google工程师，最近特别活跃，每天分享G的面试题和一些技术资料。
+@左耳朵耗子 http://weibo.com/haoel Amazon工程师，CoolShell的博主，推荐其“职场生涯”相关的博文 http://coolshell.cn/category/career
+
+听说在国外，对技术人员的招聘亦逐渐看重面试者在StackOverflow，Github等的贡献。虽说现在在国内还是太geek了，但整体而言应该是一个趋势。有时间关注一下总是好事。
+
+找工作的时候多组团，要相信团体的力量远胜于个人的力量。
+
+
+祝每一个BYR都能找到理想的工作！
+
+
+更新于2012.10.13
+
+关于工作抉择的补充
+
+在论坛上比较offer，除了户口之外，往往第一关心的因素是入职年薪。而传闻的各种年薪，个人觉得都不尽真实，虽说在当事人心里应该都是真实的。入职待遇，尤其是福利等不在offer写明的内容，每年不一样，同一个公司不同部门也不一样，故不必尽信，大概知道个范围即可。
+
+据我听说的和NB的前辈们灌输的观念，大公司间的整体待遇一般相差不大，而且很难量化成一个数值去比较差异，故粗略地用本身可能就不太靠谱的入职年薪去权衡工作间的好坏自然更没什么可信度。
+
+入职时待遇差异小，但工作几年之后便开始有显著的差别，主要原因在于发展的差异。所以发展空间是值得考虑亦更重要的一个因素。但这个因素，如果排除人的个性化差异，无法衡量。比如说“私企更锻炼人，肯定比大公司发展空间要好！”，在此“更锻炼人”更准确地说往往是更能全方面地锻炼能力，而得出“发展空间更好”的观点往往是“更全面的人发展前途更好！”。这些观点都带有片面性，在好些场景下往往不成立，比如想往在某个技术领域做专的技术人，也许更全方面的锻炼机会直接剥夺了其投入专业领域的时间。
+
+没有一份工作对于所有人都是绝对的好，公司往往也不会考虑针对不同的人提供不同的环境，它只是根据自己的价值观为符合自己公司文化和价值观的员工提供了一个良好的环境。考虑适合不适合，完全是个人的判断，要根据自己本身的情况去考虑，不可一概一论。
+
+作为一名保守份子，我认为选择一份适合自己发展而且自己有能力发展好的工作最重要。首先知己——得有自知之明，知道自己有几斤几两，拿得住什么程度的offer。企业不会白给你这么多钱的，给你多少就期望更大地剥夺你多少的剩余价值。其次知彼——尽可能了解能提供的条件，比如绩效和晋升信息、补充的保险、福利、办公环境、等等等等。根据自己的情况判断是否满足自身需求，适合自身发展。
+
+同时，在同一家公司，不同部门间的待遇、发展空间亦可能巨大。找工作只关注公司不关注部门和将来做的工作，犹如考研只关注学院和专业方向不关注报考导师一般，真没啥意义。上过研的能理解吧！
+
 选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决
-于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。 
+于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。
+** java相关
+*** final finally finalize
+final  finally   finalize
+-----------------------------------------------------------
+final可以用于控制成员、方法、或者是一个类是否可以被覆写或继承等功能
+final用于成员时，这个变量一旦被初始化，便不可改变。它的初始化可以放在
+两个地方一个是变量定义出，另一个是在构造函数中。
+final用于参数时，可以防止在函数中改变它的值
+final用于函数时不允许子类来覆写这个方法
+final用于类时，这个类不能被继承，因此一个类不能即被声明为abstract又被
+声明为final
+
+finally是对java异常处理模型的最佳补充，无论有无异常发生，finally里的代
+码总会执行，如果在try块里边有return语句，则在return语句执行之前会先执
+行finally中的语句
+
+finalize是垃圾回收器删除对象之前对这个对象调用的
+-----------------------------------------------------------
+
+*** sleep()和wait()区别
+sleep()是使线程停止一段时间的方法，在sleep时间间隔期满以后，线程不一定
+立即回复执行，这是因为在那个时刻，其它线程可能正在运行，而且没有被调度
+为放弃执行，除非醒来的线程具有更高的优先级，或者正在运行的线程因为其它
+原因阻塞。
+wait() 线程交互时，如果线程对一个同步对象发出一个wait()调用，该线程会
+暂停执行，被调对象进入等待状态，直到被唤醒或等待时间到。
+*** 参数的传值和传引用
+可以说java中的参数传递都是传值，传递引用其实也是传值。
+基本的数据类型都是传值，对象类型传递引用。
+
+这里有一点要注意： String类型
+
+String是对象类型， 但是由于String不可改变，每次赋新值的时候先在内存中分
+配一个新的空间并赋予给定的值，并返回新地址的引用，所以String类型虽然是
+传递引用但是效果和传值是一样的
+#+BEGIN_EXAMPLE
+String name = "hello";
+String who = name;
+who = "world";
+System.out.print(name +" " + who);   hello world
+#+END_EXAMPLE
+迪米特法则：开放封闭原则，对扩展开放对修改封闭。  面向接口编程
+里氏代换原则：一个软件实体中，可以把父类都替换成它的子类，程序行为没有变化
 
 
-* 2. 各种有趣问题
-** 哈希表的尴尬
+创建模式、结构模式、行为模式
+
+单一职责原则：仅有一个可以引起对象发生变化的原因
+
+单例模式：在整个应用中仅含有一个该类的实例
+
+工厂模式根据抽象程度的不同分为三种，简单工厂模式、工厂方法模式、抽象工厂模式
+
+简单工厂模式：所有的该类对象都由一个工厂来生产
+工厂方法模式：有四个要素。工厂接口、工厂实现、产品接口、产品实现。降低了耦合度，定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。也就是说，工厂方法模式将简单工厂内部的逻辑判断移到了客户端来进行
+抽象工厂模式：核心工厂不再负责具体对象的构造，而是根据传入的参数，返回一个对应的工厂对象，然后由该工厂对象来构造具体对象
+
+
+门面模式(外观模式)：感觉是Service层的一个翻版，为子系统中的一组接口提供一个一致的界面，此模式定义了一个高层接口
+
+策略模式：策略模式指定一组算法，将每一个算法封装到具有公共接口的独立的类中，从而使它们可以相互替换。
+
+迭代器模式：提供一种方式访问容器对象中的各个元素，而又不需要暴露该对象的内部细节
+
+适配器模式：在原型不做任何改变的情况下，扩展了新的接口。可以采用继承或者聚合的方式来实现适配器模式
+
+装饰模式：为已有功能动态地添加更多功能的一种方式，I/O里用的最多
+
+聚合表示一种弱的拥有关系，体现的是A对象可以包含B对象，但B对象不是A对象的一部分；合成则是一种强的拥有关系，体现了严格的部分和整体的关系，部分和整体的生命周期一样
+
+合成模式(组合模式)：将众多对象组合成树形结构
+
+观察者模式：一个Subject可以有多个Observer，Subject内部用一个变量存储了所有依附于它的Observer，当Subject状态发生改变的时候，就遍历通知所有观察者来自动更新自己
+
+原型模式：通过原型类克隆自身从而创建一个新的对象
+
+模版方法模式：先定义好逻辑处理的框架，然后将一些步骤放到子类中来实现，具体就是在一个抽象类中定义好框架，在具体子类中实现这些抽象方法，并且不同的子类有不同的实现
+
+享元模式：
+
+代理模式：不让客户端直接访问目标对象，而是通过一个代理，把客户端的请求通过该代理对象传递给目标对象
+
+责任链模式：在责任链模式中，很多对象由每一个对象对其下家的引用而接 起来形成一条链。请求在这个链上传递，直到链上的某一个对象决定处理此请求。客户并不知道链上的哪一个对象最终处理这个请。用户发出一个请求，同时有多个handler可以处理该请求，将这些handler连成一条链，请求沿着传递该请求，知道有一个对象处理它为止
+
+命令模式：将一个请求封装为一个对象，从而使你可用不同的请求对客户进行参数化
+
+调停者模式(中介者模式)：用一个中介对象来封装一系列的对象交互，中介者使各对象不需要显示的互相调用，从而使其耦合松散
+
+备忘录模式：在不破坏封装性的前提下，捕获一个对象的内部状态，并在对象之外保存这个状态。这样以后就可以将该对象恢复到原先保存的状态
+
+桥梁模式：
+
+创建模式：用来创建对象的实例。如单例模式
+结构模式：用于帮助将多个对象组织成更大的结构，如适配器模式、桥接模式、组合器模式等
+行为模式：维护多个对象间复杂的逻辑关系，如命令行模式
+** 其它知识点
+*** 基本知识点
+-----------------------------------------------------------
+private 在类内部可以访问本类私有的成员变量和函数，注意main方法也属于类
+的内部方法，是一个public的静态方法
+
+main方法是静态方法不能访问非静态的方法和变量
+-----------------------------------------------------------
+布尔类型的默认值是false，整形默认是0
+
+-----------------------------------------------------------
+java test abc def    在java中使用java命令执行程序的时候程序的名字并不
+作为参数，在这里总共有两个参数， 第一个参数是abc， 第二个是def
+
+c语言中，程序名字作为第一个参数传递到程序中，真正的参数从第二个开始
+
+-----------------------------------------------------------
+静态方法不能被覆写
+-----------------------------------------------------------
+抽象类中可以没有抽象方法，可以是个空类，也可以都是具体方法
+-----------------------------------------------------------
+进入目录时需要获得目录的执行权限
+-----------------------------------------------------------
+所有32位应用程序都有4GB的进程地址空间，对于window应用程序可以访问2GB的
+进程地址空间，Linux32位操作系统下，一个应用程序可以访问3GB的内存空间，
+剩余的虚拟地址空间由操作系统内核使用，被称为内核模式的虚拟空间。
+*** 线程安全和线程不安全
+线程安全和不安全通常针对的是方法或者函数，函数执行过程中不会造成资源冲突的就是线程安全，即使有多个线程也没有关系
+
+线程不安全就是会造成数据错误或者崩溃
+
+如何处理线程不安全情况： 做好互斥与同步，对异常处理要完善。
+
+*** 进程的生命周期
+进程的开始与终止程是一个动态的实体，从创建到消亡，是一个进程的整个生命周期。进程可能
+会经历各种不同的状态，一般来说有三种状态。
++ 就绪态： 进程已经获得了除cpu以外的所有其它资源，在就绪队列中等待cpu调度
++ 执行状态： 已经获得cpu以及所有需要的资源正在运行
++ 阻塞状态(等待状态)： 进程因等待所需要的资源而放弃处理器，或者进程本
+  来就不拥有处理器，且其它资源也没有满足
+
+[[file:pic/procedure.gif]]
+状态转换： 就绪态的进程得到cpu调度就会变为执行状态，执行态的进程如果因
+为休眠或等待某种资源就会变为等待状态，执行态的进程如果时间片到了就会重
+新变为就绪状态放入就绪队列末尾，等待状态的进程如果得到除cpu以外的资源
+就会变为就绪状态
+
+*注意处于等待状态的进程不能直接转变为执行状态，而首先要变为就绪状态，哪怕系统中只有一个进程*
+
+*** 数据库范式
+数据库的设计范式是数据库设计所需要满足的规范，满足这些规范的数据库是简
+洁的、结构明晰的，同时，不会发生插入（insert）、删除（delete）和更新
+（update）操作异常。反之则是乱七八糟，不仅给数据库的编程人员制造麻烦，
+而且面目可憎，可能存储了大量不需要的冗余信息。
+
+第一范式1NF
+所谓第一范式是指数据库表中的每一列都是不可分割的基本数据项
+
+第二范式2NF
+如果关系模式为第一范式，并且每一个非主属性完全函数依赖于某个候选键，则
+称为第二范式
+
+第三范式3NF
+如果关系模式是第二范式，并且每个非主属性都不传递依赖于R的候选键，则称
+为第三范式  消除了传递依赖
+
+BCNF
+若关系模式R是第一范式，并且每个属性都不传递依赖于R的候选键。称为BCNF，
+在第三范式的基础上，数据库表中不存在任何字段对任一候选关键字段的传
+递函数依赖
+
+四种范式之间存在如下关系：
+
+BCNF 属于 3NF 属于 2NF 属于 1NF
+[[file:pic/NF.gif]]
+
+*** tcp/ip协议
+四类ip地址
+|     A |       B |       C |       D |       E |
+|-------+---------+---------+---------+---------|
+| 1-126 | 128-191 | 192-223 | 224-239 | 240-254 |
+
+*** tcp三次握手和四次挥手
+连接建立：三次握手
+1. 客户端发送tcp报文syn j到服务器
+2. 服务器发送对syn j的确认报文ack j+1，同时发送报文syn k
+3. 客户端发送对报文syn k的确认报文ack k+1
+连接建立，服务器处于ESTABLISHED状态
+
+连接释放：四次挥手
+由于tcp连接时全双工的，因此每个方形都必须单独进行关闭，当一方完成它的
+数据发送任务后就能发送一个FIN来终止这个方向的连接，这样它就不再发送数
+据了，但是仍然呢可以接收数据，首先进行关闭的一方将进行主动关闭，而另一
+方执行被动关闭
+
+1. tcp客户端发送一个FIN j， 用来关闭客户到服务器的数据传送。
+2. 服务器收到这个FIN j，发回一个ack k
+3. 服务器关闭客户端的连接，发送一个FIN i给客户端
+4. 客户端发挥ack i+1确认报文
+
+CLOSED表示初始状态
+LISTEN表示服务器端的某个socket处于监听状态，可以接受连接
+SYN_RECV在建立tcp连接时的三次握手过程中，在收到客户端的syn请求报文之后
+处于此状态
+SYN_SENT当客户端发送完syn请求报文之后就处于这个状态
+ESTABLISHED表示连接已经建立
+
+FIN_WAIT_1: 这个状态要好好解释一下，其实FIN_WAIT_1和FIN_WAIT_2状态的真正含义都是表示等待对方的FIN报文。而这两种状态的区别是：FIN_WAIT_1状态实际上是当SOCKET在ESTABLISHED状态时，它想主动关闭连接，向对方发送了FIN报文，此时该SOCKET即进入到FIN_WAIT_1状态。而当对方回应ACK报文后，则进入到FIN_WAIT_2状态，当然在实际的正常情况下，无论对方何种情况下，都应该马上回应ACK报文，所以FIN_WAIT_1状态一般是比较难见到的，而FIN_WAIT_2状态还有时常常可以用netstat看到。
+FIN_WAIT_2：上面已经详细解释了这种状态，实际上FIN_WAIT_2状态下的SOCKET，表示半连接，也即有一方要求close连接，但另外还告诉对方，我暂时还有点数据需要传送给你，稍后再关闭连接。
+TIME_WAIT: 表示收到了对方的FIN报文，并发送出了ACK报文，就等2MSL后即可回到CLOSED可用状态了。如果FIN_WAIT_1状态下，收到了对方同时带FIN标志和ACK标志的报文时，可以直接进入到TIME_WAIT状态，而无须经过FIN_WAIT_2状态。
+CLOSING: 这种状态比较特殊，实际情况中应该是很少见，属于一种比较罕见的例外状态。正常情况下，当你发送FIN报文后，按理来说是应该先收到（或同时收到）对方的ACK报文，再收到对方的FIN报文。但是CLOSING状态表示你发送FIN报文后，并没有收到对方的ACK报文，反而却也收到了对方的FIN报文。什么情况下会出现此种情况呢？其实细想一下，也不难得出结论：那就是如果双方几乎在同时close一个SOCKET的话，那么就出现了双方同时发送FIN报文的情况，也即会出现CLOSING状态，表示双方都正在关闭SOCKET连接。
+CLOSE_WAIT: 这种状态的含义其实是表示在等待关闭。怎么理解呢？当对方close一个SOCKET后发送FIN报文给自己，你系统毫无疑问地会回应一个ACK报文给对方，此时则进入到CLOSE_WAIT状态。接下来呢，实际上你真正需要考虑的事情是察看你是否还有数据发送给对方，如果没有的话，那么你也就可以close这个SOCKET，发送FIN报文给对方，也即关闭连接。所以你在CLOSE_WAIT状态下，需要完成的事情是等待你去关闭连接。
+LAST_ACK: 这个状态还是比较容易好理解的，它是被动关闭一方在发送FIN报文后，最后等待对方的ACK报文。当收到ACK报文后，也即可以进入到CLOSED可用状态了。
+
+*** c/c++内存分配以及区别
+申请了内存空间后，必须检查是否分配成功。
+当不需要再使用申请的内存时，必须记得释放，释放后应该把指向这块内存的指
+针指向NULL，防止后边不小心使用了它。
+
+已经释放了的指针，再次被释放的时候会报错，但是释放空指针不会出错，所以释
+放了的指针需要赋值为NULL
+
+malloc和new的区别
+1. new返回指定类型的指针，并且可以自动计算所需要的大小
+2. malloc必须要由我们计算字节数，在返回后强制转换我实际类型的指针
+3. malloc只管分配内存，并不能对所得的内存进行初始化，new分配的内存如何
+   是对象类型，则会调用类的构造函数初始化
+
+注意用delete释放malloc分配的内存会出错，用free释放用new分配的内存就不
+能调用析构函数
+** 算法相关
+*** 哈希表的尴尬
 由于cache命中率的原因，哈希表的性能通常好于红黑树。即使只有32个元素，
 也要进行5次随机内存访问。随机内存访问对cpu cache是不友好的。
 
@@ -1636,7 +439,7 @@ hash表最大的缺陷是当数据量难以估计时，没法设置合适的buck
 3. 把hash表的list变成哈希表，缺点是结构复杂，多次哈希速度慢。
 综合来看方案一是比较好的这种。
 
-** 用磁带机求第K小元素                                                         :第K大元素:
+*** 用磁带机求第K小元素                                                       :第K大元素:
 如果输入在磁带机上， 你的机器只有一个磁带机驱动器和几十字的内存，如何
 找第K小的数
 1. 遍历一遍磁带，随即选择一个数M
@@ -1650,7 +453,7 @@ hash表最大的缺陷是当数据量难以估计时，没法设置合适的buck
 
 目前求第K小的数，比较好的算法时间复杂度为O(n),常数大概为3.4
 
-** 裁纸机程序
+*** 裁纸机程序
 一个字条上边印有一串数字，对字条进行切割，满足一下条件
 1. 每个字条上边都有字
 2. 所有字条上数字的和小于给定数字
@@ -1701,7 +504,7 @@ int main()
 }
 #+END_EXAMPLE
 
-** 从0-N中随机生成M个数
+*** 从0-N中随机生成M个数
 思路一：先从N个数中随机找出M个，然后对这M个数进行随机排列，时间复杂度
 为O(n),空间复杂度为O(M)。
 #+BEGIN_EXAMPLE
@@ -1774,7 +577,7 @@ for J:=N-M+1 to N do
        insert J in S after T
 #+END_EXAMPLE
 
-** 0-1背包问题                                                                 :动态规划:
+*** 0-1背包问题                                                               :动态规划:
 给定一个整数K和n个不同大小的物品，第i个物品的大小为整数Ki，寻找一个物
 品的子集，它们的大小之和为K，或者确定不存在这样的子集。
 
@@ -1835,7 +638,7 @@ return 0;
 }
 #+END_EXAMPLE
 
-** 乘法操作 以及用移位实现的乘法操作
+*** 乘法操作 以及用移位实现的乘法操作
 解题思路： 对于两个整数97 * 61, 61的二进制形式是0111101
 97 * 61 = 97 * （32 + 16 + 8 + 4 + 1）
 #+BEGIN_EXAMPLE
@@ -1863,7 +666,7 @@ int main()
     return 1;
 }
 #+END_EXAMPLE
-** N次方问题，当N很大时，把N转换为二进制
+*** N次方问题，当N很大时，把N转换为二进制
 2的N次方问题：当N很大时，由31 = 16 + 8 + 4 + 2 + 1可以得到启发，2 ^ 31
 = 2 ^ 16 * 2 ^ 8 * 2 ^ 4 * 2 ^ 2 * 2 ^ 1.
 #+BEGIN_EXAMPLE
@@ -1890,18 +693,7 @@ int main()
     return 0;
 }
 #+END_EXAMPLE
-** 最大连续和
-有四种方法：
-1. 遍历数组，记录区间i,j之间的数的总和，找到其中的最大值时间复杂度为
-   o(n^2)
-2. 把区间分成两个部分，分别求出左右两个部分中的最大连续和，然后再求出
-   端点分别在两个区间中的最大连续和，这三个中的最大值就是整个区间的最
-   大连续和，时间复杂度为o(nlogn)
-3. 遍历序列，记录从序列开头到每一个位置的和，并记录这些和中的最大最小
-   值，以及它们的差值，整个序列的最大连续和，就是这些差值中最大的，时
-   间复杂度为o(n)
-4. 
-** 求平方根 求多维空间中两个点间的距离
+*** 求平方根 求多维空间中两个点间的距离
 1. K维空间中有两个点A和B，求它们间的距离
 2. 其中最重要的是求平方根操作，使用牛顿迭代可以减小开方操作的时间
 3. 先找出A到B的距离中距离最大的一维 并记该距离为M，则A到B的距离值介于M和sqrt(K) * M
@@ -1952,7 +744,7 @@ int main()
     return 0;
 }
 #+END_EXAMPLE
-** 检测链表中是否存在环，并找到相遇点
+*** 检测链表中是否存在环，并找到相遇点
 
 1. 用两个指针p1和p2都指向链表第一个元素
 2. p1向后移动一个元素,p2向后移动两个元素，比较两者是否相等，如果相等表
@@ -1991,18 +783,18 @@ void FindLoop(list * head)
     return t;
 }
 #+END_EXAMPLE
-** 检测两个链表是否相交
+*** 检测两个链表是否相交
 方法一：将其中一个链表的首位相连，判断另外一个链表是否有环，如果有则两
 个链表相交，否则不想交
 方法二： 如果预先知道两个链表的长度n和m，如果两个链表相交，则它们的最
 后一部分肯定是相同的，让长度比较长的链表先移动n-m步，然后两个链表再同
 时移动，当两部分相同时，表明到了相交点。
 
-** 如何判断一个变量时有符号数还是无符号数
+*** 如何判断一个变量时有符号数还是无符号数
 #define ISUNSIGNED(a) (a>=0 && ~a>=0)
 如果宏的参数是一个类型，其中一个方法是使用类型转换
 #define ISUNSIGNED(type) ((type)0 - 1 > 0)
-** 一个文本文件中存入了很多字符串，如果随机的从中选中一个
+*** 一个文本文件中存入了很多字符串，如何随机的从中选中一个
 1. 最简单的方法就是读一次文件，并记录每个字符串到文件开头的偏移量，最
    后随机一个数，打印该数字对应的字符串
 2. 如果限制只能读一次文件，并且不能用变量存储字符串的偏移量，该怎么办
@@ -2011,7 +803,7 @@ void FindLoop(list * head)
    这两个字符串中选择一个保存
    2）再读入一个字符串，从保存的字符串和该字符串中再以相同的概率选择保
    存一个，丢弃另一个，直到文件末尾，则选中任意字符串的概率都是相同的。
-** 判定点是否在多边形内部
+*** 判定点是否在多边形内部
 思路：二维空间中多个点的连线构成了一个多边形，給一定点p(x, y)，判断该点是否在
 多边形内部
 1. 沿着定点p做一条直线，判断直线与多边形的交点个数，只算从p到多边形外
@@ -2026,11 +818,11 @@ void FindLoop(list * head)
    y2),是否有x1<=x&&x2>=x如果满足，再判断该交点的位置。
 5. 注意为了防止重复计算，只当交点为多边形的边的右顶点时才算作有效交点
 
-** poj1503 简单求大整数的和
+*** poj1503 简单求大整数的和
 当输入字符串为0时表示输入结束
 错误点：最后验证字符串输入结束的标志是s[0]='0' && s[1]=0
 
-** B·ellman_ford算法
+*** B·ellman_ford算法
 Bellman-ford算法用来求解最短路径，还可以检测是否存在负环，算法的核心思想是：对每一条边进行n-1次松弛操作，时间复杂度是O(NE),其中N是顶点的个数，E是边的个数。最后检测每一条边是否还可以松弛，如果可以就表明存在负环，否则已经求出了最短路径。
 #+BEGIN_EXAMPLE
 /**
@@ -2095,7 +887,7 @@ int main()
     return 0;
 }
 #+END_EXAMPLE
-** Spfa算法
+*** Spfa算法
 spfa算法是用队列优化过的Bellman_ford算法，在Bellman_ford算法中对每一
 条边都进行了n-1次松弛，时间复杂度是O(NE), 而spfa算法的时间复杂度通常是
 O(KE)，通常情况下k<=2,但是spfa算法的稳定性较差，对于稀疏图和稠密图，时
@@ -2172,7 +964,7 @@ int main()
     return 0;
 }
 #+END_EXAMPLE
-** 汇率转换问题，判断是否能赚到更多的钱
+*** 汇率转换问题，判断是否能赚到更多的钱
 poj 1806
 题意：已知有n种货币，编号为1~n，以及它们之间的瑞换比例。现在Nick有第fir种货币meney元，问你Nick能不能通过这些货币的瑞换规则，使自己拿到更多的fir货币。
 
@@ -2249,10 +1041,10 @@ int main()
 }
 #+END_EXAMPLE
 
-** DP动态规划问题
+*** DP动态规划问题
 1. 转移方程
 2. 初始值
-** 动态规划求RMQ(区间最值问题Range Minimum/Maximum Query) 有点小问题，代码中注释之处
+*** 动态规划求RMQ(区间最值问题Range Minimum/Maximum Query) 有点小问题，代码中注释之处
 求RMQ最简单的方法是遍历区间，时间复杂度O(n), 但是当查询次数很多的时候，
 时间效率并不高。可以用线段树把算法优化到O(logn) (在线段树中保存线段的
 最值)，不过sparse_table算法是较好的，用O(nlogn)的时间进行预处理，然后
@@ -2300,7 +1092,7 @@ int RMQ(int a, int b)
 {
     int k = (int)(log(b-a+1)/log(2)); /* 区间长度为b-a+1 */
     /* 两个区间之间有重合 */
-    return max(map[a][k], map[b-1-(int)pow(2, k)][k]);
+    return max(map[a][k], map[b+1-(int)pow(2, k)][k]);
 }
 
 int main()
@@ -2317,11 +1109,11 @@ int main()
     return 0;
 }
 #+END_EXAMPLE
-** 树的公共祖先问题LCA
+*** 树的公共祖先问题LCA
 树的公共祖先问题可以分为在线法和离线法,在线法就是来一个请求就处理一次，
 离线法就是收集所有请求然后统一给出回复。
 
-*** 1. 在线法。LCA可以转换为RMQ
+**** 1. 在线法。LCA可以转换为RMQ
 1） 对树进行dfs，访问每个节点时要记录节点的层次，同时要记录每个节点第一次出现的位置，对于节点个数为n的树，最后会形成一个2n-1长度的序列
 2） 如果要查询节点a和节点b的公共祖先，只需找出a和b节点在在序列中第一次
 出现的位置，形成了一个从a到b的子序列， 对应序列中层数最小的节点即为公
@@ -2416,10 +1208,9 @@ void pre_handle(int * m , int n)
 
 int RMQ(int a, int b)
 {
-    /* 注意log(8)/log(2) 结果为2 所以在b-a+1后边多加了一个1*/
-    int k = (int)(log(b-a+1 + 1)/log(2)); /* 区间长度为b-a+1 */
+    int k = (int)(log(b-a+1)/log(2)); /* 区间长度为b-a+1 */
     /* 两个区间之间有重合 */
-    return min(map[a][k], map[b-1-(int)pow(2, k)][k]);
+    return min(map[a][k], map[b+1-(int)pow(2, k)][k]);
 }
 
 
@@ -2433,40 +1224,1099 @@ int main()
     return 0;
 }
 #+END_EXAMPLE
-*** 2. 离线法。Tarjan
+**** 2. 离线法。Tarjan
+算法主要是采用dfs+并查集
+#+BEGIN_EXAMPLE
+/**
+ * @file   code.c
+ * @author  <kong@KONG-PC>
+ * @date   Mon Dec 03 20:52:03 2012
+ *
+ * @brief  Tarjan算法，基本思想是深度优先遍历+并查集，利用并查集可以将
+ * 查询两个数字是否在一个集合中的操作变为O(1)
+ */
+
+#include <stdio.h>
+#include <vector>
+using namespace std;
+#define N 100
+
+vector<int> tree[N],request[N]; /* 用来记录子节点和对应节点的询问信息 */
+int ancestor[N];                /* 记录节点的祖先节点 */
+
+int visit[N];                   /* 记录节点的访问情况 */
+int p[N];                  /* 临时记录并查集中的父亲节点，在遍历的过程
+                            * 中它的值会不断变化 */
+int rank[N];
+
+void init(int n)
+{
+    for(int i=0;i<n;i++)
+    {
+        rank[i]=1;              /* 初始化所在集合的节点个数 */
+        p[i]=i;
+        visit[i]=0;
+        ancestor[i]=-1;          /* 把所有节点的祖先节点先初始化为-1 */
+        tree[i].clear();
+        request[i].clear();
+    }
+}
+
+/* 返回并查集的根节点 */
+int find(int t)
+{
+    if(p[t]==t)
+        return t;
+    return p[t]=find(p[t]);     /* 在查询的过程中对并查集进行优化，使
+                                 * 用路径压缩 */
+}
+/* 合并两个集合，使用启发算法，将深度较小的树指到深度较大的树的根上，
+ * 可以防止树的退化 */
+int unionSet(int a, int b)
+{
+    int m=find(a);              /* 首先获取m,n所在集合的根元素 */
+    int n=find(b);
+    if(m==n)
+        return 0;
+    if(rank[m]>=rank[n])        /* 判断两个集合的rank值，并把值小的并
+                                 * 到值大的集合中 */
+    {
+        p[n]=m;
+        rank[m]+=rank[n];
+    }
+    else
+    {
+        p[m]=n;
+        rank[n]+=rank[m];
+    }
+    return 1;
+}
+/* 深度优先遍历+并查集 */
+void LCS(int t)
+{
+    ancestor[t]=t;
+    for(int i=0;i<(int)tree[t].size();i++)
+    {
+        LCS(tree[t][i]);
+        unionSet(tree[t][i],t);
+        ancestor[p[t]]=t;
+    }
+    visit[t]=1;
+    for(int i=0;i<(int)request[t].size();i++)
+        if(visit[request[t][i]]==1)
+            printf("%d %d  %d\n", t, request[t][i],ancestor[p[request[t][i]]]); /* 这里需要知道request[t][i]所在集合的祖先节点 */
+}
+
+int main()
+{
+    freopen("in","r",stdin);
+    int n,t,r;                  /* 分别表示节点个数、边的个数和询问个
+                                 * 数 */
+    int a,b;
+    scanf("%d%d%d",&n,&t,&r);
+    init(n);                    /* 初始化结构 */
+    while(t--)                  /* 读入树结构 */
+    {
+        scanf("%d%d",&a,&b);
+        tree[a].push_back(b);
+    }
+    while(r--)                  /* 读入询问并存入对应的列表中 */
+    {
+        scanf("%d%d",&a,&b);
+        request[a].push_back(b);
+        request[b].push_back(a);
+    }
+    LCS(0);
+    return 0;
+}
+#+END_EXAMPLE
+*** 求最大子序列和
+问题描述：有一串数字，可正可负也可为0，连续两个或多个数字组成了一个子
+序列，每个子序列都有一个和，求出所有子序列中和最大的一个。
+例如输入的数组为3 6 -7 -1 4 3 -2 -5 10 -3,则和最大的子序列为3 6 -7 -1
+4 3 -2 -5 10,最大和为11
+
+分析： 这个问题容易想到的方法是计算出任意两点之间的序列和，取出它们中的最大值，
+时间复杂度为O(n^2)
+
+程序员编程艺术上提到一种二分的方法，将序列分成左右两个部分，分别计算出
+左右两个部分的连续最长子序列，再求出端点分别在左右两边的连续最长子序列，
+它们三个中的最大值就是整个序列上的最长连续子序列，时间复杂度是O(nlogn)
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#define M 100
+
+int a[M];
+
+int max_sum(int left,int right)
+{
+    int leftmax,rightmax;       /* 左边和右边的最大值 */
+    int leftside,rightside;     /* 暂时从中间到左边和右边的最大值 */
+    int leftsidemax, rightsidemax; /* 记录从中间到左边和右边的最大值 */
+
+    if(left==right)
+
+        return a[left]>0?a[left]:0;
+    leftside=leftsidemax=0;
+    rightside=rightsidemax=0;
+
+    int middle=(left+right)/2;
+    leftmax=max_sum(left,middle);
+    rightmax=max_sum(middle+1,right);
+
+    /* 求出从中间到左边的最大连续和 */
+    for(int i=middle;i>=left;i--)
+    {
+        leftside+=a[i];
+        if(leftside>leftsidemax)
+            leftsidemax=leftside;
+    }
+    /* 求出从中间到右边的最大连续和 */
+    for(int i=middle+1;i<=right;i++)
+    {
+        rightside+=a[i];
+        if(rightside>rightsidemax)
+            rightsidemax=rightside;
+    }
+    int maxside=leftmax>rightmax?leftmax:rightmax;
+    int middleside=leftsidemax+rightsidemax;
+    int max=maxside>middleside?maxside:middleside;
+    return max;
+}
+
+int main()
+{
+    freopen("in","r",stdin);
+    int n;
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+    int max = max_sum(0, n-1);
+    printf("%d\n", max);
+}
+#+END_EXAMPLE
+
+将数字存放在数组中，下标从0到n-1，假如已经求出以i为末尾的最大连续子序
+列之和为sum[i],则如果要求以i+1为结尾的最大连续子序列的和sum[i+1],有
+sum[i+1]=sum[i]>0 ? sum[i]+a[i+1] : a[i+1];找出它们中的最大值
+#+BEGIN_EXAMPLE
+int a[M];
+int sum[M];
+
+int max_sum(int left, int right)
+{
+    int max=0;            #考虑全是负数的情况改为max=a[left]
+    sum[left]=a[left];
+    for(int i=left+1;i<=right;i++)
+    {
+        sum[i]=sum[i-1]>0?sum[i-1]+a[i]:a[i];
+        if(sum[i]>max)
+            max=sum[i];
+    }
+    return max;
+}
+#+END_EXAMPLE
+
+条件：只有1M可用内存空间，磁盘空间足够大
+
+归并排序：但是题目限制只有1M可用内存空间
+位图：由于题目的特殊性每个数都不超过10^7，并且没有重复整数，可以用10^7
+位来表示每个整数，如果存在这个整数就把改为置为1，否则置为0，然后再顺序
+遍历数组，检测每一位是否存在，如果存在就打印输出，这样最后所有数都有序。
+但是使用的内存空间为10^7/8，大概是1.25MB，因此需要分两次读取数据，第
+一次读取小于10^7/2的整数，有序输出，第二次再读取大于10^7的整数，内存也
+够用。
+
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <stdlib.h>
+#define width 5000000
+
+int bit[(width>>5)+1];          /* 注意:移位操作符优先级比算术操作符低 */
+
+void clear(int i)
+{
+    bit[i>>5] &= ~(1<<(i%32));
+}
+
+void set(int i)
+{
+    bit[i>>5] |= 1 <<(i & 31);
+}
+int test(int i)
+{
+    return bit[i>>5]&(1<<(i & 31));
+}
+int main()
+{
+    FILE * fpin, *fpout;
+    int d;
+    fpin=fopen("in","r");
+    if(fpin==NULL)
+        exit(1);
+    for(int i=0;i<width;i++)
+        clear(i);
+    /* 由于内存容量限制，将磁盘文件分两批排序，第一匹先排序前半部分 */
+    while(fscanf(fpin,"%d", &d)!=EOF)
+        if(d < width)
+            set(d);
+
+    fpout=fopen("out","w");
+    if(fpout==NULL)
+        exit(1);
+
+    for(int i=0;i<width;i++)
+        if(test(i))
+            fprintf(fpout,"%d\n",i);
+
+    int length=fseek(fpin,0,SEEK_SET);
+    if(length)                  /* 定位正确返回0 */
+        exit(1);
+
+    for(int i=0;i<width;i++)
+        clear(i);
+    while(fscanf(fpin,"%d", &d)!=EOF)
+        if(d >= width && d < 10000000)
+            set(d-width);
+
+    for(int i=0;i<width;i++)
+        if(test(i))
+            fprintf(fpout,"%d\n",i+width);
+    return 0;
+}
+#+END_EXAMPLE
+*** 给定a b两个文件，各存在50亿个URL，每个URL各占64字节，内存限制是4G，让你找出a b文件中共同的URL
+看到要找两个文件的共同元素，想到要使用Hashset,把一个文件中的内容映射入
+Hashset中，然后遍历另外一个文件的每一个元素，判断是否在Hashset中存在，
+如果存在，表明是两个文件共有的。
+但是这种方法需要内存容量大约为5G * 64 = 320G,显然无法放入内存，一个通
+用的方法是想办法把一个不能放入内存中的大文件分成小文件，然后分别对小文
+件进行处理之后再进行合并。
+
+至于如何把大文件分成小文件，通常采用hash的方法，对于这题使用hash() % 1000把大文件分为1000个小文件，每个小文件的大小大概为330MB,使用同样的hash()把a b分别分
+为1000个小文件，这样a b中共同出现的URL就出现在1000对小文件中，不对应的小文件，不可能存在相同的URL
+
+用hashset分别找出这1000对小文件中相同的URL即可
+
+*** 积水问题
+有这样一块土地，可以被划分为M*N块正方形小块，每块面积是一平方英寸，第i行第j列的小块可以表示成P(i,j)，这块土地高低不平，每一小块地P(i,j)都有自己的高度H(i,j),一场倾盆大雨后，由于这块地地势高低不同，许多低洼的地方都积存了不少降水，如果已经知道了这块土地的详细信息，求出它最多能积存多少立方英寸的降水
+分析：先分析一些比较容易求出的格子，例如边界，边界上积水上一定为0，从边
+界上最低的格子x开始，它就像是一个有洞的水桶，桶的容量取决于最低的那个
+洞，假设这个格子的高度为h，那么它相邻格子y的水位不会超过h，如果y的高度
+小于h，那么y的水位将是h，可以继续对y周围的格子进行灌水，直到这块水全部
+被高度大于h的地势包围起来，实际上是把高度大于h的地方和已经确定水位的地
+方看做是障碍物，然后从格子x开始做一次floodfill,则填好的格子水位全是h，
+并且这个格子周围的土地全部应该标记为已访问过，并把这些位置放入堆中。这
+样每次从堆中取出一个位置最低的点，处理它周围的点，直到堆的大小减为0。
+每个格子最多被访问一次，每次调整堆的操作时间复杂度为O(logmn),因此总的
+时间复杂度为O(mnlogmn)
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <string.h>
+#define M 10
+#define N 10
+
+int map[M][N];                  /* 存储每块正方形的高度 */
+int flag[M][N];                 /* 表示禁止积水 */
+int treenode=0;                 /* 表示堆中节点个数 */
+int water=0;                    /* 记录注入的水量 */
+int m,n;
+struct node
+{
+    int i,j;
+    int height;                 /* 表示土地的高度 */
+    node(){}
+    node(int a, int b, int h){
+        i=a;
+        j=b;
+        height=h;
+    }
+};
+
+struct node tree[M*N];          /* 用来表示堆中节点 */
+
+void swap(node * a, node * b)
+{
+    node t = *a;
+    *a=*b;
+    *b=t;
+}
+void siftdown(int i)
+{
+    int c=i;
+    if(2*i<=treenode)
+        c=2*i+1;
+    if(2*i+1<treenode && tree[2*i+1].height<tree[c].height)
+        c=2*i+1;
+    if(tree[i].height>tree[c].height)
+    {
+        swap(&tree[i],&tree[c]);
+        siftdown(c);
+    }
+}
+void siftup(int i)
+{
+    while(i/2>0)
+    {
+        if(tree[i].height<tree[i/2].height)
+            swap(&tree[i],&tree[i/2]);
+        i/=2;
+    }
+}
+
+void createTree()
+{
+    for(int i=treenode/2;i>0;i--)
+        siftdown(i);
+}
+
+/* 返回堆顶最小元素，并用最后一个元素替换，调整堆 */
+node deleteNode()
+{
+    struct node temp=tree[1];
+    tree[1]=tree[treenode--];
+    siftdown(1);
+    return temp;
+}
+/* 插入节点 */
+void insert(node t)
+{
+    tree[++treenode]=t;
+    siftup(treenode);
+}
+
+void slove()
+{
+    /* 每次从堆中取出一个节点，并处理它周围的节点，直到堆的大小为0 */
+    while(treenode>0)
+    {
+        node t = deleteNode();
+        int a = t.i;
+        int b = t.j;
+        /* 处理上下左右四个方向的点 */
+        if(a-1>=1 && !flag[a-1][b])
+        {
+            if(map[a-1][b]<t.height)
+            {
+                water+=t.height-map[a-1][b];
+                map[a-1][b]=t.height;
+            }
+            /* 对位置进行标记 */
+            flag[a-1][b]=1;
+            insert(node(a-1,b,map[a-1][b]));
+        }
+        if(a+1<=m && !flag[a+1][b])
+        {
+            if(map[a+1][b]<t.height)
+            {
+                water+=t.height-map[a+1][b];
+                map[a+1][b]=t.height;
+            }
+            flag[a+1][b]=1;
+            insert(node(a+1,b,map[a+1][b]));
+        }
+        if(b-1>=1 && !flag[a][b-1])
+        {
+            if(map[a][b-1]<t.height)
+            {
+                water+=t.height-map[a][b-1];
+                map[a][b-1]=t.height;
+            }
+            flag[a][b-1]=1;
+            insert(node(a,b-1,map[a][b-1]));
+        }
+        if(b+1<=n && !flag[a][b+1])
+        {
+            if(map[a][b+1]<t.height)
+            {
+                water+=t.height-map[a][b+1];
+                map[a][b+1]=t.height;
+            }
+            flag[a][b+1]=1;
+            insert(node(a,b+1,map[a][b+1]));
+        }
+    }
+}
+
+int main()
+{
+    freopen("in","r",stdin);
+    memset(flag,0,sizeof(flag));
+    scanf("%d%d",&m,&n);
+    for(int i=1;i<=m;i++)
+        for(int j=1;j<=n;j++)
+            scanf("%d",&map[i][j]);
+    for(int i=1;i<=m;i++)
+    {
+        insert(node(i,1,map[i][1]));
+        flag[i][1]=1;
+        insert(node(i,n,map[i][n]));
+        flag[i][n]=1;
+    }
+
+    for(int i=2;i<n;i++)
+    {
+        insert(node(1,i,map[1][i]));
+        flag[1][i]=1;
+        insert(node(m,i,map[m][i]));
+        flag[m][i]=1;
+    }
+    slove();
+    printf("%d\n", water);
+    return 0;
+}
+#+END_EXAMPLE
+
+*** Bloom filter/Bitmap
+使用范围：实现数据字典，进行数据的判重，集合求交集
+基本原理：基于bitmap，bitmap中用一个bit位来表示一个数字，而Bloom
+filter是用多个bit位是否同时存在来判定元素是否存在。它的实现用到了位数
+组和k个hash函数，存入一个元素时，用k个hash函数分别求值，并将响应的bit
+位置1，当查找的时候，根据k个hash值，到k个位置查找，如果k个位置都存在，
+表明该元素存在，如果有一个bit位不存在表明元素不存在。很明显这个过程并
+不保证查找结果是百分百正确。同时它也不支持删除一个已经插入的关键字，因
+为该关键字对应的位会牵动其它的关键字，一个简单的改进是使用counting
+bloom filter,用一个counter数组来替换位数组，就可以支持删除了。
+
+还有一个比较重要的问题，如何根据输入元素个数n，确定位数组m的大小以及
+hash函数个数k
+
+当hash函数个数k=(ln2)*(m/n)时错误率最小，在错误率不大于E的情况下，m至
+少要等于n*lg(1/E)才能表示任意n个元素的集合，因为要保证bit数组里至少一
+半为0，则应该满足m>=n*lg(1/E) * lge,大概就是n*lg(1/E)的1.44倍(lg表示以
+2为底的对数)
+
+举个例子，我们假设错误率为0.01，则此时m应该大概是n的13倍，k大概是8个
+
+注意m是以bit为单位，而n则是以元素个数为单位，通常单个元素的长度都是有
+很多bit的，所以使用Bloom filter通常很节省内存
+
+扩展：Counting bloom filter将数组中的每一位扩展为一个counter，从而支持
+了元素的删除操作，而Spectral Bloom Filter将其与几何元素的出现次数惯量，
+SBF采用counter中的最小值来近似表示元素出现的频率
+
+** STL
+*** 排序
+所有的sort算法的参数都需要输入一个范围[begin, end),这里使用的迭代器都
+需要是随机迭代器，也就是说可以随机访问的迭代器，如it+n什么的(partition
+和stable_partition除外)
+
+如果需要自己定义比较函数，可以把定义好的仿函数作为参数传入，每种算法都
+支持比较函数。
+
+| 函数名            | 功能描述                       |
+|-------------------+--------------------------------|
+| sort              | 对给定区间所有元素进行排序     |
+| stable_sort       | 对给定区间所有元素进行稳定排序 |
+| partial_sort      | 对给定区间所有元素部分排序     |
+| partial_sort_copy | 对给定区间复制并排序           |
+| nth_element       | 找出给定区间某个位置对应的元素 |
+| is_sorted         | 判断一个区间是否已经排好序     |
+| partition         | 使得符合某个条件的元素放在前面 |
+| stable_partition  | 相对稳定的使符合某个条件的元素放在前面            |
+
+**** 全排序
+
+vector<int> vect;
+sort(vect.begin(),vect.end());
+相当于调用
+sort(vect.begin(),vect.end(),less<int>>);
+
+上述例子中系统自己为sort提供了less函数，在STL中还提供了其他仿函数
+| 名称          | 功能描述 |
+|---------------+----------|
+| equal_to      | 相等     |
+| not_equal_to  | 不相等   |
+| less          | 小于     |
+| greater       | 大于     |
+| less_equal    | 小于等于 |
+| greater_equal | 大于等于     |
+
+不要直接写仿函数的名字要写其重载的()函数, less<int>() greater<int>()
+
+在类内部重载<符号
+bool operator<(const myclass & m)const{
+    return first < m.first;
+}
+
+在外部定义两个对象间的比较关系
+bool less_second(const myclass & a, const myclass & b){
+    return a.second < b.second;
+}
+
+sort采用的是快速排序算法，但是不是简单的快速排序，而是结合内插排序算法，
+可以保证很好的平均性能，复杂度为nlog(n),stable_sort采用的是归并排序，
+分派足够内存，其算法复杂度为nlog(n),否则其复杂度为nlog(n) * log(n)
+
+**** 局部排序 partial_sort
+局部排序其实是为了减少不必要的操作而提供的排序方式
+当需要取一系列数中前5个最小数，可以采用全排序，然后取前5个，也可以使用
+部分排序
+stable_sort(vect.begin()), vect.end(), less<student>());
+替换为：
+partial_sort(vect.begin(), vect.begin() + 5, vect.end(),
+less<student>());
+
+partial_sort采用堆排序，它在任何情况下的复杂度都是nlog(n)
+partial_sort(begin,middle,end);
+begin和middle之间的元素有序，但是不包括middle
+
+**** 指定元素排序 nth_element
+班上有10个学生，如何知道排在倒数第4名的学生
+如果要满足上述要求，可以采用sort排好序，然后取第4名，更好的方法时使用
+partial_sort只排前4位，然后得到第4位，使用nth_element会更加方便
+
+nth_element(vect.begin(), vect.begin() + 3, vect.end());
+因为要取第4大的数，所以是vect.begin() + 3
+
+**** 分类算法 partition
+partition和stable_partition
+这两个函数并不是用来排序的，算做是分类算法
+partition函数的作用是：将容器根据程序员的要求 划分成两个部分，属于整理算法。
+partition(first,last,compare);//first为容器的首迭代器，last为容器的末迭代器，compare为比较函数（不可略写）。
+函数返回值是指向范围中第一个不满足指定条件的迭代器
+#+BEGIN_EXAMPLE
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool comp(int value)
+{
+    return value > 20;
+}
+
+int main()
+{
+    vector<int> vect;
+    vector<int>::iterator it,at;
+    vect.push_back(10);
+    vect.push_back(32);
+    vect.push_back(12);
+    vect.push_back(51);
+    vect.push_back(8);
+    vect.push_back(10);
+    vect.push_back(21);
+    vect.push_back(40);
+    vect.push_back(3);
+    at=stable_partition(vect.begin(),vect.end(), comp);
+
+    for(it=vect.begin();it!=at;it++)
+        cout<<*it<<endl;
+
+    cout<<"hello"<<endl;
+
+    for(it=at;it!=vect.end();it++)
+        cout<<*it<<endl;
+
+    return 0;
+}
+#+END_EXAMPLE
+
+注意这里需要指定自定义的comp函数，它使得数值必须满足一定的条件
+
+其中stable_partition函数保证了数字的顺序和原来一样
+
+**** sort和容器
+STL中标准容器主要vector, list, deque, string, set, multiset, map,multimay， 其中set, multiset, map, multimap都是以树结构的方式存储其元素。因此在这些容器中，元素一直是有序的。
+
+这些容器的迭代器类型并不是随机型迭代器，因此，上述的那些排序函数，对于这些容器是不可用的。上述sort函数对于下列容器是可用的：
+
+vector
+string
+deque
+
+如果你自己定义的容器也支持随机型迭代器，那么使用排序算法是没有任何问题的。
+
+对于list容器，list自带一个sort成员函数list::sort(). 它和算法函数中的
+sort差不多，但是list::sort是基于指针的方式排序，也就是说，所有的数据移
+动和比较都是此用指针的方式实现，因此排序后的迭代器一直保持有效（vector
+中sort后的迭代器会失效).
+
+c语言中的qsort和这里的sort是一样的都采用快速排序，一下排序算法效率从高
+到低(耗时从小到大)
+1. partition
+2. stable_partition
+3. nth_element
+4. partial_sort
+5. sort
+6. stable_sort
+
+若需对vector, string, deque, 或 array容器进行全排序，你可选择sort或stable_sort；
+若只需对vector, string, deque, 或 array容器中取得top n的元素，部分排序partial_sort是首选.
+若对于vector, string, deque, 或array容器，你需要找到第n个位置的元素或者你需要得到top n且不关系top n中的内部顺序，nth_element是最理想的；
+若你需要从标准序列容器或者array中把满足某个条件或者不满足某个条件的元素分开，你最好使用partition或stable_partition；
+若使用的list容器，你可以直接使用partition和stable_partition算法，你可以使用list::sort代替sort和stable_sort排序。若你需要得到partial_sort或nth_element的排序效果，你必须间接使用。正如上面介绍的有几种方式可以选择。
+
+** 面试资料
+*** binder简介
+client server services manager
+
+server向services manager注册服务，client向services manager发出请求，services manager返回给
+客户端一个binder的引用
+
+android启动过程中，会生成一个services manager进程，它通过ioctl向binder进行注册，以后每生成
+一个新的进程都会拥有一个默认的句柄指向services manager，默认值是0
+
+ServiceManager进程通过ioctl告诉内核自己是ServiceManager，这时驱动会为它建立一个Binder节点
+。假设某个服务想要被系统内其它进程访问到，那它必须先去ServiceManager注册，他知道
+ServiceManager的句柄是0，所以通过系统调用告诉Binder驱动他想要和ServiceManager通信，驱动看
+到他引用的是0就知道他想访问ServiceManager，就会为该Service建立一个指向ServiceManager的
+Binder节点的Binder引用。
+这样Service就可以向ServiceManager发数据，ServiceManager也可以通过刚刚获得的句柄主动向
+service发数据，但ServiceManager获得的句柄并不止这个用处。ServiceManager分析收到的数据包里
+的其它数据，知道对方service想要注册成服务，就调用自身的addService方法，把对方发过来的服务
+名和接受到的handle值填入一张映射表，服务名和handle值一一对应。
+
+注册成功以后，servicemanager就可以主动向Services发送消息了。
+
+当某个Client通过名字向ServiceManager请求获得某个Service的句柄时，他们的建立通信的过程和前
+面Service与ServiceManager的过程一样，ServiceManager得到数据中的服务名，调用自己的
+getService得到指定服务的句柄，并返回给客户端，客户端获得了服务的句柄之后就可以和server通信
+了
+*** 启动过程
+init进程
+解析init.rc文件
+启动本地服务 zygote servicesamanger mediaserver
+
+AndroidRuntime.c
+zygote:
+建立java运行环境
+建立java虚拟机
+创建socket
+预加载类和资源
+创建systemserver
+轮询监听socket   接收ActivityManangerService的请求，Fork应用程序
+
+systemserver:
+启动java服务  并且注册到ServiceManager上
+
+ActivityManagerService.systemReady()
+startHomeActivityLocked()
+*** 设计模式
+迪米特法则：开放封闭原则，对扩展开放对修改封闭。  面向接口编程
+里氏代换原则：一个软件实体中，可以把父类都替换成它的子类，程序行为没有变化
+
+创建模式、结构模式、行为模式
 
 
-* 3. 一些热点信息收集
-** redis
-*** redis备忘录
-redis是一个带持久化的高速key-value存储系统。
+单例模式：在整个应用中仅含有一个该类的实例
 
-特点是：热数据放在内存里面实现高速访问，支持可配置的数据持久化，支持主从同步，不依赖任何第三方库（包括通讯层），自己实现了类似virtual memory的机制，代码量不大。
+工厂模式根据抽象程度的不同分为三种，简单工厂模式、工厂方法模式、抽象工厂模式
 
-和mysql相比，redis的读写速度要快很多。
+简单工厂模式：所有的该类对象都由一个工厂来生产
 
-和memcached相比，redis带有持久化和主从机制，不过redis重启比较慢。
+工厂方法模式：有四个要素。工厂接口、工厂实现、产品接口、产品实现。降低了耦合度，定义一个用
+于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。也就是说
+，工厂方法模式将简单工厂内部的逻辑判断移到了客户端来进行
 
-和bdb相比，redis的读写速度快一些、扩展性也相对好一些。
+抽象工厂模式：核心工厂不再负责具体对象的构造，而是根据传入的参数，返回一个对应的工厂对象，
+然后由该工厂对象来构造具体对象
 
-和mongodb相比，redis要简单得多。mongodb没有行级锁，性能特征很不相同；其实主要是是scheme less的数据库，和redis没有多少可比性。
+门面模式(外观模式)：感觉是Service层的一个翻版，为子系统中的一组接口提供一个一致的界面，此
+模式定义了一个高层接口
 
-redis是一个很有潜力的存储系统。目前最大的缺点是尚未有重量级的公司应用；我们不应该忘记cassandra的故事，看起来很美，但是twitter用了没几天就不用了。
+策略模式：策略模式指定一组算法，将每一个算法封装到具有公共接口的独立的类中，从而使它们可以
+相互替换。
 
-另外有谣言说redis的稳定性有问题。
+迭代器模式：提供一种方式访问容器对象中的各个元素，而又不需要暴露该对象的内部细节
+
+适配器模式：在原型不做任何改变的情况下，扩展了新的接口。可以采用继承或者聚合的方式来实现适
+配器模式
+
+装饰模式：为已有功能动态地添加更多功能的一种方式，I/O里用的最多
+具体实现
+#+BEGIN_EXAMPLE
+class A{
+   void insert(){
+        ....
+   }
+}
+
+class B{
+    private A a;
+    private AnotherObject o = new AnotherObject();
+    public B(A a){
+        this.a=a;
+    }
+
+    void insert(){
+         o.dosomething();
+         a.insert();
+    }
+
+    public static void main(String args[]){
+         A a = new A();
+         B b = new B(a);
+         b.insert();
+    }
+}
+在不改变原有类的情况下动态增加功能，并且将多出来的功能用对象封装起来
+#+END_EXAMPLE
+
+聚合表示一种弱的拥有关系，体现的是A对象可以包含B对象，但B对象不是A对象的一部分；合成则是一
+种强的拥有关系，体现了严格的部分和整体的关系，部分和整体的生命周期一样
+
+合成模式(组合模式)：将众多对象组合成树形结构
+
+观察者模式：一个Subject可以有多个Observer，Subject内部用一个变量存储了所有依附于它的
+Observer，当Subject状态发生改变的时候，就遍历通知所有观察者来自动更新自己
+
+原型模式：通过原型类克隆自身从而创建一个新的对象
+
+模版方法模式：先定义好逻辑处理的框架，然后将一些步骤放到子类中来实现，具体就是在一个抽象类
+中定义好框架，在具体子类中实现这些抽象方法，并且不同的子类有不同的实现
+
+享元模式：
+
+代理模式：不让客户端直接访问目标对象，而是通过一个代理，把客户端的请求通过该代理对象传递给
+目标对象
+
+责任链模式：在责任链模式中，很多对象由每一个对象对其下家的引用而接 起来形成一条链。请求在
+这个链上传递，直到链上的某一个对象决定处理此请求。客户并不知道链上的哪一个对象最终处理这个
+请。用户发出一个请求，同时有多个handler可以处理该请求，将这些handler连成一条链，请求沿着传
+递该请求，直到有一个对象处理它为止
+
+命令模式：将一个请求封装为一个对象，从而使你可用不同的请求对客户进行参数化
+
+调停者模式(中介者模式)：用一个中介对象来封装一系列的对象交互，中介者使各对象不需要显示的互
+相调用，从而使其耦合松散
+
+备忘录模式：在不破坏封装性的前提下，捕获一个对象的内部状态，并在对象之外保存这个状态。这样
+以后就可以将该对象恢复到原先保存的状态
+
+单一职责原则：仅有一个可以引起对象发生变化的原因
+
+桥梁模式：
 
 
-那么目前对待redis的最好态度是什么呢？静观其变，看谁先吃螃蟹。这是“死道友莫死贫道”的意思。
+创建模式：用来创建对象的实例。如单例模式
+结构模式：用于帮助将多个对象组织成更大的结构，如适配器模式、桥接模式、组合器模式等
+行为模式：维护多个对象间复杂的逻辑关系，如命令行模式
 
-mysql、memcached和bdb都是久经考验的成熟系统，通常都能满足需求。
+*** hashset和hashmap的区别
+HashSet实现Set接口，由哈希表（实际上是一个HashMap实例）支持。它不保证set 的迭代顺序；特别是它不保证该顺序恒久不变。此类允许使用null元素。
 
-** ssl
-SSL是为网络通信提供安全及数据完整性的一种安全协议，TLS与SSL在传输层对
-网络连接进行加密。
-SSL使用RSA加密
+对于 HashSet 而言，它是基于 HashMap 实现的，HashSet 底层采用 HashMap 来保存所有元素，
+HashSet的绝大部分方法都是通过调用 HashMap 的方法来实现的，因此 HashSet 和 HashMap 两个集合在实现本质上是相同的
+
+对于HashSet中保存的对象，请注意正确重写其equals和hashCode方法，以保证放入的对象的唯一性
+
+注意HashMap是哈希表的链地址法实现，用key得到hash值，然后找到在数组中的相应位置，在链表中查找指定的key值，如果不存在就在链表头部插入
+
+*** +和append的区别
+两个字符串相加操作的时候，+号会被编译器优化成stringbuilder的append操作，stringBuffer的append也会被优化成 stringbuilder的append操作，使用两个string相加的时候会多创建两个对象，也没有append操作安全
+*** linux的通信方式
+File
+Signal
+Socket
+Message queue
+Pipe
+Named pipe
+Semaphore
+Shared memory
+Message passing
+Memory-mapped file
+
+*** session.get和session.load
+get不支持lazy,load支持lazy, get如果不存在数据,返回null,load如果不存在返回异常
+*** hibernate管理对象的生命周期
+transient Persistent Detached
+
+Transient save persist或者saveorupdate之后变成Persistent
+session关闭之后变成Detached状态
+*** 操作系统知识
+http://blog.csdn.net/hackbuteer1/article/details/6787354
+*** STL知识
+**** hash_map
+http://blog.csdn.net/sdhongjun/article/details/4517325
+**** hash_set
+http://blog.csdn.net/morewindows/article/details/7330323
+*** sed命令以及对应的perl命令
+sed命令替换，删除
+比如，要将目录/modules下面所有文件中的zhangsan都修改成lisi，这样做：
+sed -i 's/zhangsan/list/g' `grep zhangsan -rl /modules`
+
+-i表示inplace edit，就地修改文件
+-r表示搜索子目录
+-l表示输出匹配的文件名
+
+（1）sed 'y/1234567890/ABCDEFGHIJ/' test_sed
+sed 'y/1234567890/ABCDEFGHIJ/' filename
+ABCDEFGHIJ
+BCDEFGHIJA
+CDEFGHIJAB
+DEFGHIJABC
+注意变换关系是按两个list的位置对应变换
+其中：test_sed的内容是：
+1234567890
+2345678901
+3456789012
+4567890123
+
+(2)替换每行所有匹配
+sed 's/01/Ab/g' test_sed
+1234567890
+23456789Ab
+3456789Ab2
+456789Ab23
+注意：第一行的0，1没有分别替换为A,b
 
 
-* 4. Android编译框架
+删除：d命令
+     $ sed '2d' example-----删除example文件的第二行。
+     $ sed '2,$d' example-----删除example文件的第二行到末尾所有行。
+     $ sed '$d' example-----删除example文件的最后一行。
+     $ sed '/test/'d example-----删除example文件所有包含test的行。
+
+替换：s命令
+     $ sed 's/test/mytest/g' example-----在整行范围内把test替换为mytest。如果没有g标记，则只有每行第一个匹配的test被替换成mytest。
+     $ sed -n 's/^test/mytest/p' example-----(-n)选项和p标志一起使用表示只打印那些发生替换的行。也就是说，如果某一行开头的test被替换成mytest，就打印它。
+     $ sed 's/^192.168.0.1/&localhost/'example-----&符号表示替换换字符串中被找到的部份。所有以192.168.0.1开头的行都会被替换成它自已加localhost，变成192.168.0.1localhost。
+     $ sed -n 's/\(love\)able/\1rs/p' example-----love被标记为1，所有loveable会被替换成lovers，而且替换的行会被打印出来。
+     $ sed 's#10#100#g' example-----不论什么字符，紧跟着s命令的都被认为是新的分隔符，所以，“#”在这里是分隔符，代替了默认的“/”分隔符。表示把所有10替换成100。
+
+选定行的范围：逗号
+     $ sed -n '/test/,/check/p' example-----所有在模板test和check所确定的范围内的行都被打印。
+     $ sed -n '5,/^test/p' example-----打印从第五行开始到第一个包含以test开始的行之间的所有行。
+     $ sed '/test/,/check/s/$/sed test/' example-----对于模板test和west之间的行，每行的末尾用字符串sed test替换。
+
+多点编辑：e命令
+$ sed -e '1,5d' -e 's/test/check/'example-----(-e)选项允许在同一行里执行多条命令。如例子所示，第一条命令删除1至5行，第二条命令用check替换test。命令的执行顺序对结果有影响。如果两个命令都是替换命令，那么第一个替换命令将影响第二个替换命令的结果。
+     $ sed --expression='s/test/check/' --expression='/love/d' example-----一个比-e更好的命令是--expression。它能给sed表达式赋值。
+
+从文件读入：r命令
+     $ sed '/test/r file' example-----file里的内容被读进来，显示在与test匹配的行后面，如果匹配多行，则file的内容将显示在所有匹配行的下面。
+
+写入文件：w命令
+     $ sed -n '/test/w file' example-----在example中所有包含test的行都被写入file里。
+
+追加命令：a命令
+     $ sed '/^test/a\\--->this is a example' example<-----'this is a example'被追加到以test开头的行后面，sed要求命令a后面有一个反斜杠。
+
+插入：i命令 $ sed '/test/i\\
+new line
+-------------------------' example
+如果test被匹配，则把反斜杠后面的文本插入到匹配行的前面。
+下一个：n命令
+     $ sed '/test/{ n; s/aa/bb/; }' example-----如果test被匹配，则移动到匹配行的下一行，替换这一行的aa，变为bb，并打印该行，然后继续。
+
+变形：y命令
+     $ sed '1,10y/abcde/ABCDE/' example-----把1--10行内所有abcde转变为大写，注意，正则表达式元字符不能使用这个命令。
+
+退出：q命令
+     $ sed '10q' example-----打印完第10行后，退出sed。
+
+保持和获取：h命令和G命令
+$ sed -e '/test/h' -e '$Gexample-----在sed处理文件的时候，每一行都被保存在一个叫模式空间的临时缓冲区中，除非行被删除或者输出被取消，否则所有被处理的行都将打印在屏幕上。接着模式空间被清空，并存入新的一行等待处理。在这个例子里，匹配test的行被找到后，将存入模式空间，h命令将其复制并存入一个称为保持缓存区的特殊缓冲区内。第二条语句的意思是，当到达最后一行后，G命令取出保持缓冲区的行，然后把它放回模式空间中，且追加到现在已经存在于模式空间中的行的末尾。在这个例子中就是追加到最后一行。简单来说，任何包含test的行都被复制并追加到该文件的末尾。
+
+保持和互换：h命令和x命令
+     $ sed -e '/test/h' -e '/check/x' example -----互换模式空间和保持缓冲区的内容。也就是把包含test与check的行互换。
+
+      7. 脚本
+
+Sed脚本是一个sed的命令清单，启动Sed时以-f选项引导脚本文件名。Sed对于脚本中输入的命令非常挑剔，在命令的末尾不能有任何空白或文本，如果在一行中有多个命令，要用分号分隔。以#开头的行为注释行，且不能跨行。
+
+     8. 小技巧
+
+     在sed的命令行中引用shell变量时要使用双引号，而不是通常所用的单引号。下面是一个根据name变量的内容来删除named.conf文件中zone段的脚本：
+     name='zone\ "localhost"'
+sed "/$name/,/};/d" named.conf
+
+sed -i "s/oldstring/newstring/g" `grep oldstring -rl yourdir`
+
+例如：替换/home下所有文件中的www.itbbs.cn为chinafar.com
+
+sed -i "s/www.itbbs.cn/chinafar.com/g" `grep www.itbbs.cn -rl /home`
+
+二、下面这条命令：
+perl -pi -e 's|ABCD|Linux|g' `find ./ -type f`
+将调用perl执行一条替换命令，把find命令找到的所有文件内容中的ABCD替换为Linux
+
+find ./ -type f
+此命令是显示当前目录下所有的文件
+
+上面的“s|ABCD|Linux| g”是perl要执行的脚本，即把所有ABCD替换为Linux
+如果不写最后的那个g，“s|ABCD|Linux| ”将只替换每一行开头的ABCD
+
+
+当编辑指令(参照[section2.2])在命令列上执行时,其前必须加上选项-e。其命令格式如下:
+
+sed-e'编辑指令1'-e'编辑指令2'...文件档
+
+其中,所有编辑指令都紧接在选项-e之後,并置於两个"'"特殊字元间。另外,命令上编辑指令的执行是由
+
+左而右。
+
+一般编辑指令不多时,使用者通常直接在命令上执行它们。
+
+例如,删除yel.dat内1至10行资料,并将其馀文字中的"yellow"字串改成"black"字串。此时,可将编辑指令直接在命令上执行,其命令如下:
+
+sed-e'1,10d'-e's/yellow/black/g'yel.dat
+
+在命令中,编辑指令'1,10d'(解[5])执行删除1至10行资料;编辑指令's/yellow/black/g'(解[6]),
+
+"yellow"字串替换(substuite)成"black"字串。
+
+2.2sed的编辑指令
+
+sed编辑指令的格式如下:
+
+[address1[,address2]]function[argument]
+
+其中,位址参数address1、address2为行数或regularexpression字串,表示所执行编辑的资料行;函数参
+
+数function[argument]为sed的内定函数,表示执行的编辑动作。
+
+下面两小节,将仔细介绍位址参数的表示法与有哪些函数参数供选择。
+
+2.2.1位址(address)参数的表示法
+
+实际上,位址参数表示法只是将要编辑的资料行,用它们的行数或其中的字串来代替表示它们。下面举几个例子
+
+说明(指令都以函数参数d(参照[section4.2])为例):
+
+删除档内第10行资料,则指令为10d。
+
+删除含有"man"字串的资料行时,则指令为/man/d。
+
+删除档内第10行到第200行资料,则指令为10,200d。
+
+删除档内第10行到含"man"字串的资料行,则指令为10,/man/d。
+
+接下来,以位址参数的内容与其个数两点,完整说明指令中位址参数的表示法(同样也以函数参数d为例)。
+
+位址参数的内容:
+
+位址为十进位数字:此数字表示行数。当指令执行时,将对符合此行数的资料执行函数参数指示的编辑动作。例如,
+
+删除资料档中的第15行资料,则指令为15d(参照[section4.2])。其馀类推,如删除资料档中的第m行资料,则
+
+指令为md。
+
+位址为regularexpression(参照[附录A]):
+
+当资料行中有符合regularexpression所表示的字串时,则执行函数参数指示的编辑动作。另外,在
+
+regularexpression前後必须加上"/"。例如指令为/t.*t/d,表示删除所有含两"t"字母的资料行。其中,"."
+
+表示任意字元;"*"表示其前字元可重任意次,它们结合".*"表示两"t"字母间的任意字串。
+
+位址参数的个数:在指令中,当没有位址参数时,表示全部资料行执行函数参数所指示的编辑动作;当只有一位址
+
+参数时,表示只有符合位址的资料行才编辑;当有两个位址参数,如address1,address2时,表示对资料区执行
+
+编辑,address1代表起始资料行,address2代表结束资料行。对於上述内容,以下面例子做具说明。
+
+例如指令为
+
+d
+
+其表示删除档内所有资料行。
+
+例如指令为
+
+5d
+
+其表示删除档内第五行资料。
+
+例如指令为
+
+1,/apple/d
+
+其表示删除资料区,由档内第一行至内有"apple"字串的资料行。
+
+例如指令为
+
+/apple/,/orange/d
+
+其表示删除资料区,由档内含有"apple"字串至含有"orange"字串的资料行
+
+2.2.2有那些函数(function)参数
+
+下页表中介绍所有sed的函数参数(参照[chapter4])的功能。
+
+函数参数功能
+
+:label建立scriptfile内指令互相参考的位置。
+
+** 总结
+1. linux中如何查找一个命令 find whereis which locate
+
+find：在磁盘中搜索，功能最强大，但是由于要遍历搜索，效率比较低
+
+whereis：命令只能用于程序名的搜索,找不到的时候可能与搜索路径有关系
+
+locate：linux系统会将系统内的所有文件都记录在一个数据库文件中/var/lib/mlocate/mlocate.db，当使用locate时，不用搜索具体目录，而是从数据库中查找数据，但是该数据库并不是实时更新，默认情况下是一天更新一次，因此使用locate查找文件时，会找到已经被删除的文件，刚刚建立文件可能没有被数据库收录无法查找到，可以使用updatedb命令,手动更新数据库
+
+which：在PATH变量指定的路径中，搜索某个系统命令的位置，并且返回第一个搜索结果。也就是说，使用which命令，就可以看到某个系统命令是否存在，以及执行的到底是哪一个位置的命令
+
+简单的说：
+locate是在数据库中查找，数据库有一定的更新周期
+whereis可以找到可执行命令和man page
+find就是根据条件查找文件
+which通过PATH环境变量到该路径内查找可执行文件，基本功能是查找可执行文件
+
+2. 如何强制杀死一个进程
+kill -9 pid 或者
+kill -KILL
+可以强制杀死
+
+3. System.out.print中的out是PrintStream类型
+但是System.in里边的in是InputStream类型
+
+public class PrintStream extends FilterOutputStream implements Appendable, Closeable
+
+public class FilterOutputStream extends OutputStream
+
+可见PrintStream也是OutputStream类型
+-----------------------------------------------------------
+Scanner in = new Scanner(System.in);
+public Scanner(InputStream source) {
+        this(new InputStreamReader(source), WHITESPACE_PATTERN);
+}
+在scanner是用InputStreamReader对InputSteam进行了包装
+
+
+PrintWriter writer = new PrintWriter(System.out);
+public PrintWriter(OutputStream out) {
+	this(out, false);
+}
+
+public PrintWriter(OutputStream out, boolean autoFlush) {
+	this(new BufferedWriter(new OutputStreamWriter(out)), autoFlush);
+
+	// save print stream for error propagation
+	if (out instanceof java.io.PrintStream) {
+	    psOut = (PrintStream) out;
+	}
+}
+可见PrintWriter是用OutPutStreamWriter和BufferedWriter对OutputStream进行了封装
+
+4. string str = new String();编译不通过
+5. <?xml version="1.0" encoding="utf-8" ?>
+6. 查看路由表的两种方式
+   route -e
+   netstat -r
+
+7. $? 是显示最后命令的退出状态，0表示没有错误，其它表示有错误
+   $$是脚本运行的当前进程ID号
+   $@是传给脚本的所有参数列表
+   $#是传给脚本的参数个数
+   $0是脚本本身的名字
+   $1是传递给该shell脚本的第一个参数
+   $2是传递给该shell标本的第二个参数
+
+8.  查看内核版本命令
+    cat /proc/version
+    uname -a
+
+    查看linux版本号
+    cat /etc/issue
+    lsb_release -a
+
+9. 如何创建同名文件
+
+* 2. Android知识
 ** 编译框架基本概念
 Android编译系统是通过各种.mk文件和shell脚本建立的一个编译框架，这个框
 架基于基本的make概念。换句话说Android并没有建立新的编译脚本，而是建立
@@ -2484,17 +2334,8 @@ make：最常规的编译，通常用来编译整个Android源码
 mm：用来编译当前目录下的所有子项目
 mmm： 用来编译指定目录下的所有子项目
 
-
-* 5. 兴趣收集
-** 电影
-<<我如何度过这个夏天>>
-** 读书
-
-** 音乐
-
-
-* 6. 零碎笔记
-1.
+* 3. 零碎笔记
+1. c中
 char  一个字节
 int   四个字节
 long  四个字节
@@ -2504,18 +2345,25 @@ long long 八个字节
 
 3. printf("%.*s\n", len, s); 这里len限制了要输出的字符长度。
 
+4. 注意建堆的时间复杂度是O(n)不是O(nlogn)
 
-* 7. 工作计划
+5. jvm为了效率问题，并没有把long和double当做一个64位的长整形来使用，而
+   是把它分为两个32-bit，分别交付
+   x.high_word=value.high_word;
+   x.low_word=value.low_word;
+   一次存在一个线程设置了高位之后被另外一个线程交换出去，而改变了其高
+   位或者低位的值，存在同步问题，需要synchronized关键字
+
+* 4. 工作计划
 ** TODO 后缀树
 ** TODO 后缀数组
 ** TODO java webservice
 ** TODO Delvik虚拟机和Java虚拟机的区别 Android技术内幕
 ** TODO 一致性哈希表 布隆过滤器
-** TODO source . exec的区
 ** TODO select 和 poll有什么区别
 ** TODO RMI远程方法调用 SOAP简单对象访问协议 CORBA通用对象请求代理架构
 ** TODO JNDI java命名目录服务接口
 ** TODO AIDL
 ** TODO 迷宫生成算法http://maskray.me/posts/2012-11-02-perfect-maze-generation.html
 http://bbs.byr.cn/#!article/ACM_ICPC/23147
-** TODO trie树
+** TODO STL

@@ -3,6 +3,7 @@ Makefile
 README
 TAGS
 in
+out
 .gitignore
 /.git/
 !kong.org

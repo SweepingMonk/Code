@@ -1,0 +1,1519 @@
+* java编程
+** 深复制和浅复制
+⑴浅复制（浅克隆）
+被复制对象的所有变量都含有与原来的对象相同的值，而所有的对其他对象的引
+用仍然指向原来的对象。换言之，浅复制仅仅复制所考虑的对象，而不复制它所
+引用的对象。
+
+⑵深复制（深克隆）
+被复制对象的所有变量都含有与原来的对象相同的值，除去那些引用其他对象的
+变量。那些引用其他对象的变量将指向被复制过的新对象，而不再是原有的那些
+被引用的对象。换言之，深复制把要复制的对象所引用的对象都复制了一遍。
+
+2．Java的clone（）方法
+⑴clone方法将对象复制了一份并返回给调用者。一般而言，clone（）方法满足：
+①对任何的对象x，都有x.clone() !=x//克隆对象与原对象不是同一个对象
+②对任何的对象x，都有x.clone().getClass()= =x.getClass()//克隆对象与原对象的类型一样
+③如果对象x的equals()方法定义恰当，那么x.clone().equals(x)应该成立。
+
+⑵Java中对象的克隆
+①为了获取对象的一份拷贝，我们可以利用Object类的clone()方法。
+②在派生类中覆盖基类的clone()方法，并声明为public。
+③在派生类的clone()方法中，调用super.clone()。
+④在派生类中实现Cloneable接口。
+
+-----------------------------------------------------------
+
+浅拷贝：只复制一个对象，对象内部存在的指向其他对象数组或者引用则不复制
+深拷贝：对象，对象内部的引用均复制
+为了更好的理解它们的区别我们假设有一个对象A，它包含有2对象对象A1和对象A2
+
+[[file:pic/clone.jpg]]
+
+对象A进行浅拷贝后，得到对象B但是对象A1和A2并没有被拷贝
+[[file:pic/cloneA.jpg]]
+
+对象A进行深拷贝，得到对象B的同时A1和A2连同它们的引用也被拷贝
+[[file:pic/deepClone.jpg]]
+
+
+在理解了深拷贝和浅拷贝后，我们来看看Java的深拷贝和浅拷贝实现。
+java.lang.Object的clone（）方法默认是返回一个浅拷贝对象。因此如果要用clone（）方法实现一个深拷贝，我们必须对每个对象的clone（）方法进行特别实现。当对象层次复杂的时候，这样做不但困难而且浪费时间和容易出现错误，特别有时候你不但需要深拷贝同时你也对这个对象进行浅拷贝的时候，你会发现写这个clone（）方法真不是一个好的解决方案。
+
+除了clone()方法，还可以使用序列化来实现拷贝操作。把要拷贝的对象输出成
+byte array，然后再利用ObjectInputStream转换出新的对象
+
+#+BEGIN_EXAMPLE
+public class Test implements Serializable{
+
+	private String name = "hello";
+
+	protected Object clone(Object obj){
+		Object object = null;
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			ObjectOutputStream outputStream = new ObjectOutputStream(out);
+			outputStream.writeObject(obj);
+			outputStream.flush();
+			outputStream.close();
+
+			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+			ObjectInputStream inputStream = new ObjectInputStream(in);
+
+			object = inputStream.readObject();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return object;
+	}
+
+	public static void main(String args[]){
+		Test test = new Test();
+		Test one = (Test)test.clone(test);
+		one.name = "world";
+		System.out.print(test.name + " " + one.name);
+	}
+}
+#+END_EXAMPLE
+
+** 面向对象的三个基本特征
+封装、继承和多态
+封装：把客观的数据和操作封装成抽象的类，只暴露一些对外的接口，具体实现
+对外不可见。
+继承：通过继承，它可以使用现有类的所有功能，并在无需重新编写原来的类的情况下对这些功能进行扩展。
+多态：对于同一个调用，父类的不同子类执行不同的操作。
+多态的实现方式有两种，覆盖和重载。覆盖就是覆盖父类中的同名函数，参数
+列表和返回值都必须相同。重载就是存在多个同名函数，参数列表不同，包括参
+数个数不同或者参数类型不同，或者两者都不同，返回值随意。
+** 数据库操作
+**** 数据库连接
+注意在使用mysql时，要首先加载mysql驱动程序类
+Class.forName("com.mysql.jdbc.Driver");
+或者使用System.setProperty("jdbc.drivers", "com.mysql.jdbc.Driver");
+**** 数据库设计自增操作
+如果要在某一列上设置自增操作，该列绝大多数时间必须是主键
+#+BEGIN_EXAMPLE
+create table student(id int(4) primary key auto_increment,name
+varchar(20), age int)
+创建一个student表，并且设置主键自增
+
+对于自增字段插入时，如果指定要插入的列则不需要特殊处理，否则自增的列插
+入null即可
+insert into student values(null, 'xiaoming', 20)
+#+END_EXAMPLE
+
+**** 存储过程
+sql语句执行的时候要先编译，然后执行。存储过程（Stored Procedure）是一
+组为了完成特定功能的SQL语句集，经编译后存储在数据库中。用户通过指定存
+储过程的名字并给出参数（如果该存储过程带有参数）来执行它。
+
+数据库存储过程的实质就是部署在数据库端的一组定义代码以及SQL。
+
+mysql存储过程实现过程
+（1）MySQL存储过程是在“命令提示符”下创建的，所以首先应该打开“命令提示符”窗口。
+（2）进入“命令提示符”窗口后，首先应该登录MySQL数据库服务器，在“命令提示符”下输入如下命令：
+mysql –u用户名 –p用户密码
+（3）更改语句结束符号，本实例将语句结束符更改为“//”。代码如下：
+delimiter //
+说明:存储过程用以;作为结束符，而;又是命令行下sql语句的结束符，所以要进
+行更改
+（4）创建存储过程前应首先选择某个数据库。代码如下：
+use 数据库名
+（5）delimiter ;
+（6）创建存储过程。
+（7）通过call语句调用存储过程。
+
+存储过程示例:
+#+BEGIN_EXAMPLE
+create procedure pr_add
+(
+a int,
+b int
+)
+begin
+declare c int;
+-- 用来声明局部变量
+-- DECLARE仅被用在BEGIN ... END复合语句里，并且必须在复合语句的开头，在任何其它语句之前。
+if a is null then
+set a = 0;
+end if;
+if b is null then
+set b = 0;
+end if;
+set c = a + b;
+select c as sum;
+/*
+return c;
+不能在 MySQL 存储过程中使用。return 只能出现在函数中。
+*/
+end;
+
+#执行：
+set @a = 10;
+set @b = 20;
+call pr_add(@a, @b);
+
+create procedure pro_sort(a int)
+begin
+if a=0
+then
+select * from student order by age desc;   -- 降序排列
+else
+select * from student order by age asc;    -- 升序排列
+end if;
+end;
+
+#创建 MySQL 存储过程的简单语法为：
+
+create procedure 存储过程名字()
+(
+[in|out|inout] 参数 datatype
+)
+begin
+ySQL 语句;
+end;
+#+END_EXAMPLE
+删除存储过程
+DROP PROCEDURE  IF  EXISTS 存储过程名
+不能在一个存储过程中删除另一个存储过程，只能调用另一个存储过程
+
+**** 存储过程参数的三种形态
+见示例
+http://www.exampledepot.com/egs/java.sql/CallProcedure.html
+**** 数据库一些不常见概念
+CachedRowSet 被缓存的行集：允许与用户的整个交互过程中，断开连接，并且
+可以将修改的部分同步到数据库
+数据库元数据 DatabaseMetaData:可以获取数据库的一些信息，比如表格
+结果集元数据 RestltSetMetaData: 可以获取结果集的总列数，列名，列的宽度
+可滚动的结果集
+** 网络通信
+**** java获取本机地址的方式
+InetAddress.getByName("localhost") #结果总是127.0.0.1
+InetAddress.getLocalHost();     #得到本机的有效网络地址
+**** java中创建socke超时的解决办法
+Socket s = new Socket("time....", 13); #创建一个Socket连接
+s.setSoTimeOut(1000);                  #设置socket获取信息的超时时间
+
+这里有一个问题，创建socket也有一个时间，如果连接不到服务器就会一直阻塞，
+这里哟一个办法，先创建一个未连接的套接字，然后把该套接字连接到给定的地
+址。
+Socket s = new Socket();   #设置创建socket的超时时间
+s.connect(new InetSocketAddress("time...", 13), 1000);
+s.setSoTimeOut(1000;        #设置获取信息的超时时间
+** jndi java命名与目录接口
+java命名与目录接口，是java平台的一个标准扩展，提供一组接口、类和关于命名空间的概念。如同其它很多java技术一样，JDNI是provider-based的技术，暴露一个API和一个服务供应接口(SPI)。这意味着任何基于名字的技术都能通过JNDI而提供服务，只要JNDI支持这项技术。jdbc1.0使用DriverManager类来产生一个对数据源的连接，jdbc2.0使用DataSource对象代表了一个真正的数据源。根据DataSource的实现方法，数据源既可以是从关系数据库，也可以是电子表格，还可以是一个表格形式的文件，当一个DataSource对象注册到名字服务中，应用程序就可以通过名字服务获得DataSource对象并用它来产生一个与DataSource代表的数据源之间的连接。命名服务：提供名称-对象的映射目录服务：提供有关对象的信息，并提供定位这些对象所需的搜索工具。有许多命名和目录服务的实现并且到它们的接口是不同的。
+
+** URL和URI
+URI: A uniform resource identifier (URI) is a compact sequence of
+characters that identifier an abstract or physical resource.
+
+Uniform, 统一。统一可以使不同类型的资源标志在同一个上下文中使用，即使对这些资源的访问方式可能是不同的。
+Resource， 资源。自理的资源可以是任何东西，比如电子表格，图片，邮件服务等。
+identifier, 标志符。标识符用来唯一标志Web中的资源，可以使用名称来作为
+标志符，也可以用资源的地址作为标识符，前者称为URN(统一资源名称)，后者
+称为URL(统一资源定位符)，所以URN和URL是URI的子集。
+
+URL和URI的区别： URI确定一个资源，URL不但确定一个资源，也指定了资源的
+地址。
+比如下面的统一资源标志符确定因特网工程工作组RFC1738，但并没有说出在哪里才找得到这份资料
+urn:ietf:rfc:1738
+
+** Http Get/Post请求区别
+1. HTTP请求格式：
+   <request line>
+   <headers>
+   <blank line>
+   [<request body>]
+   在HTTP请求中，第一行是一个请求行，用来说请求的方式，要访问的资源，
+   HTTP版本。然后是首部小节header，用来说明服务器要使用的附加信息。首
+   部之后是一个空行，然后是请求主体。
+2. GET和POST
+   HTTP定义了与服务器交互的不同方法，最基本的方法是POST和GET。HTTP-GET
+   和HTTP-POST是使用HTTP的标准协议动词，用于编码和传送变量名/变量值对
+   参数，如果请求成功则返回应答。URL字符串中如果含有中文字符则用base64
+   加密。
+
+   POST方式，变量名/变量值不作为URL的一部分传送，而是放在实际的HTTP请
+   求消息内部被传送
+
+   浏览器请求时，默认是GET方式
+   GET一般用于获取/查询 资源信息，而POST一般用于更新 资源信息
+   #根据HTTP规范，GET用于信息获取，而且应该是安全的和幂等的。
+   1.所谓安全的意味着该操作用于获取信息而非修改信息。换句话说，GET请求一般不应产生副作用。就是说，它仅仅是获取资源信息，就像数据库查询一样，不会修改，增加数据，不会影响资源的状态。
+
+　　* 注意：这里安全的含义仅仅是指是非修改信息。
+
+　　2.幂等的意味着对同一URL的多个请求应该返回同样的结果。
+
+#根据HTTP规范，POST表示可能修改变服务器上的资源的请求。
+| get                                                 | post                                 |
+|-----------------------------------------------------+--------------------------------------|
+| 从服务器上获取数据                                  | 向服务器传送数据                     |
+| 在客户端，通过URL提交数据                           | 数据放在HTML HEADER内提交            |
+| 服务器端用Request.QueryString获取变量的值           | 服务器端用Request.Form获取提交的数据 |
+| 提交的数据受到URL长度的限制，如IE限制长度为2083字节 | 没有限制                             |
+| 参数显示在地址栏，不安全                            | 安全                                 |
+
+示例代码
+#+BEGIN_EXAMPLE
+<!-分别通过get和post方式提交表单-->
+<FORM ACTION="getpost.asp" METHOD="get">
+<INPUT TYPE="text" NAME="Text" VALUE="http://wxf0701.cnblogs.com//>
+<INPUT TYPE="submit" VALUE="Get方式"></INPUT>
+</FORM>
+<BR>
+<FORM ACTION="getpost.asp" METHOD="post">
+<INPUT TYPE="text" NAME="Text" VALUE="http://wxf0701.cnblogs.com/>
+<INPUT TYPE="submit" VALUE="Post方式"></INPUT>
+</FORM>
+<BR>
+
+<% If Request.QueryString("Text") <> "" Then %>
+通过get方式传递的字符串是： "<B><%= Request.QueryString("Text") %></B>"<BR>
+<% End If %>
+
+<% If Request.Form("Text") <> "" Then %>
+通过Post方式传递的字符串是： "<B><%= Request.Form("Text") %></B>"<BR>
+<% End If %>
+#+END_EXAMPLE
+
+*HTTP响应实例*
+#+BEGIN_EXAMPLE
+HTTP响应实例
+
+HTTP/1.1 200 OK
+Date: Sat, 31 Dec 2005 23:59:59 GMT
+Content-Type: text/html;charset=ISO-8859-1
+Content-Length: 122
+＜html＞
+＜head＞
+＜title＞Wrox Homepage＜/title＞
+＜/head＞
+＜body＞
+＜!-- body goes here --＞
+＜/body＞
+＜/html＞
+2．最常用的状态码有：
+
+◆200 (OK): 找到了该资源，并且一切正常。
+◆304 (NOT MODIFIED): 该资源在上次请求之后没有任何修改。这通常用于浏览器的缓存机制。
+◆401 (UNAUTHORIZED): 客户端无权访问该资源。这通常会使得浏览器要求用户输入用户名和密码，以登录到服务器。
+◆403 (FORBIDDEN): 客户端未能获得授权。这通常是在401之后输入了不正确的用户名或密码。
+◆404 (NOT FOUND): 在指定的位置不存在所申请的资源。
+#+END_EXAMPLE
+
+#+begin_example
+#+begin_src ditaa :file helloworld.png :cmdline -r -s 1.5 -e UTF-8
++-----------+
+| cBLU      |
+| 你好        |
+|    +------+
+|    |cPNK  |
+|    |世界    |
++----+------+
+#+end_src
+#+end_example
+
+** javabean 和 Enterprise JavaBean的区别和联系
+javabean是一种java语言编写的可重用组件。javabean的类必须是具体的和公开的，并且具有无参数构造器，javabean通过提供符合一致性设计模式(这和通常的设计模式不同，只是一种理念)的公共方法暴露内部域成员变量，通常是get/set方法
+
+JavaBean 和 Server Bean（通常称为 Enterprise JavaBean (EJB)）有一些基本相同之处。它们都是用一组特性创建，以执行其特定任务的对象，获得其它特性的能力。这使得 bean 的行为根据特定任务和所在环境的不同而有所不同。
+
+| javabean                             | Enterprise JavaBean                  |
+|--------------------------------------+--------------------------------------|
+| 使用java.beans包开发            | 使用javax.ejb包开发             |
+| beans包是java2标准的一部分   | ejb包是标准JDK的扩展          |
+| 一台机器上同一个地址空间中运行的组件 | 在多台机器上跨几个地址空间运行的组件 |
+| javabean是进程内组件           | ejb是进程间组件                |
+| 通常用作GUI窗口小部件       | 用作分布式商业对象                   |
+
+javabean存在与四种范围：页面(page)，请求(request)，对话(sessin)，应用(application)。
+
+对话范围：
+对话范围的JavaBean 主要应用与跨多个页面和时间段： 例如填充用户信息。 添加信息并且接受回馈，保存用户最近执行页面的轨迹。对话范围JavaBean保留一些和用户对话 ID 相关的信息。这些信息来自临时的对话cookie，并在当用户关闭浏览器时，这个cookie将从客户端和服务器删除。
+页面/请求范围：
+页面和请求范围的JavaBean有时类似表单 的bean， 这是因为他们大都用于处理表单。表单需要很长的时间来处理用户的输入??外页面和请求范围的bean可以用于减少大型站点服务器上的负载，如果使用对话bean，耽搁的处理就可能会消耗掉很多资源。
+应用：
+应用范围通常应用于服务器的部件，例如 JDBC连接池、应用监视、用户计数和
+其他参与用户行为的类。
+
+javaBean持久化是指以流的形式，用JavaBean的属性来保存bean，并在以后的某
+个时候或者在另一个虚拟机中再将它们读回来，和对象的序列化有点类似，然而
+它们有一个非常重要的区别，javabean持久化适合于长期存储。
+
+当一个对象被序列化存储以后，如果类的实现发生了变化，则把对象重新读出来
+的时候就要在新旧数据表现之间进行转化。因此对象序列化仅适合于短期存储或
+者应用程序之间的RMI。
+
+JavaBean的持久化可以考虑三种方式：数据库、XML文件、二进制流
+第一种方式可以使用O/R Mapping技术将一个JavaBean映射到关系数据库中的表；
+第二种方式可以使用JAVA1.4 的
+java.beans.XMLDecoder/java.beans.XMLEncoder将Bean映射到一个XML文件中；
+第三种方式要求Bean实现Java的Serializable接口；
+
+** java注解
+Annotation(注释)是JDK5.0及以后版本引入的,它可以用于创建文档，跟踪代码
+中的依赖性，甚至执行基本编译时检查。注释是以‘@注释名’在代码中存在的，
+根据注释参数的个数，我们可以将注释分为：标记注释、单值注释、完整注释三
+类。它们都不会直接影响到程序的语义.只是作为注释（标识）存在。
+*** 用于编译的注解
+@Deprecated注解可以被添加到任何不再鼓励使用的项上
+@SuppressWarnings注解会告知编译器阻止特殊类型的警告信息，例如：
+@SuppressWarnings("unchecked")
+@Override这种注解只能应用到方法上，表明一个方法声明打算重写超类中的另
+一个方法声明，如果方法利用此注释类型进行注解但没有重写超类方法，则编译
+器会生成一条错误消息。
+@Generated注解的目的是供代码生成工具来使用。任何生成的源代码都可以使用，
+用来区分程序员写的代码。
+*** 用于管理资源的注解
+@PostConstruct和@PreDestroy注解用于控制对象生命周期的环境中，标记了这
+些注解的方法应该在对象被构建之后，或者在对象被移除之前，紧接着调用。
+
+@Resurce注解用于资源注入，例如，数据库访问信息不应该被硬编码到web应用
+中，而是应该让web容器提供某种用户接口，以便设置连接参数和数据库资源
+JNDI名字，在web应用中，可以像下面这样引用数据源：
+@Resource(name="jdbc/mydb")
+private DataSource source;这样由容器给DataSource对象赋值
+
+*** 元注解@Target
+@Target元注解可以应用于一个注解，以限制该注解可以应用的范围，例如：
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface BugReport
+表明注解BugReport只可以应用在类，接口和方法上。
+
+*** 自定义注解
+1. 自定义注解，注意注解的时空范围，简单说就是注解针对的目标(类、方法、
+   字段)，以及注解的时效(运行时或者源码中有效)
+2. 要获取注解的信息，必须通过java的反射技术来获取Annotation对象，因为
+   你除此之外没有别的获取注解对象的方法
+3. 获取了注解对象，就可以调用注解的方法来获取相应的值了，为基础框架所
+   使用
+4. 当然，注解也可以没有定义成员，这样注解就称为了一个标记符号了，注解
+   中的字段是可以设定默认值的
+
+注释annotation与接口的异同
+因为annotation类型是一个非凡的接口，所以它与接口之间存在着某些异常：
+1. 使用关键字@interface而不是interface，这个关键字声明隐含了一个信息，
+   它是继承了java.lang.Annotation.Annotation接口，并非声明了一个
+   interface
+2. Annotation类型的方法定义是独特的、受限制的、方法必须声明为无参数的、
+   无异常抛出的。这些方法定义了annotation的成员： 方法名成为了成员名，
+   而方法返回值成为了成员的类型。方法返回值必须为primative类型、Class
+   类型、枚举类型、annotation类型或者由前面类型之一作为元素的一维数组。
+   方法的后面可以使用default和一个默认数值来表明成员的默认值，null不能
+   作为成员默认值，这与我们在非annotation类型中定义方法有很大不同。
+3. Annotation类型又与接口有着相似之处，它们可以定义常量、静态成员类型，
+   比如枚举类型定义。Annotation类型也可以如接口一般被实现或者继承。
+
+Meta-Annotation类型：
+Annotation类型可以被它们自己所标注。java5.0定义了4个标准的
+meta-annotation类型，分别是:Target、Retention、Documented、Inherited，
+它们被用来提供对其它annotation类型作说明。这些类型和它们所支持的类在
+java.lang.annotation包中可以找到。
+
+@Target: 指示注释类型所适用的程序元素的种类。如果注释类型声明中不存在
+Target元注释，则声明的类型可以用在任意元素上。如果存在这样的元注释，则
+编译器强制实施指定的使用限制。
+以下这个注释只能用来声明方法：
+#+BEGIN_EXAMPLE
+@Target(ElementType.METHOD)
+  public @interface MyAnnotation {
+      ...
+  }
+#+END_EXAMPLE
+java.lang.annotation.ElementType是一个枚举类型，它具有以下定义：
+| ElementType值               | 说明               |
+|-----------------------------+--------------------|
+| ElementType.ANNOTATION_TYPE | 应用于注释类型声明 |
+| ElementType.CONSTRUCTOR     | 构造方法声明       |
+| ElementType.FIELD           | 应用于字段声明     |
+| ElementType.LOCAL_VARIABLE  | 应用于局部变量声明 |
+| ElementType.METHOD          | 应用于方法声明     |
+| ElementType.PACKAGE         | 应用于包声明       |
+| ElementType.PARAMETER       | 应用于参数声明     |
+| ElementType.TYPE            | 应用于类、接口或枚举声明       |
+
+@Retention的用法：指示注释类型的注释要保留多久。如果注释类型声明中不存
+在 Retention 注释，则保留策略默认为 RetentionPolicy.CLASS，例如：
+#+BEGIN_EXAMPLE
+@ Retention(RetentionPolicy.CLASS)
+    public @interface MyAnnotation {
+        ...
+    }
+#+END_EXAMPLE
+| RetentionPolicy值       | 说明                                                                       |
+|-------------------------+----------------------------------------------------------------------------|
+| RetentionPolicy.CLASS   | 编译器将把注释记录在类文件中，但在运行时VM不需要保留注释                   |
+| RetentionPolicy.RUNTIME | 编译器将把注释记录在类文件中，但在运行时VM将保留注释，因此可以反射性地读取 |
+| RetentionPolicy.SOURCE  | 编译器要丢弃的注释                                                         |
+
+@Documented的用法：指示某一类型的注释将通过 javadoc 和类似的默认工具进
+行文档化。应使用此类型来注释这些类型的声明：其注释会影响由其客户端注释
+的元素的使用。如果类型声明是用 Documented 来注释的，则其注释将成为注释
+元素的公共 API 的一部分。Documented是一个没有成员的注释。
+
+@Inherited的用法：指示注释类型自动被子类继承。 Inherited也是一个没有成员的注释。
+注意，如果使用@Inherited注释类以外的任何事物都是无效的。还要注意，此元注释仅对从超类继承注释有效；对已实现接口的注释无效。
+
+#+BEGIN_EXAMPLE
+
+自定义类注解
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface MyAnnotationClass {
+	public String msg();
+}
+
+自定义函数注解
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface MyAnnotationMethod {
+	public String msg1();
+	public String msg2();
+}
+
+自定义域注解
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface MyAnnotationField {
+	public String comment();
+	public boolean request();
+}
+
+测试类
+@MyAnnotationClass(msg="测试类注解功能")
+public class Test {
+	@MyAnnotationField(comment="成员注解信息", request=true)
+	public String testField;
+
+	@MyAnnotationMethod(msg1="hello", msg2="world")
+	public void test(){
+		System.out.println("hello");
+	}
+	public static void main(String args[]){
+		Test test = new Test();
+		MyAnnotationClass an4clazz  = test.getClass().getAnnotation(MyAnnotationClass.class);
+		System.out.println(an4clazz.msg());
+		try {
+			Method method = test.getClass().getMethod("test", new Class[0]);
+			MyAnnotationMethod an4method = method.getAnnotation(MyAnnotationMethod.class);
+			System.out.println(an4method.msg1() + " " + an4method.msg2());
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			Field field = test.getClass().getField("testField");
+			MyAnnotationField an4field =  field.getAnnotation(MyAnnotationField.class);
+			System.out.println(an4field.comment() + " " + an4field.request());
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+	}
+}
+#+END_EXAMPLE
+
+** java安全机制
+各种加密实现
+http://www.blogjava.net/stone2083/archive/2012/09/02/168113.html
+
+
+java->类加载器->文件校验器->安全管理器
+简述：
+校验器的作用：校验类文件是否完整
+安全管理器： 负责控制某个操作是否被允许
+用户认证
+数字签名
+加密
+数字签名更多是用来校验信息有没有被修改过，而加密可以彻底杜绝防止别人看
+到信息内容
+
+1. 语言层次安全性
+最初的Java(JDK1.2)平台采用沙箱安全模型,基本安全模型由三部分来承担,这三
+部分构成Java运行环境的三个安全组件,分别是:类加载器,文件校验器,安全管理
+器。
+1.1 类加载器是Java安全机制的重要组成部分,可以将类加载器主要分为四类,即,启动类加载器、标准扩展类加载器、路径加载器和网络类加载器。
+1.1.1采用“双亲委派链模式”
+1.1.2类加载器为加载的类提供了不同的命名空间
+1.1.3类加载器提供了类型检查的功能模块。类加载器在程序的执行周期中还进
+行语义、类型匹配、类型转换和抛出异常等相关检查,保证了程序的健壮性。
+1.2 类文件校验器的校验类文件校验器负责检查那些无法执行的明显有破坏性的
+操作
+1.3 安全管理器是一个负责控制某个操作是否允许执行的类,
+
+2企业层次的安全特性
+
+*** SHA-1 和 MD5算法
+严格说来它们不算是加密算法，只能说是摘要算法。
+SHA-1算法：Security Hash Algorithm 安全哈希算法， 它可以把长度不超过2
+的64次方位的信息转换成160位(20字节)长的散列值
+
+MD5算法：Message Digest 信息摘要算法， 散列长度是128位，16个字节。它对输入以512位分组，输出是4个32位字的级联。
+
+CRC算法：循环冗余校验，碰撞几率比较高
+
+| 比较类型       | SHA-1    | MD5     |
+|----------------+----------+---------|
+| 分组长度       | 512比特  | 512比特 |
+| 摘要长度       | 160比特  | 128比特 |
+| 循环中的步骤   | 80       | 60      |
+| 报文的最大长度 | 2^64 - 1 | 无穷大  |
+| 基本逻辑函数   | 4        | 4       |
+| 结构形式       | 大端     | 小端      |
+
+由于MD5 与SHA-1均是从MD4 发展而来，它们的结构和强度等特性有很多相似之处，表（1）是对MD5与SHA-1 的结构比较。SHA-1与MD5 的最大区别在于其摘要比MD5 摘要长 32 比特。对于强行攻击，产生任何一个报文使之摘要等于给定报文摘要的难度：MD5 是2^128 数量级的操作，SHA-1 是2^160 数量级的操作。产生具有相同摘要的两个报文的难度：MD5是 2^64 是数量级的操作，SHA-1 是2^80 数量级的操作。因而,SHA-1 对强行攻击的强度更大。但由于SHA-1 的循环步骤比MD5 多（80:64）且要处理的缓存大（160 比特:128 比特），SHA-1 的运行速度比MD5 慢。
+
+D5 和SHA-1 是单项散列函数的典型代表
+
+*** DSA(Datasignature Algorithm数字签名)
+生成一对公钥和私钥，把公钥发送给需要获取消息的人。将所要发送的消息用自
+己的私钥加密，然后发送给接收者，接受者得到文件之后用公钥验证.主要作用
+是验证发送者的身份和信息的完整性。
+它是数字签名算法，一种标准的 DSS（数字签名标准），严格来说不算加密算法
+
+*** RSA公钥密码体制
+RSA公钥加密算法
+RSA算法基于一个十分简单的数论事实：将两个大素数相乘十分容易，但那时想
+要对其乘积进行因式分解却极其困难，因此可以将乘积公开作为加密密钥。
+
+RSA是第一个既能用于数据加密也能用于数字签名的算法。RSA的安全性依赖于大
+数分解，但是否等同于大数分解不得而知。
+
+由于进行的都是大数计算，使得RSA最快的情况也比DES慢上倍，无论是软件还是
+硬件实现。速度一直是RSA的缺陷。一般来说只用于少量数据加密。
+
+是一个支持变长密钥的公共密钥算法，需要加密的文件块的长度也是可变的，非对称算法
+
+*** DES和AES 单密钥算法 对称加密算法
+DES：data encryption standard
+DES的算法是对称的，既可用于加密又可用于解密,是一个密码长度为56位的古老
+的分组密码，DES算法现在已经过时了，因为可以用穷举法破解。
+** java虚拟机和delvik虚拟机的区别
+
+| java虚拟机             | Dalvik                             |
+|------------------------+------------------------------------|
+| 基于堆栈               | 基于寄存器                         |
+|                        | 透过zygote预加载类完成虚拟机的启动 |
+| 运行java字节码         | 运行dex字节码                      |
+| 有218个机器指令        | 有200中机器指令                    |
+| 每个类中都有一个常量池 | 只有一个统一的常量池               |
+
+Dalvik虚拟机主要是完成对象生命周期的管理，堆栈的管理，线程管理，安全和
+异常的管理，以及垃圾回收等等重要功能。
+
+Dalvik适用于那些内存容量和数据处理能力比较小的机器，因此适合移动终端。
+由于delvik虚拟机指令都大多数都包含寄存器的地址，所以它的指令通常比java
+虚拟机的指令更长。
+一般而言基于栈的机器需要更多指令，而基于寄存器的机器指令更长.
+
+Dalvik虚拟机的主要特征
+*专有的DEX文件格式*
+1. 一个应用中会定义很多类，编译完成后会形成很多的class文件，class文件
+   之间有不少冗余信息，而dex文件格式会把所有的class文件全都整合到一块。
+   这样除了减少了文件大小，便利I/O操作外，也加快了查找速度。
+   原来每个类文件中都存在一个常量池，在dex文件中由一个常量池来管理。见
+   上图
+2. 增加了新的操作码的支持
+3. 文件结构尽量简洁，使用等长的指令，提高解析速度
+4. 尽量扩大只读结构的大小，借以提高进程的数据共享
+5. 如何生成dex文件呢
+
+[[file:pic/JVM_vs_DVM.jpg]]
+[[file:pic/DVM_Convert.jpg]]
+
+java字节码文件由多个.class文件组成，在运行期间虚拟机会从相应的.class文
+件中加载相应类，而Dalvik字节码只由一个.dex文件组成，它包括了应用的所有
+类。
+.dex文件形成的过程： java编译器编译java源文件形成.class字节码文件，
+Dalvik dx编译器删除所有的.class文件，并把它们重新编译成Dalvik字节码文
+件，之后dx编译器把它们合成一个.dex文件。
+
+原来每个类文件中都存在一个常量池，在dex文件中由一个常量池来管理。
+
+*DEX优化*
+1. 调整所有字段的字节序和对其结构中的每一个域
+2. 验证DEX文件中的所有类
+3. 对一些特定的类进行优化，对方法里的操作码进行优化
+由于dex文件的结构是紧凑的，所有优化之后文件的大小会有所增减，大概是原来文件的1-4倍。
+
+优化发生的时机有两个：对于预置应用，可以在系统编译后，生成优化文件，以ODEX结尾。这样在发布时除APK文件（不包含DEX）以外，还有一个相应的ODEX文件；对于非预置应用，包含在APK文件里的DEX文件会在运行时被优化，优化后的文件将被保存在缓存中。
+
+*指令集基于寄存器*
+基于堆栈虚拟机实现，基于寄存器的虚拟机实现虽然在硬件通用性上要差一些，
+但是它在代码的执行效率却更胜一筹，虚拟机中指令的解释时间主要花在下面三
+个： 分发指令、访问运算数、执行运算， 其中分发指令这个环节对性能的影响
+最大。在基于寄存器的虚拟机里，可以更为有效的减少冗余指令的分发和减少内
+存的读写访问。
+
+*一个应用，一个虚拟机实例，一个进程*
+每一个Android应用都运行在一个Dalvik虚拟机实例里，而每一个虚拟机实例都
+是一个独立的进程空间。虚拟机的线程机制，内存分配和管理，Mutex等等都是
+依赖底层操作系统而实现的。所有Android应用的线程都对应一个Linux线程，虚
+拟机因而可以更多的依赖操作系统的线程调度和管理机制
+
+不同的应用在不同的进程空间里运行，加之对不同来源的应用都使用不同的Linux用户来运行，可以最大程度的保护应用的安全和独立运行
+
+Zygote是一个虚拟机进程，同时也是一个虚拟机实例的孵化器，每当系统要求执
+行一个Android应用程序，Zygote就会FORK出一个子进程来执行该应用程序。这
+样做的好处显而易见：Zygote进程是在系统启动时产生的，它会完成虚拟机的初
+始化，库的加载，预置类库的加载和初始化等等操作，而在系统需要一个新的虚
+拟机实例时，Zygote通过复制自身，最快速的提供给系统。另外，对于一些只读的系统库，所有虚拟机实例都和Zygote共享一块内存区域，大大节省了内存开销。
+
+应用程序包被发布到手机上后，运行前会对其中的dex文件进行优化，优化后的
+文件被保存在缓冲区（优化后的格式被称为dey），虚拟机会直接执行该文件，
+如果应用包文件不发生变化，dey文件不会被重新生成。
+[[file:pic/DalvikOptimize.jpg]]
+
+Android应用所使用的编程语言是Java语言，和Java SE一样，编译时使用Sun
+JDK将Java源程序编程成标准的Java字节码文件（.class文件），而后通过工具
+软件DX把所有的字节码文件转成DEX文件（classes.dex）。最后使用Android打
+包工具（aapt）将DEX文件，资源文件以及AndroidManifest.xml文件（二进制格
+式）组合成一个应用程序包（APK）。应用程序包可以被发布到手机上运行。
+[[file:pic/AndroidPackage.jpg]]
+
+** RMI远程方法调用技术
+RMI是EJB之间通信时所使用协议，EJB是服务端架构
+RMI的开发步骤
+
+1. 先创建远程接口及声明远程方法，注意这是实现双方通讯的接口，需要继承Remote
+2. 开发一个类来实现远程接口及远程方法，值得注意的是实现类需要继承
+   UnicastRemoteObject, 由于每个方法都要抛出RemoteException异常，所以
+   需要显示声明构造函数
+
+3. 通过javac命令编译文件，通过java -server 命令注册服务，启动远程对象
+4. 最后客户端查找远程对象，并调用远程方法
+
+注意: 当你创建一个扩展自UnicastRemoteObject的类的对象时，将会启动一个
+单独的线程，它将保持该程序无限地存活下去。
+在虚拟机之间传递值有两种机制：
+1. 实现了Remote接口的类的对象将作为远程引用传递。
+2. 实现了Serializable接口，但是没有实现Remote接口的类的对象将使用序列
+   化进行复制。
+
+#+BEGIN_EXAMPLE
+# 接口
+public interface Hello extends Remote{
+	public String say() throws RemoteException;
+}
+# 接口实现 并启动服务
+public class HelloServer extends UnicastRemoteObject implements Hello{
+
+	private static final long serialVersionUID = 1L;
+
+	private String message;
+
+	protected HelloServer(String message) throws RemoteException {
+		this.message = message;
+	}
+
+	public String say() throws RemoteException {
+		System.out.println("Called by HelloClient");
+		return message;
+	}
+
+
+	public static void main(String args[]){
+		try {
+                        //本地主机上的远程对象注册表Registry的实例，并指定端口，这一步必不可少（Java默认端口是1099），必不可缺的一步，缺少注册表创建，则无法绑定对象到远程注册表上
+			Registry registry = LocateRegistry.createRegistry(1099);
+			Hello hello = new HelloServer("你好啊");
+                        //把远程对象注册到RMI注册服务器上，并命名为hello
+                        //绑定的URL标准格式为：rmi://host:port/name(其中协议名可以省略，下面两种写法都是正确的）
+			Naming.rebind("hello", hello);
+			//Naming.rebind("rmi://192.168.56.1:1099/hello",hello);
+	                //Naming.rebind("//192.168.56.1:1099/hello", hello);
+			System.out.println("server is ready");
+		} catch (Exception e) {
+			System.out.println("Hello Server failed: " + e);
+		}
+	}
+}
+
+public class HelloClient {
+
+	public static void main(String args[]){
+		try {
+			Hello hello = (Hello)Naming.lookup("rmi://192.168.56.1:1099/hello");
+			System.out.println(hello.say());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+	}
+}
+#+END_EXAMPLE
+
+** CORBA通用对象请求代理架构
+corba体系结构是对象管理组织为了解决 *分布式处理环境* 中硬件和软件系统的
+互连而提出的一种解决方案，
+
+corba定义了一系列的api，通信协议和物理/服务信息模型用于使得异质应用程
+序能够互相操作，这些应用程序用不同的程序语言编写，运行在不同的平台上。
+
+corba因此为定义明确的物件提供了平台和位置的透明性，这些物件是分布式计
+算平台的基础。
+
+COBRA标准主要分为3个层次：对象请求代理、公共对象服务和公共设施。最底层
+是对象请求代理ORB，规定了分布对象的定义（接口）和语言映射，实现对象间
+的通讯和互操作，是分布对象系统中的"软总线"；在ORB之上定义了很多公共服
+务，可以提供诸如并发服务、名字服务、事务(交易)服务、安全服务等各种各样
+的服务；最上层的公共设施则定义了组件框架，提供可直接为业务对象使用的服
+务，规定业务对象有效协作所需的协定规则。
+
+CORBA用于在不同进程之间，甚至是不同物理机器上的进程之间通讯，底层技术
+依靠RPC实现。
+
+CORBA的核心是对象请求代理ORB，它提供对象定位、对象激活和对象通讯的透明
+机制。客户发出要求服务的请求，而对象则提供服务，ORB把请求发送给对象、
+把输出值返回给客户。
+
+ORB的服务对客户而言是透明的，客户不知道对象驻留在网络中何处、对象是如
+何通讯、如何实现以及如何执行的，只要他持有对某对象的对象引用，就可以向
+该对象发出服务请求。
+
+CORBA允许用户以两种不同的方式提出对象请求：
+
+1）静态调用：
+通过给定接口的存根，在编译了对象代码后，进入客户端的程序。因此，静态调用必须在编译时就知道对象及其类型。
+2）动态调用：
+通过ORB的动态调用接口DII，在运行时生成访问对象的代码。
+不管客户以哪一种形式提出请求，ORB的任务是：找出所要对象的位置，激活该
+对象，向对象传递此请求。对象执行所请求的服务后，把输出值返回给ORB，然
+后再由ORB返回给客户。
+
+** sql注入技术
+SQL注入
+一、 SQL注入简介
+
+
+SQL注入是比较常见的网络攻击方式之一，它不是利用操作系统的BUG来实现攻击，而是针对程序员编程时的疏忽，通过SQL语句，实现无帐号登录，甚至篡改数据库。
+===========================================
+
+二、 SQL注入攻击的总体思路
+
+1.寻找到SQL注入的位置
+2.判断服务器类型和后台数据库类型
+3.针对不通的服务器和数据库特点进行SQL注入攻击
+===========================================
+
+三、SQL注入攻击实例
+
+比如在一个登录界面，要求输入用户名和密码：
+
+可以这样输入实现免帐号登录：
+
+用户名： ‘ or 1 = 1 –
+密 码：
+
+点登陆,如若没有做特殊处理,那么这个非法用户就很得意的登陆进去了.(当然现在的有些语言的数据库API已经处理了这些问题)
+
+这是为什么呢? 下面我们分析一下：
+
+从理论上说，后台认证程序中会有如下的SQL语句：
+
+String sql = "select * from user_table where username=
+' "+userName+" ' and password=' "+password+" '";
+当输入了上面的用户名和密码，上面的SQL语句变成：
+
+SELECT * FROM user_table WHERE username=
+'’or 1 = 1 -- and password='’
+分析SQL语句：
+条件后面 username=” or 1=1 用户名等于 ” 或 1=1 那么这个条件一定会成功；
+然后后面加两个-，这意味着注释，它将后面的语句注释，让他们不起作用，这样语句永远都能正确执行，用户轻易骗过系统，获取合法身份。
+
+这还是比较温柔的，如果是执行
+
+SELECT * FROM user_table WHERE
+username='' ;DROP DATABASE (DB Name) --' and password=''
+….其后果可想而知…
+** 异常与错误的区别  注：运行时异常不需要捕获，编译时异常需要
+java中所有错误都有一个基类Throwable, Exception 和 Error都继承它。
+
+异常： 在java中程序的错误主要是语法错误和语义错误，程序在编译和运行时
+的错误统一称为异常，java中使用异常类来表示异常，不同的异常类代表了不同
+的异常，java中所有异常有一个基类Exception.
+
+错误： 一个应用程序不能截获的严重问题，程序本身很难进行处理，只能通过其他程序干预，比如内存溢出，死循环，java中用错误类来表示错误，不同的错误类代表了不同的错误。所有错误类有一个基类叫做Error。
+
+异常和错误的最本质区别是，异常可以由应用程序来捕获并进行处理，而错误是应用程序本身无法处理。
+
+异常分为两类： 编译异常和运行异常。 运行异常是RuntimeException,其余
+全是编译异常，运行异常不需要捕获，而编译异常是必须要捕获的。
+
+常见的运行时异常有：
+1. java.lang.ArrayIndexOutOfBoundsException 越界异常
+2. java.lang.ArithmeticException 算术条件异常
+3. java.lang.NullPointerException 空指针异常
+
+** 异常的不当处理方法
+反例之一：丢弃异常
+捕获了异常，但是却不做任何处理，打印异常不算对异常的处理，只是方便调试，
+而在程序交付以后，打印异常就不应该在异常处理模块中占据主要位置了。
+
+改正方法：
+1. 处理异常，修正问题
+2. 重新抛出异常，如果自己不能处理可以重新抛出异常
+3. 把该异常转换成另一种异常，大多数情况下，是把一个低级的异常转换成应
+   用级别的异常
+4. 不要捕获异常
+
+反例之二： 不指定具体的异常
+
+很多人用一个catch语句来捕获所有异常，最常见的情形就是使用
+catch(Exception ex)语句，但实际上，在绝大多数情况下，这种做法不提倡。
+因为catch语句表示预期会出现某种异常，而且希望能处理该异常，异常类的作
+用就是告诉java编译器我们想要处理的是哪一种异常，由于绝大多数异常都直接
+或间接从java.lang.Exception派生，catch(Exception ex)就相当于说我们想要处理几乎所有的异常。
+
+而有的时候，异常不适合在这里处理，应该继续抛出，但是这里用这种方式就捕
+获了所有异常，失去了可以正确处理它的方式。
+
+反例之三：占用资源不释放
+异常改变了程序正常的执行顺序，如果程序用到了文件，socket,jdbc连接之类
+的资源，即使遇到了异常，也要正确释放占用的资源，为此java提供了一个简化
+这种操作的关键字finally, finally保证在try/catch/finally结束前，执行清理任务的代码总是有机会执行。
+
+反例之四：不说明异常的详细信息
+在异常处理模块中提供适量的错误原因信息，组织错误信息使其易于理解和阅读。
+
+反例之五：过于庞大的try块
+
+** Java中的内存泄露
+
+java中内存泄露就是存在一些被分配的对象，这些对象有两个特点，它们不再被
+使用，但仍然被引用。为了解决这些问题，可以通过软件工具来检测内存泄露，
+检查的主要原理就是暴露出所有堆中的对象，让程序员寻找那些无用但仍被引用
+的对象。
+
+如果满足这两个条件，这些对象就可以判定为java中的内存泄露，这些对象不会
+被GC所回收，然而它却占用内存。
+
+在C++中，内存泄漏的范围更大一些。有些对象被分配了内存空间，然后却不可
+达，由于C++中没有GC，这些内存将永远收不回来。在Java中，这些不可达的对
+象都由GC负责回收，因此程序员不需要考虑这部分的内存泄露。
+
+[[file:pic/Java_memory.gif]]
+
+因此对于C++程序需要自己管理边和顶点，而对于java程序员只需要管理边就可
+以了，通过这种方式，java提高了编程的效率。
+
+Java中也有内存泄露但是比C++中范围要少一些，因为从语言上来讲任何对象都
+是可达的，所有不可达的对象都由GC管理。
+
+Java 使用有向图的方式进行内存管理，可以消除引用循环的问题，例如有三个对象，相互引用，只要它们和根进程不可达，那么GC 也是可以回收它们的。在Java 语言中，判断一块内存空间是否符合垃圾收集器收集标准的标准只有两个：一个是给对象赋予了空值null，以下再没有调用过，另一个是给对象赋予了新值，即重新分配了内存空间。
+
+因此在确认一个对象无用之后，要显示的将其所有引用都显示的置为null.
+
+** Java回调机制
+回调函数就是一个通过函数指针调用的函数。如果你把函数的指针(地址)作为参
+数传递给另一个函数，当这个指针被用为调用它所指向的函数时，我们就说这是
+回调函数。
+
+Java回调机制实现的是一种面向对象的设计策略，通常用匿名内部类来实现
+
+策略模式：策略模式对应的一系列的算法，并且这些算法之间可以相互调用，
+
+某天，我打电话向你请教问题，当然是个难题，^_^，你一时想不出解决方法，我又不能拿着电话在那里傻等，于是我们约定：等你想出办法后打手机通知我，这样，我就挂掉电话办其它事情去了。过了XX分钟，我的手机响了，你兴高采烈的说问题已经搞定，应该如此这般处理。故事到此结束。这个例子说明了“异步+回调”的编程模式。其中，你后来打手机告诉我结果便是一个“回调”过程；我的手机号码必须在以前告诉你，这便是注册回调函数；我的手机号码应该有效并且手机能够接收到你的呼叫，这是回调函数必须符合接口规范。
+JAVA中不允许直接操作指针，那它的回调是如何实现的呢？
+答案：它是通过接口或者内部类来实现的。
+拿这个例子类比Ajax中的回调机制以及Spring中HibernateTemplate用到的回调+模板机制，可以更容易地理解回调机制。
+
+#+BEGIN_EXAMPLE
+public   interface  CallBack {
+    //执行回调操作的方法
+    void  execute();
+}
+#+END_EXAMPLE
+然后再写一个工具类
+#+BEGIN_EXAMPLE
+public   class  Tools {
+
+    /**
+     * 测试函数使用时间，通过定义CallBack接口的execute方法
+     * @param callBack
+     */
+    public   void  testTime(CallBack callBack) {
+        dosomething();
+        callBack.execute(); ///进行回调操作,通知
+    }
+
+    public   static   void  main(String[] args) {
+        Tools tool = new  Tools();
+        tool.testTime(new  CallBack(){
+            //定义execute方法
+            public   void  execute(){
+                //这里可以加放一个或多个要测试运行时间的方法
+                TestObject.testMethod();
+            }
+        });
+    }
+}
+#+END_EXAMPLE
+
+Spring中HibernateTemplate的回调机制与模板方法
+#+BEGIN_EXAMPLE
+interface CallBack{
+    public void doCRUD();
+}
+
+public class HibernateTemplate {
+
+    public void execute(CallBack action){
+        getConnection();
+        action.doCRUD();
+        releaseConnection();
+    }
+
+    public void add(){
+         execute(new CallBack(){
+            public void doCRUD(){
+                System.out.println("执行add操作...");
+            }
+         });
+    }
+
+    public void delete(){
+         execute(new CallBack(){
+            public void doCRUD(){
+                System.out.println("执行delete操作...");
+            }
+         });
+    }
+
+    public void getConnection(){
+        System.out.println("获得连接...");
+    }
+
+    public void releaseConnection(){
+        System.out.println("释放连接...");
+    }
+}
+#+END_EXAMPLE
+
+** 动态代理模式 和 普通代理模式
+谈到动态代理模式就需要先看看普通的代理模式是如何实现的
+首先需要定义一个接口interface，包含需要提供的服务，然后定义一个实体类
+classA实现该接口，并实现接口中的方法，最后定义一个代理类ClassB，该类也
+实现interface接口，并传入一个classA的对象，ClassB中的方法最后都调用
+classA的对象来实现，这样就实现了代理结构。
+
+但是当需要代理的类比较多的时候，每一个实体类都需要定义一个代理类，就会
+显得太繁杂，这个时候就需要用到动态代理，动态代理根据提供的接口和
+invocationHandler对象可以动态的生成代理对象，不需要用户自己生成。
+
+具体实现：
+一个接口
+实现接口的具体类
+一个继承InvocationHandler的类  最重要
+
+首先声明一个接口，然后定义一个实现了该接口的实体类，这个类需要提供一定
+的服务，动态代理里边最重要的就是InvocationHander类
+
+要想实现动态代理模式，就需要定义一个继承自InvocationHande的类，在该类
+的构造函数中需要传入实体类的对象，并覆盖掉public Object invoke(Object
+proxy, Method method, Object[] args)方法
+
+得到实体类的类加载器和它所实现的接口，以及上边自定义的
+InvocationHandler类，利用这些参数，得到一个动态代理对象，该代理对象默
+认也实现了实体类所实现的接口，并用相同的类加载器进行加载，然后调用代理
+对象执行操作
+
+具体实现：
+#+BEGIN_EXAMPLE
+public interface Call {
+	public void request();
+}
+
+public class RealCall implements Call{
+	@Override
+	public void request() {
+		System.out.println("from real caller");
+	}
+}
+
+public  class DynamicHandler implements InvocationHandler{
+	Object object;
+	public DynamicHandler(Object object){
+		this.object=object;
+	}
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args)
+			throws Throwable {
+		method.invoke(object, args);
+		return null;
+	}
+
+	public static void main(String args[]){
+		Call call = new RealCall();
+		DynamicHandler test = new DynamicHandler(call);
+		Call proxy = (Call) Proxy.newProxyInstance(call.getClass().getClassLoader(), call.getClass().getInterfaces(), test);
+		proxy.request();
+	}
+}
+#+END_EXAMPLE
+
+** HTTP、SOCKET连接、TCP连接
+
+http://blog.csdn.net/yangzl2008/article/details/7366428
+
+http协议：简单对象访问协议，对应于应用层，基于TCP连接
+tcp协议：对应于传输层
+ip协议：对应与网络层
+
+[[file:pic/网络层次图.gif]]
+tcp/ip是传输层协议，主要解决数据如何在网络中传输的问题，而http是应用层
+协议，主要解决如何包装数据。
+
+socket是对tcp/ip的封装，本身并不是一个协议，而是一个调用api，通过
+socket我们才能使用tcp/ip协议。
+
+*短连接和长连接*
+短连接：连接->传输数据->关闭连接
+长连接：连接->传输数据->保持连接-> ......  ->传输数据->保持连接->...->
+关闭连接
+
+一般长连接用于客户端和服务器端间频繁的通信，列如数据库的连接用长连接，
+用短连接频繁的通信会造成socket错误
+而像web网站的http服务一般都使用短连接，长连接会耗费一定的资源，成千上
+万甚至上亿的短连接会比长连接更节省一些资源
+
+http协议是建立在tcp协议上的一种应用，它与tcp连接不同的是，客户端向服务
+器端发送一次请求，服务器端响应，请求结束后，会主动释放连接，由于http每
+次请求结束之后会主动释放连接，因此是一个短连接，所以如果要保持客户端在
+线状态，就必须不停的向服务器发起连接请求，在开发的过程中，即使不需要获
+得任何数据，客户端也要隔一段时间发起一个请求，以保证通行的正常。
+
+socket连接是长连接，客户端和服务器端一旦建立连接之后不会主动断掉，但是
+如果服务器端或者客户端主机down了，网络故障，或者长时间没有数据传输之后，
+网络防火墙就会断开该连接释放网络资源。
+
+** J2EE servlet体系架构
+http://lewis-q.iteye.com/blog/161472
+
+** J2EE spring
+控制翻转IOC
+
+控制反转是对组件对象控制权的转移，从程序代码本身转移到了外部容器，通过
+容器来实现对象组件的装配和管理
+
+依赖注入DI
+所谓依赖注入即在运行期由容器将组件的依赖关系注入到组件中，spring根据配
+置文件，将其他对象的引用通过组件提供的setter方法进行设定
+
+spring提供了一种无侵入式的高扩展性框架，代码中无须设计spring专有类，即
+可将其纳入spring容器进行管理， 作为对比ejb则是一种高侵入性的框架规范，
+它制定了众多的的接口和编码规范，一旦系统基于侵入式设计开发，那么之后想
+要脱离就比较困难了，为了实现无侵入式的方式，spring使用了java的reflect
+机制，通过动态调用来避免硬编码的约束，并构建了BeanFactory作为其依赖注
+入的基础
+
+** J2EE hibernate
+*** 工作流程
+hibernate可以理解为一个中间件，它负责接收java中的sql语句并发送到数据库，
+从数据库返回的结果经过hibernate组装成对象以后再返回给程序
+
+hibernate的工作原理:
+1. 读取并解析配置文件
+2. 读取并解析映射信息，创建SessionFactory
+3. 创建事务Transaction
+4. 持久化操作
+5. 提交事务
+6. 关闭Session
+7. 关闭
+
+#+BEGIN_EXAMPLE
+SessionFactory sess = new
+Configuration().configure().BuildSessionFactory();
+Session session = sess.opensession();
+Transaction transaction = session.beginTransaction();
+dosomething();
+session.save(a);
+session.update(b);
+transaction.commit();
+session.close();
+#+END_EXAMPLE
+hibernate的核心接口有5个，分别为Session、SessionFactory、Transaction、
+Query、Configuration。通过这些接口不仅可以对持久化对象进行存取，还能够
+进行事务控制。
+
+Session接口：负责执行被持久化对象的CRUD操作，Session是非线程安全的
+SessionFactory接口：负责初始化Hibernate，充当数据存储源的代理，并负责
+创建Session对象。这里用到了工厂模式，一个数据库对应一个SessionFactory
+
+Configuration接口：负责配置并启动Hibernate，创建SessionFactory对象，在
+Hibernate的启动过程中，Configuration类的实例首先定位映射文档位置、读取
+配置、然后创建SessionFactory对象。
+
+Transaction接口：负责事务相关的操作。
+
+Query和Crteria接口：负责执行各种数据库查询，可以使用HQL语言或SQL语句两
+种表达方式。
+
+Hibernate提高性能的方法：
+
++ 延迟加载
++ Cache 有一级缓存和二级缓存，一级缓存是必须的，位于Session部分，二级
+  缓存则是不必须的，二级缓存能明显提高系统性能，然后也会增加内存
++ 高效的查询语句
+
+*** hibernate中各种保存方式的区别，以及对象的生命周期
+一、hibernate，它的对象有三种状态，transient、persistent、detached
+transient：瞬态或者自由态
+persistent：持久化状态
+detached：脱管状态或者游离态
+
+游离状态的实例可以通过调用save()、persist()或者saveOrUpdate()方法进行持久化。
+持久化实例可以通过调用 delete()变成脱管状态。通过get()或load()方法得到
+的实例都是持久化状态的。
+脱管状态的实例可以通过调用 update()、0saveOrUpdate()、lock()或者
+replicate()进行持久化。
+
+save()和persist()将会引发SQL的INSERT，delete()会引发SQLDELETE，
+而update()或merge()会引发SQLUPDATE。对持久化（persistent）实例的修改在刷新提交的时候会被检测到，
+它也会引起SQLUPDATE。saveOrUpdate()或者replicate()会引发SQLINSERT或者
+UPDATE
+
+二、save 和update区别
+把这一对放在第一位的原因是因为这一对是最常用的。
+save的作用是把一个新的对象保存
+update是把一个脱管状态的对象保存
+
+三,update 和saveOrUpdate区别
+这个是比较好理解的，顾名思义，saveOrUpdate基本上就是合成了save和update
+引用hibernate reference中的一段话来解释他们的使用场合和区别
+通常下面的场景会使用update()或saveOrUpdate()：
+程序在第一个session中加载对象
+该对象被传递到表现层
+对象发生了一些改动
+该对象被返回到业务逻辑层
+程序调用第二个session的update()方法持久这些改动
+
+saveOrUpdate()做下面的事:
+如果对象已经在本session中持久化了，不做任何事
+如果另一个与本session关联的对象拥有相同的持久化标识(identifier)，抛出一个异常
+如果对象没有持久化标识(identifier)属性，对其调用save()
+如果对象的持久标识(identifier)表明其是一个新实例化的对象，对其调用save()
+如果对象是附带版本信息的（通过<version>或<timestamp>） 并且版本属性的值表明其是一个新实例化的对象，save()它。
+否则update() 这个对象
+
+四、save()和persist()区别
+在事务开启的时候，两者几乎没有区别，但是当在事务之外调用时，persist并
+不会执行insert操作，而save保证返回一个标志符，如果需要运行insert来获取
+标识符，这个insert将立即运行，不管你是在事务内部还是外部。
+
+五、merge()和update()区别
+update制作更新操作
+merge根据所给对象的id值来判断是更新还是新增
+
+** J2EE struts2
+*** 起源
+struts 2由web work发展而来
+*** ActionMapper
+ActionMapper其实是HttpServletRequest和Action调用请求的一个映射，它屏蔽
+了Action对于Request等java servlet类的依赖。struts2中它的默认实现类是
+DefaultActionMapper,ActionMapper很大的好处是可以根据自己id需求来设计
+url格式，它自己也有Resultful的实现
+*** struts2执行流程
+1. 客户端提起一个（HttpServletRequest）请求,如上文在浏览器中输
+   入”http://localhost:8080/TestMvc/add.action”就是提起一个
+   （HttpServletRequest）请求。
+2. 请求被提交到一系列（主要是三层）的过滤器（Filter），如
+   （ActionContextCleanUp、其他过滤器（SiteMesh等）、
+   FilterDispatcher）。注意这里是有顺序的，先ActionContextCleanUp，再
+   其他过滤器（SiteMesh等）、最后到FilterDispatcher
+3 .FilterDispatcher是控制器的核心，就是mvc中c控制层的核
+心.FilterDispatcher进行初始化并启用核心doFilter
+4. FilterDispatcher询问ActionMapper是否需要调用某个Action来处理这个
+   （request）请求，如果ActionMapper决定需要调用某个Action，
+   FilterDispatcher把请求的处理交给ActionProxy
+5. ActionProxy通过Configuration Manager（struts.xml）询问框架的配置文件，找到需要调用的Action类.
+如上文的struts.xml配置
+6. ActionProxy创建一个ActionInvocation的实例，同时ActionInvocation通过
+   代理模式调用Action。但在调用之前ActionInvocation会根据配置加载
+   Action相关的所有Interceptor
+7. 一旦Action执行完毕，ActionInvocation负责根据struts.xml中的配置找到
+   对应的返回结果。如上文中将结构返回“add.jsp”，但大部分时候都是返回
+   另外一个action，那么流程又得走一遍
+** websphere weblogic
+websphere和weblogic都是web应用服务器
+** J2EE webservice + axis
+
+http://blog.csdn.net/qjyong/article/details/2148558
+http://www.cnblogs.com/liwp_Stephen/archive/2008/08/03/1259385.html
+http://yafei.iteye.com/blog/619795
+http://blog.csdn.net/xw13106209/article/details/7049614
+
+web service是一个软件系统，为了支持跨网络的机器间相互操作交互而设计，
+web service服务通常被定义为一组模块化的api，它们可以通过网络进行调用，
+来执行远程系统的请求服务。
+
+在传统的程序编码中，存在这各种的函数方法用调，一个程序模块M中的方法A，
+向其发出调用请求，并传入A方法需要的参数P，方法A执行完毕后，返回处理结
+果R。这种函数或方法调用通常发生在同一台机器上的同一程序语言环境下。现
+在的我们需要一种能够在不同计算机间的不同语言编写的应用程序系统中，通过
+网络通讯实现函数和方法调用的能力，而Web service正是应这种需求而诞生的。
+
+从简单来说
+Web Service = SOAP + HTTP + WSDL
+soap是web service的主体，它通过http或者smtp等应用层协议进行通讯，自身
+使用XML文件来描述程序的函数方法和参数信息，从而完成不同主机的异构系统
+间的计算服务处理。WSDL web服务描述语言也是一个XML文档，它通过HTTP向公
+众发布，告知客户端程序关于某个具体的web service服务的URL信息、方法的命
+名、参数和返回值等。
+
+*** SOAP协议
+
+简单对象访问协议，它是一种基于XML的消息通讯格式，用于网络上，不同平台，
+不同语言的应用程序间的通讯，可自定义，易于扩展，一条SOAP消息就是一个普
+通的xml文档，包含下列元素
+
+Envelope 元素，标识XML 文档一条 SOAP 消息
+Header 元素，包含头部信息的XML标签
+Body 元素，包含所有的调用和响应的主体信息的标签
+Fault 元素，错误信息标签。
+
+以上的元素都在 SOAP的命名空间http://www.w3.org/2001/12/soap-envelope中
+声明；
+
+SOAP的语法规则
+• SOAP 消息必须用 XML 来编码
+• SOAP 消息必须使用 SOAP Envelope 命名空间
+• SOAP 消息必须使用 SOAP Encoding 命名空间
+• SOAP 消息不能包含 DTD 引用
+• SOAP 消息不能包含 XML 处理指令
+
+SOAP消息的基本结构
+#+BEGIN_EXAMPLE
+<? xml version="1.0"?>
+<soap:Envelope
+xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
+soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
+<soap:Header>
+  ...
+  ...
+</soap:Header>
+<soap:Body>
+  ...
+  ...
+  <soap:Fault>
+    ...
+    ...
+  </soap:Fault>
+</soap:Body>
+</soap:Envelope>
+#+END_EXAMPLE
+
+*** WSDL
+WSDL是一种web服务描述语言，它的实现采用XML文档
+
+WSDL文档可以分为两部分。顶部分由抽象定义组成，而底部分则由具体描述组成。抽象部分以独立于平台和语言的方式定义SOAP消息，它们并不包含任何随机器或语言而变的元素。这就定义了一系列服务，截然不同的应用都可以实现。
+
+WSDL文档例子
+#+BEGIN_EXAMPLE
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+ xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:tns="http://www.jsoso.com/wstest"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns="http://schemas.xmlsoap.org/wsdl/"
+ targetNamespace="http://www.jsoso.com/wstest"
+ name="Example">
+
+<types>
+  <xsd:schema>
+  <xsd:import
+   namespace="http://www.jsoso.com/wstest"
+   schemaLocation="http://localhost:8080/hello?xsd=1"></xsd:import>
+  </xsd:schema>
+</types>
+
+<message name="toSayHello">
+  <part name="userName" type="xsd:string"></part>
+</message>
+<message name="toSayHelloResponse">
+  <part name="returnWord" type="xsd:string"></part>
+</message>
+
+<message name="sayHello">
+  <part name="person" type="tns:person"></part>
+  <part name="arg1" type="xsd:string"></part>
+</message>
+<message name="sayHelloResponse">
+  <part name="personList" type="tns:personArray"></part>
+</message>
+<message name="HelloException">
+  <part name="fault" element="tns:HelloException"></part>
+</message>
+
+<portType name="Example">
+  <operation name="toSayHello" parameterOrder="userName">
+    <input message="tns:toSayHello"></input>
+    <output message="tns:toSayHelloResponse"></output>
+  </operation>
+  <operation name="sayHello" parameterOrder="person arg1">
+    <input message="tns:sayHello"></input>
+    <output message="tns:sayHelloResponse"></output>
+    <fault message="tns:HelloException" name="HelloException"></fault>
+  </operation>
+</portType>
+
+<binding name="ExamplePortBinding" type="tns:Example">
+  <soap:binding
+    transport="http://schemas.xmlsoap.org/soap/http"
+    style="rpc"></soap:binding>
+  <operation name="toSayHello">
+    <soap:operation soapAction="sayHello"></soap:operation>
+    <input>
+      <soap:body use="literal"
+        namespace="http://www.jsoso.com/wstest"></soap:body>
+    </input>
+    <output>
+      <soap:body use="literal"
+         namespace="http://www.jsoso.com/wstest"></soap:body>
+    </output>
+  </operation>
+  <operation name="sayHello">
+    <soap:operation soapAction="sayHello"></soap:operation>
+    <input>
+      <soap:body use="literal"
+        namespace="http://www.jsoso.com/wstest"></soap:body>
+    </input>
+    <output>
+      <soap:body use="literal"
+        namespace="http://www.jsoso.com/wstest"></soap:body>
+    </output>
+    <fault name="HelloException">
+      <soap:fault name="HelloException" use="literal"></soap:fault>
+    </fault>
+    </operation>
+</binding>
+
+<service name="Example">
+  <port name="ExamplePort" binding="tns:ExamplePortBinding">
+    <soap:address location="http://localhost:8080/hello"></soap:address>
+  </port>
+</service>
+</definitions>
+#+END_EXAMPLE
+
+*** WEB SERVICE
+从JavaSE6.0开始，Java引入了对Web Service的原生支持。我们只需要简单的使
+用Java的Annotation标签即可将标准的Java方法发布成Web Service
+
+不是所有的Java类都可以发布成Web Service。Java类若要成为一个实现了Web
+Service的bean，它需要遵循下边这些原则:
+1. 这个类必须是public类
+2. 这些类不能是final或者abstract
+3. 这个类必须有一个公共的默认构造函数
+4. 这个类绝对不能有finalize()方法
+
+发布web service
+
+java -Djava.ext.dirs=lib org.apache.axis.client.AdminClient -lhttp://localhost:8080/services/AdminService deploy.wsdd
+** ActionServlet ActionForm Servlet
+以上三个概念在struts1中见的比较多
+** Java synchronized同步 和 volatile变量
+java语言包含两种内在的同步机制：同步块(或方法)和volatile变量。这两种机
+制的提出都是为了实现代码线程的安全性。其中volatile变量的同步性较差，而
+且其使用也更容易出错。
+
+Java 语言中的 volatile 变量可以被看作是一种 “程度较轻的
+synchronized”；与 synchronized 块相比，volatile 变量所需的编码较少，
+并且运行时开销也较少，但是它所能实现的功能也仅是 synchronized 的一部分。
+
+java中synchroized关键字的效率很低：
+这是因为java中线程是映射到操作系统的原生线程上的。如果要唤醒或者是阻塞
+一条线程需要操作系统的帮助。这就需要从用户态转换到心态，状态转换需要相
+当长的时间，所以说synchronized是java中比较重量级的操作。虚拟机本身会做
+一些优化。比如通知操作系统阻塞线程之前，加入一段自旋等待过程，避免频繁
+的切入和换出和心态。
+
+synchronized关键字的作用域有二种：
+1. 是某个对象实例内，synchronized aMethod(){}可以防止多个线程同时访问
+   这个对象的synchronized方法（如果一个对象有多个synchronized方法，只
+   要一个线程访问了其中的一个synchronized方法，其它线程不能同时访问这
+   个对象中任何一个synchronized方法）。这时，不同的对象实例的
+   synchronized方法是不相干扰的。也就是说，其它线程照样可以同时访问相
+   同类的另一个对象实例中的synchronized方法
+2. 是某个类的范围，synchronized static aStaticMethod{}防止多个线程同时
+   访问这个类中的synchronized static 方法。它可以对类的所有对象实例起
+   作用。
+3. 除了方法前用synchronized关键字，synchronized关键字还可以用于方法中
+   的某个区块中，表示只对这个区块的资源实行互斥访问。用法是:
+   synchronized(this){/*区块*/}，它的作用域是当前对象；
+4 . synchronized关键字是不能继承的，也就是说，基类的方法synchronized
+f(){} 在继承类中并不自动是synchronized f(){}，而是变成了f(){}。继承类
+需要你显式的指定它的某个方法为synchronized方法； 至于为什么不能继承
+
+#+BEGIN_EXAMPLE
+1．  把synchronized当作函数修饰符时，示例代码如下：
+
+Public synchronized void methodAAA()
+{
+     //….
+}
+
+上边的示例代码等同于如下代码：
+
+public void methodAAA()
+{
+     synchronized (this)
+     {
+       //…..
+      }
+}
+ (1)处的this指的是什么呢？它指的就是调用这个方法的对象，如P1。可见同步
+方法实质是将synchronized作用于object reference。――那个拿到了P1对象锁
+的线程，才可以调用P1的同步方法，而对P2而言，P1这个锁与它毫不相干
+
+
+将synchronized作用于static 函数，示例代码如下：
+
+Class Foo
+{
+
+     public synchronized static void methodAAA()   // 同步的static 函数
+     {
+             //….
+     }
+
+      public void methodBBB()
+      {
+          synchronized(Foo.class)   //  class literal(类名称字面常量)
+      }
+}
+#+END_EXAMPLE
+代码中的methodBBB()方法是把class literal作为锁的情况，它和同步的static函数产生的效果是一样的，取得的锁很特别，是当前调用这个方法的对象所属的类（Class，而不再是由这个Class产生的某个具体对象了）。
+
+记得在《Effective Java》一书中看到过将 Foo.class和 P1.getClass()用于作
+同步锁还不一样，不能用P1.getClass()来达到锁这个Class的目的。P1指的是由
+Foo类产生的对象。
+
+还有一些技巧可以让我们对共享资源的同步访问更加安全：
+
+1．  定义private 的instance变量+它的 get方法，而不要定义public/protected的instance变量。如果将变量定义为public，对象在外界可以绕过同步方法的控制而直接取得它，并改动它。这也是JavaBean的标准实现方式之一。
+
+2．  如果instance变量是一个对象，如数组或ArrayList什么的，那上述方法仍然不安全，因为当外界对象通过get方法拿到这个instance对象的引用后，又将其指向另一个对象，那么这个private变量也就变了，岂不是很危险。 这个时候就需要将get方法也加上synchronized同步，并且，只返回这个private对象的clone()――这样，调用端得到的就是对象副本的引用了。
+
+*同步封装器*
+Java的Collection框架，它是用来取代原本散乱的繁重的Vector类型，Vector的
+任何方法都是同步的，因此特别的繁重，而对于Collections对象，在需要同步
+是时候，一般都会访问其它方法来保证同步，没有必要使用两次锁定(一次是锁
+定包含使用Collections对象，一次是锁定Collection对象自身)。java的解决方
+案是使用同步封装器。
+
+** java线程的sleep.wait.notify.yield方法的区别要点
+1.sleep()使线程休眠一段时间，一段时间结束后，线程进入可执行状态，但并不是立即执行，只是在被排程器调用的时候才执行。在休眠期间，并不释放所持有的“锁”；
+
+2.wait()使线程休眠一段时间，若设置参数，时间到时，线程就自动进入可执行状态。若没有，则需要notify()方法去调用。注意：wait()方法和notify()方法都时针对this对象的，调用wait()方法后，会释放加在对象上的“锁”。
+
+3.yield()使线程放弃执行的权利，进入可执行状态，也就意味着线程在yield()方法后，有可能又执行。使用yield()方法，线程并不释放自己锁持有的“锁”。

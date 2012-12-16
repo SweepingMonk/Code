@@ -1,0 +1,654 @@
+* 系统编程
+** 可执行文件的内存布局
+可执行文件内部主要包括文本端text，数据段data，和BSS段，用size命令可以
+查看可执行文件a.out的大小。
+数据段主要放置的是经过初始化的全局变量和静态变量，注意是经过初始化的，
+如果没有被初始化则会放在BSS段，文本段主要放置可执行程序的指令。
+局部变量并不进入a.out，它们在运行时创建。
+
+** 进程的地址空间
+注意：进程的地址空间和可执行程序的内存空间不太一样。
+它除了包括上边的文本段，数据段和BSS段之外，还需要保存堆栈段，用于保存
+局部与函数的数据。
+同时，注意虚拟地址空间的最低部分未被映射，它位于进程的地址空间中，但并未赋予
+物理地址，所有对它的引用都是非法的，在典型情况下，它是地址零开始的几K
+字节，用于捕获使用空指针和小整形值的指针引用内存的情况。
+堆栈段占据进程空间的最高地址，并向下增长。
+** 段错误和BUS错误
+常见的段错误和BUS错误，BUS错误通常是由于数据在内存中不对齐引起的
+#+BEGIN_EXAMPLE
+union{ char a[10];
+       int i;
+}u;
+int * p = (int *)&(u.a[1]);
+*p = 17;
+#+END_EXAMPLE
+在实例中，数组a在共用体中是和int对齐的，所以a[1]必然不和int对齐，然后
+在这个地方放入一个4字节的数据会引发BUS错误。
+
+段错误比较常见，通常是
+1. 坏指针值错误。在指针赋值前就用它来引用内存，指针释放后再将它置为空
+   值。
+2. 改写错误。 数组越界。
+3. 释放链表出错。
+** 捕捉信号signal
+使用头文件signal.h,使用句柄函数signal(SIGSGEV, handler)
+常见的错误信号值SIGBUS,SIGSGEV,SIGILL,SIGINT,SIGABRT
+
+注意有两个信号是不能被捕获的， SIGKILL和SIGSTOP 并且这两个信号是不能被
+忽略的，因为，它们向超级用户提供了使进程终止或停止的可靠方法。
+
+shell自动将后台进程对中断和退出信号的处理方式设置为忽略，于是当按中断
+键时就不会影响到后台进程，如果没有这样的处理，那么当按中断键时，它不但
+会终止当前进程，还会终止所有后台进程。
+
+** 如何捕获一个子进程终止状态
+1. 可以在父进程中使用wait或者waitpid捕获子进程的结束状态
+2. 或者使用信号机制捕获SIGCHLD信号
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+#include <stdlib.h>
+
+int p = 0;
+void handler(int sig)
+{
+    p++;
+}
+
+int main()
+{
+    signal(SIGCHLD, handler);
+    int pid;
+    if((pid=fork())<0)
+        exit(1);
+    else if(pid==0)
+    {
+        printf("hello\n");
+    }
+    else{
+        sleep(4);
+    }
+    printf("%d %d\n", p, getpid());
+    return 0;
+}
+#+END_EXAMPLE
+打印结果
+hello
+0 4316
+1 7364
+由此可见已经成功捕获到了子进程终止的信号，并执行了处理函数handler，使
+得p的值增加
+
+注意：父进程已经结束的进程被称为孤儿进程，而子进程如果先于父进程结束，
+父进程却没有捕获子进程的状态，被称为僵尸进程。
+
+** sleep函数
+unsigned int sleep(unsigned int secondes);
+1. 已经过了seconds所指定的墙上时钟时间
+2. 调用进程捕捉到了一个信号并从信号处理程序返回
+
+如同alarm信号一样，由于其他系统活动，实际返回的时间会比所要求的会迟一些
+
+第一种情况下，返回值是0，第二种情况下，由于捕捉到某个信号sleep提早返回，返回值是未睡够的秒数
+
+sleep可以用alarm来实现
+
+** 作业控制信号
+与作业控制有关的6个信号
+SIGCHLD  子进程停止或终止
+SIGCONT  如果进程已停止，则使其继续进行
+SIGSTOP  停止信号
+SIGTTIN  后台进程组成员读控制终端
+SIGTTOU  后台进程组成员写控制终端
+
+** unix系统中逐字符输入的两种实现
+一种是把I/O设置为raw状态，可以实现阻塞式读入，如果终端没有字符输入，进
+程就一直等待，直到有字符输入为止。
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int c;
+    /* 中断驱动原来处于普通的一次一行模式*/
+    /* 把终端设置为raw状态可以实现阻塞式读入*/
+    system("stty raw");
+    while(1){
+        /*现在驱动处于一次一字符的模式*/
+        c=getchar();
+        putchar(c);
+        if(c=='q')
+            break;
+    }
+    /* 终端驱动又处于一次一字符的方式 */
+    system("stty cooked");
+    return 0;
+}
+#+END_EXAMPLE
+
+另外一种方式是使用ioctl(),这样只有当一个字符等待被读入时，进程才进行读
+取，这种类型的I/O被称为轮询，就好像你不断地询问设备的状态，看看它是否
+有字符要传给你。
+
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <sys/ioctl.h>
+
+int kbhit()
+{
+    int i;
+    /* 设置I/O轮询 */
+    ioctl(0, FIONREAD, &i);
+    return i;
+}
+
+int main()
+{
+    int i=0;
+    int c=' ';
+    system("stty raw -echo");
+    printf("enter 'q' to quit \n");
+    for(;c!='q';i++){
+        if(kbhit()){
+            c=getchar();
+            printf("\n got %c, on iteration %d", c, i);
+        }
+    }
+    system("stty cooked echo");
+}
+#+END_EXAMPLE
+** 函数库调用和系统调用的区别
+system是一个库函数 strlen并不调用任何系统调用
+函数库调用是语言或应用程序的一部分，而系统调用是操作系统的一部分，不管
+是java还是python的I/O最后都是通过read和write这样的系统调用来完成的
+系统调用是用户程序和内核交互的接口
+| 函数库调用                                  | 系统调用                                     |
+|---------------------------------------------+----------------------------------------------|
+| 在所有的ansi c编译器版本中，c库函数是相同的 | 各个操作系统的系统调用时不同的               |
+| 它调用函数库中的一个程序                    | 它调用系统内核的服务                         |
+| 与用户程序相联系           important        | 是操作系统的一个入口点                       |
+| 在用户地址空间执行         important        | 在内核地址空间执行                           |
+| 它的运行时间属于用户时间    important       | 它的运行时间属于系统时间                     |
+| 属于过程调用，开销较小      important             | 需要切换到内核上下文环境然后再切换回来开销大 |
+| 在C函数库libc中有大约300个程序              | 在unix中有大约90个系统调用(MS-DOS)中少一些   |
+
+自己总结
+| 函数库调用             | 系统调用             |
+|------------------------+----------------------|
+| 通常提供比较复杂的功能 | 通常提供一种最小界面 |
+
+#+BEGIN_EXAMPLE
+int main()
+
+{
+    int fd = create("filename",0666);
+
+    exit(0);
+}
+#+END_EXAMPLE
+在执行main函数时，是在user mode下执行，当遇到create函数时，继续在user mode下执行，然后将filename和0666两个参数压入栈中寄存器，接着调用库函数create，系统仍然处于user mode。
+这里的库函数create实际上调用了内核的系统调用create，执行到这里后，系统将create系统调用的unique number压入寄存器，然后执行指令trap使系统进入kernel mode(执行int $0x80产生中断)。
+这时系统意识到要进行系统调用的invoke，于是从刚才的寄存器中取出create系统调用的unique number，从系统调用表中得知要invoke的系统调用是create，然后执行。执行完毕返回库函数create的调用，库函数负责检查系统调用的执行情况(检查某些寄存器的值)，
+然后库函数create根据检查的结果返回响应的值。
+
+这里trap指令类似于一个系统中断并且是软中断，而系统调用create类似于一个中断处理函数
+所有的系统调用都与上边的情况类似，靠中断机制切换到内核模式实现。
+
+系统调用通常比库函数要慢，因为要把上下文环境切换到内核模式
+
+** 内核开发的特点
++ 内核编程时不能访问C库，也不能访问标准的C头文件
++ 内核编程时必须使用GNU C
++ 内核编程时缺少像用户空间那样的内存保护机制
+  内核中的内存都是不分页的，每用掉一个字节，物理内存就减少一个字节。
++ 内核编程时难以执行浮点运算
+  不要轻易在内核中使用浮点数
++ 内核给每个进程只有一个很小的定长堆栈
+  内核栈的大小是两页，32位机的内核栈是8KB，而64位机是16KB，固定不变，
+  每个处理器都有自己的栈。用户空间的栈比较大，而且通常可以动态增长，
+  DOS不可以。
++ 内核支持异步终端，抢占和SMP，因此必须时刻注意同步和并发
+  同步和并发
+  内核很容易产生竞争。和单线程的用户空间程序不同，内核的许多特性都要求
+  能够并发地访问共享数据。
+  + Linux是抢占式多任务操作系统
+  + Linux支持对称多处理器系统
+  + 中断是异步到来的
+    中断异步到来，完全不顾及当前正在执行的代码。如果不加以适当的保护，
+    中断完全有可能在代码访问资源的时候到来，这样中断处理程序就有可能访
+    问同一资源
+  + Linux内核可以抢占。所以如果不加以适当保护，内核中一段正在执行的代
+    码可能会被另外一段代码抢占，从而有可能导致几段代码同时访问相同的资
+    源。
+
+    常用的解决竞争的方法是自旋锁和信号量。
+
+** 文件描述符和文件指针的区别
+在linux系统中把设备和普通文件也都看做是文件，要对文件进行操作就必须先打开文件，
+打开文件后会得到一个文件描述符，它是一个很小的正整数，是一个索引值。
+
+内核会为每一个运行中的进程在进程控制块pcb中维护一个打开文件的记录表，
+每一个表项都有一个指针指向打开的文件，上边的索引值是记录表的索引值。
+
+文件描述符的优点：兼容POSIX标准，许多系统调用都依赖于它；缺点是不能移
+植到unix之外的系统上去。
+
+文件指针：c语言中使用的是文件指针而不是文件描述符来作为I/O的句柄，文件
+指针指向进程的用户空间中一个FILE结构的数据结构，FILE结构里主要包括一个
+I/O缓冲区和一个文件描述符，而文件描述符值是文件描述符表中的一个索引，
+从某种意义上将文件指针就是句柄的句柄(在Window中文件描述符被称为文件句
+柄)。
+
+文件指针的优点：是c语言中的通用格式，便于移植。
+
+既然FILE结构中含有文件描述符，那么可以使用fopen来获得文件指针，然后从
+文件指针获取文件描述符，文件描述符应该是唯一的，而文件指针却不是唯一的，
+但指向的对象是唯一的。
+
+C语言文件指针域文件描述符之间可以相互转换
+int fileno(FILE * stream)
+FILE * fdopen(int fd, const char * mode)
+
+open和fopen的区别
+
+| open                      | fopen                       |
+|---------------------------+-----------------------------|
+| open返回一个文件描述符    | 返回FILE *                  |
+| 无缓冲                    | 有缓冲                      |
+| 与write()和read()配合使用 | 与fwrite()和fread()配合使用 |
+
+
+FILE的结构
+#+BEGIN_EXAMPLE
+struct _iobuf {
+        char *_ptr;          //缓冲区当前指针
+        int   _cnt;
+        char *_base;         //缓冲区基址
+        int   _flag;         //文件读写模式
+        int   _file;         //文件描述符
+        int   _charbuf;      //缓冲区剩余自己个数
+        int   _bufsiz;       //缓冲区大小
+        char *_tmpfname;
+        };
+typedef struct _iobuf FILE;
+
+int fd = open("TAGS", O_RDONLY);
+FILE * fp = fopen("TAGS", "r");
+printf("%d %d\n", fd, fp->_file);
+可以从文件指针中获取文件描述符
+
+fileno(fp) 和fp->_file效果是一样的
+FILE * fp = fdopen(fd, "r") 根据文件描述符加上访问模式可以得到文件指针
+#+END_EXAMPLE
+
+** makefile规则
+*** ':='和'='的区别
+':='和平时使用的赋值符号相同，'='则不同，使用'='时，函数和变量参考会留
+在那儿，改变一个变量的值会导致其它变量的值也被改变，类似于指针。
+
+** Unix高级环境高级编程
+所有操作系统都需要向它们运行的程序提供各种服务.包括执行新程序,打开文件,读
+文件,分配存储区等.在严格意义上,可将操作系统定义为一种软件，它控制计算
+机硬件资源，提供程序运行环境。一般而言我们称这种软件为内核，它相对较小，
+位于环境的中心。UNIX的体系结构从内到外是内核、系统调用、shell 库函数、
+应用软件。内核的接口被称为系统调用，公用函数库建立在系统调用之上，应用
+软件可以使用库函数也可以使用系统调用。shell是一种特殊的应用程序，它为
+运行其它软件提供了一种接口。
+
+** APUE源码编译与使用
+UNIX环境高级编程（第二版）/ APUE 源码编译与使用
+
+为了用APUE的源码折腾了一下，网上很多方法都不能用，或者有小问题，特此记录。
+
+注意，不同环境的编译提示有所不同，如果你的环境和我的相似，那么应该没问题。
+
+环境
+
+Linux mypad 2.6.38-ARCH #1 SMP PREEMPT Tue May 3 06:04:40 UTC 2011 i686 Intel(R) Core(TM)2 Duo CPU T6570 @ 2.10GHz GenuineIntel GNU/Linux
+
+确保你已经安装了gcc和gawk。
+
+步骤
+
+到www.apuebook.com下载源码
+tar解包，cd apue.2e
+vi Make.defines.linux 修改变量WKDIR，指向你的apue源码的位置，我的是/home/huangz/code/apue.2e，所以 WKDIR=/home/huangz/code/apue.2e
+vi include/apue.h 增加一个常量ARG_MAX，这是threadctl/getenv1.c和threadctl/getenv3.c要用到的；4096这个值是参考里给的，如果有问题，自己修改吧。
+vi threadctl/getenv1.c 增加
+vi threadctl/getenv3.c 增加
+vi threads/badexit2.c 修改第31行，将pthread_self()的返回值转换为int类型。 printf(“thread 2: ID is %d\n”, (int)pthread_self());
+vi std/linux.mk 将两个nawk改为gawk
+make
+sudo cp include/apue.h /usr/include sudo cp lib/libapue.a /usr/lib
+好了，测试一下，记得要用-lapue命令让编译器链接apue库 gcc main.c -lapue
+
+** 不带缓冲的I/O
+每个read和write都调用内核的一个系统调用，是不带缓冲的I/O，
+** Unix文件共享
+1. 每个进程在进程表中都有一个记录项，记录项中包含有一张打开文件描述表，
+   每个描述符占有一项。与每个文件描述符相关联的是：
+   + 文件描述符标志
+   + 指向一个文件表的指针
+2. 内核为所有打开文件维持一张文件表，每个文件表项包含：
+   + 文件状态标志
+   + 当前文件偏移量
+   + 指向该文件V节点表项的指针
+3. 每个打开文件都有一个v节点结构(Linux中使用i节点)，v节点包含了文件类型和对此文件进行各
+   种操作的函数的指针。对于大多数文件，v节点还包含了该文件的i节点
+   (i-node索引节点)。这个信息都是在打开文件的时候从磁盘上读入内存的，i
+   节点包含了文件的所有者、文件长度、文件所在的设备、指向文件实际数据
+   块在磁盘上所在位置的指针等。
+
+Linux没有使用v节点，而是使用了通用的节点结构，虽然两种实现有所不同，但
+在概念上v节点和i节点是一样的，两者都指向文件系统特有的i节点结构。
+
+
+当在两个进程中同时打开同一个文件时，每个进程表中都有一个记录项，都有自己的
+文件描述符和指向文件表的指针，而文件表中的v节点指针指向同一个v节点。
+
+对于一个给定文件只有一个v节点表项，每个进程都有自己的文件表项的理由是：
+每个进程都拥有自己对该文件的当前偏移量。
+
+当使用dup函数或者fork之后，可能有多个文件描述符指向同一文件表项。在
+fork之后父子进程对于每一个打开文件描述符共享同一个文件表项。由于共享文
+件表项，因此拥有同一当前文件偏移量,以下实例:
+
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int main()
+{
+    FILE * fp1, * fp2;
+    int fd1, fd2;
+    if((fd1 = open("in", 2)) < 0) /* 打开文件 2表示只写方式 */
+    {
+        printf("open error\n");
+        exit(1);
+    }
+    lseek(fd1, 10, SEEK_SET);   /* 设定文件偏移量 */
+    /* fd2 = fcntl(fd1, F_DUPFD, 0); /\* 和下面一句等效 *\/ */
+    fd2 = dup(fd1);             /* 复制文件描述符 */
+    lseek(fd1, 20, SEEK_SET);   /* 设定文件偏移量 */
+    lseek(fd2, 30, SEEK_SET);   /* 设定文件偏移量 */
+    fp1 = fdopen(fd1, "r");     /* 文件描述符转化为文件指针 */
+    fp2 = fdopen(fd2, "r");
+    printf("%d %d %d %d\n", fd1, fd2, ftell(fp1), ftell(fp2)); /* 打印文件偏移量 */
+    return 0;
+}
+#+END_EXAMPLE
+复制一个描述符的另一种方法时fcntl函数，调用dup(filedes)，等效于
+fcntl(filedes, F_DUPFD, 0);而调用dup2(filedes, filedes2);等效于
+close(fildes2); fcntl(filedes, F_DUPFD, filedes2);
+** Unix文件系统基本结构
+一个磁盘分成一个或多个分区，每个分区可以包含一个文件系统。
+
+见系统附图：filesystem.jpg i_node.jpg
+
+Linux文件系统使用 索引节点i 来记录文件信息，索引节点是一个结构，用固定长度，它包含了一个文件的长度、创建及修改时间、权限、所属关系、磁盘中的位置等信息。
+
+一个文件系统维护了一个索引节点的数组 即为目录项，目录项中的每一项包括文件
+索引节点i的节点号和文件名，所以目录只是将文件的名称和它的索引节点号结
+合在一起的一张表。
+
+对于一个文件来说有唯一的索引节点与之对应，而一个索引节点却可以有多个
+文件名与之对应，因此磁盘上的同一个文件可以通过不同的路径去访问它。
+
+可以用ln命令对一个已经存在的文件建立一个新的连接，而不复制文件的内容。
+连接有软连接和硬连接之分，软连接又叫符号连接。
+
+| 硬连接                                          | 软连接                                                     |
+|-------------------------------------------------+------------------------------------------------------------|
+| 硬链接指向文件的i节点                           | 它的数据是它所连接的文件的路径名，是指向一个文件的间接指针 |
+| 目录不能有硬连接，但超级用户可以                | 目录也适用                                                 |
+| 不能跨越文件系统                                | 可以跨越文件系统                                           |
+| 文件在磁盘中只有一个拷贝                        |                                                            |
+| 索引节点的引用为0时才可以删除文件可以防止误删除 | 可以删除原有文件保留连接文件，没有防误删功能               |
+
+每个文件系统都对它们的i节点进行编号，因此目录项中的i节点指向同一文件系
+统的i节点，不能使一个目录项指向另一个文件系统的i节点，因此硬连接不能跨
+越文件系统。
+
+
+一个磁盘块分为三部分：
++ 超级快， 文件系统中第一块被称为超级快。这个快存放文件系统本身的结构
+  信息，比如每个区域的大小，未被使用的磁盘块的信息。
++ i节点， 超级块的下一个部分就是i节点表，文件系统中的每个文件在该表中
+  都对应一个i节点。
++ 数据区， 文件的内容保存在这个区域上，磁盘上所有块的大小都一样，如果
+  文件包含了超过一个块的内容，则文件内容会存放在多个磁盘块中，并把磁盘
+  块的分配情况记录在文件的i节点中的磁盘序列表中
+
+大文件存储的实现：
+linux文件系统使用三级分页存储结构，每个i节点的磁盘序列表中最多有13项，
+通常用前10个数据块存放文件数据，第11个数据块用来构造一级索引，第12个数
+据块用来构造二级索引，第13个数据块用来构造三级索引。
+
+** 进程终止方式
+1. 从main返回
+2. 调用exit
+3. 调用_exit或_Exit
+4. 最后一个线程从其启动例程返回
+5. 组后一个线程调用pthread_exit
+异常终止有三种方式：
+6. 调用abort
+7. 接收一个信号并终止
+8. 最后一个线程对取消请求作出响应
+
+有三个函数用于正常终止一个程序：_exit和_Exit立即进入内核，exit则先执行
+一些清理工作，如为所有打开文件执行fclose函数，然后进入内核
+
+内核使程序执行的唯一方法是调用一个exec函数，函数资源终止的唯一方法是显
+式或隐式调用_exit或_Exit
+** linux特殊权限:setUid setGid 粘着位(sticky)
+linux中的每个文件都有自己的可读可写可执行权限位
+
+
+** alloca函数
+alloca的调用与malloc相同，但是它是在当前函数的栈针上分配内存空间，而不是在堆中。优点是:当函数返回时，自动释放它所使用的栈桢，所以不必再为释放空间而费心。其缺点是：alloca函数增加了栈桢的长度，而某些系统在函数已被调用后不能增加栈桢长度。
+** init进程
+有关/sbin/init程序的问题
+
+最简单的请参见Linux 0.12系统（下Linux.old/bochs/下有），或者看Linux.old/Linux-0.12/
+-------------
+当init启动后，它通过执行各种启动事务来继续引导进程（检查并监视文件系统，启动后台程序daemons,等等），直至完成用户所有操作环境的设置工作。这里主要涉及4个程序：init、getty(agetty)、login和shell程序。这4个程序之间的关系见下图所示。
+
+init进程的主要任务是根据/etc/rc文件中设置的信息，执行其中设置的命令，然后根据/etc/inittab文件中的信息，为每一个允许登录的终端设备使用fork()创建一个子进程，并在每个新创建的子进程中运行agetty （getty）程序。而init进程则调用wait()，进入等待子进程结束状态。每当它的一个子进程结束退出，它就会根据wait()返回的pid号知道是哪个对应终端的子进程结束了，因此就会为相应终端设备再创建一个新的子进程，并在该子进程中重新执行agetty程序。这样，每个被允许的终端设备都始终有一个对应的进程为其等待处理。
+在正常的操作下，init确定agetty正在工作着以允许用户登录，并且收取孤立进程。孤立进程是指那些其父辈进程已结束的进程；在Linux中所有的进程必须属于单棵进程树，所以孤立进程必须被收取。当系统关闭时，init负责杀死所有其它的进程，卸载所有的文件系统以及停止处理器的工作，以及任何它被配置成要做的工作。
+
+getty程序的主要任务是设置终端类型、属性、速度和线路规程。它打开并初始化一个tty端口，显示提示信息，并等待用户键入用户名。该程序只能由超级用户执行。通常，若/etc/issue文本文件存在，则getty会首先显示其中的文本信息，然后显示登录提示信息（例如：plinux login: ），读取用户键入的登录名，并执行login程序。
+为了能让init程序运行getty，/etc/inittab文件中必须含有getty（agetty）命令。/etc/inittab文件中有关agetty的内容例子见如下所示。
+列表 3.1 poeigl-1.2中的inittab文件
+# inittab for linux, poeigl 1.2
+# Format:
+# ttyline:termcap-entry:getty-command
+tty1:con80x60:/bin/agetty 9600 tty1
+tty2:con80x60:/bin/agetty 9600 tty2
+tty3:con80x60:/bin/agetty 9600 tty3
+tty4:con80x60:/bin/agetty 9600 tty4
+# tty5:con80x60:/bin/agetty 9600 tty5
+# tty64:dumb:/bin/agetty 9600 tty64
+# tty65:dumb:/bin/agetty -m -t60 2400 tty65
+每个终端都有自己的getty命令。其中列出了tty1—tty4对应的登录项信息。以’#’开始的是注释行。第1列是所用终端设备名称，第2列是指定终端的类型，这里指定了终端类型是con80x60。第3列是所执行的命令及其参数。最后两行中的tty64和tty65对应连接在串行端口上的终端。
+对于使用串行端口与主机直接相连的终端以及通过modem拨号连接的终端，Linux的agetty程序还有其它一些属性。如在读取登录名时自动调整tty的设置信息，例如奇偶校验位、檫除字符、行结束字符以及上档键字符等。可选择地从链接的Hayes兼容modem信息中检测出传输波特率。
+/dev/inittab中每一项的参数格式与具体使用哪一种getty程序有关。目前一般常用的getty程序有如下几种：
+1.agetty（有时直接称为getty）：容易设置，无须配置文件。适用于直接连接的终端；
+2.getty（getty_ps的一部分）：适用于直接连接的终端；
+3.mgetty：最适合于通过modem连接，也可用于直连；
+4.uugetty：仅用于通过modem连接终端，是getty_ps软件包的部分；
+5.mingetty：简单的getty。适用于控制台终端或虚拟终端；
+6.fbgetty：适用于控制台或虚拟终端。
+Redhat 9系统默认配置中带有mingetty和agetty两个程序。控制台或虚拟终端使用的是mingetty。对于实际的字符终端则一般使用agetty。因此在Redhat 9系统的/etc/inittab文件中会看到以下的信息。
+列表 3.2 RedHat 9系统的/etc/inittab文件中有关getty的信息
+# Run gettys in standard runlevels
+1:2345:respawn:/sbin/mingetty tty1
+2:2345:respawn:/sbin/mingetty tty2
+3:2345:respawn:/sbin/mingetty tty3
+4:2345:respawn:/sbin/mingetty tty4
+5:2345:respawn:/sbin/mingetty tty5
+6:2345:respawn:/sbin/mingetty tty6
+其中第1列表示名称tty后的数字，2345表示该mingetty的运行层。respawn表示如果该mingetty被终止，则mingetty将再次自动执行。/sbin/mingetty是命令。ttyn代表/dev/ttyn（n表示数字1—5）。
+在登录到Linux系统中之后，你会发现（使用”top”或”ps –ax”命令）自己终端原来的getty进程已经找不到了。因为getty进程执行了login程序，被替换成了login进程，并且最后被替换成你的登录shell进程。
+当你在”login: “提示符下键入了你的用户名后，getty会读取用户名并且去执行login程序，也把用户名信息传给了它。因此getty进程被替换成了login进程。此时login进程会接着要求你输入口令。在口令检查通过后就会去执行/etc/passwd文件中对应你用户名项中记录的程序。通常这个程序是bash shell程序。因此原来的getty进程最终被替换成了bash进程，对应的这三个程序也就都具有相同的进程ID。
+当注销登录（log out）时，则该终端上的所有进程都会被终止（killed），包括登录shell进程bash。因此，对于在/etc/inittab文件中列出的getty程序，一旦其被替换执行的bash程序被终止或退出，init进程就会为对应终端重新创建一个getty进程。
+
+login程序则主要用于要求登录用户输入密码。根据用户输入的用户名，它从口令文件passwd中取得对应用户的登录项，然后调用getpass()以显示”password:”提示信息，读取用户键入的密码，然后使用加密算法对键入的密码进行加密处理，并与口令文件中该用户项中pw_passwd字段作比较。如果用户几次键入的密码均无效，则login程序会以出错码1退出执行，表示此次登录过程失败。此时父进程（进程init）的wait()会返回该退出进程的pid，因此会根据记录下来的信息再次创建一个子进程，并在该子进程中针对该终端设备再次执行agetty程序，重复上述过程。
+login程序也可以被用户在运行过程中在shell下当作一个命令执行。此时它可以被用随时从一个用户切换成另一个用户。如果执行时没有给出参数，则login就会显示输入用户名的提示信息。如果用户不是超级用户（root），并且/etc/目录下存在一个名为nologin的文件，那么该文件中的信息就会被显示出来，此次登录过程也随即被终止。
+如果在/etc/usertty文件中对该用户指定了特殊的访问限制，那么这些限制要求必须满足。如果是一个超级用户，那么所使用的登录tty设备必须是在/etc/securetty文件中指定的。
+在所有这些条件满足之后，login同样也会要求用户输入密码并对其进行检查。如果.hushlogin存在的话，login就会执行一个“安静”的登录过程，也即不检查是否有邮件，也不显示上次登录时间和motd文件中的信息。否则如果/var/log/lastlog文件存在的话，就会显示其中的最后登录时间。
+如果用户键入的密码正确，则login就会把当前工作目录（Currend Work Directory）修改成口令文件中指定的该用户的起始工作目录。并把对该终端设备的访问权限修改成用户读/写和组写，设置进程的组ID。然后利用所得到的信息初始化环境变量信息，例如起始目录（HOME=）、使用的shell程序（SHELL=）、用户名（USER=和LOGNAME=）和系统执行程序的默认路径序列（PATH=）。接着显示/etc/motd文件（message-of-the-day）中的文本信息，并检查并显示该用户是否有邮件的信息。最后login程序改变成登录用户的用户ID并执行口令文件中该用户项中指定的shell程序，如bash或csh等。
+如果口令文件/etc/passwd中该用户项中没有指定使用哪个shell程序，系统则会使用默认的/bin/sh程序。如果口令文件中也没有为该用户指定用户起始目录的话，系统就会使用默认的根目录/。有关login程序的一些执行选项和特殊访问限制的说明，请参见Linux系统中的在线手册页（man 8 login）。
+
+shell程序是一个复杂的命令行解释程序，是当用户登录系统进行交互操作时执行的程序。它是用户与计算机进行交互操作的地方。它获取用户输入的信息，然后执行命令。用户可以在终端上向shell直接进行交互输入，也可以使用shell脚本文件向shell解释程序输入。在Linux系统中，目前常用的shell有：
+Bourne Again Shell,/bin/bash
+C shell,/bin/csh（或tcsh）
+BSD shell/bin/ash（或bsh）
+在登录过程中，系统（login）会从口令文件用户对应登录项的最后一个字段知道应该为用户执行哪个shell程序。
+shell程序中实现了一个具有流控制结构的语言，使用相当广泛。目前这些shell程序都朝着与IEEE POSIX 1003.2兼容的方向发展，因此它们各自虽然各自有自己的特点，但基本功能已经越来越相象。本书主要介绍bash的工作原理和实现机制，其它几种shell的实现机制与之类似。
+在登录过程中login开始执行shell时，所带参数argv[0]的第一个字符是’-’，表示该shell是作为一个登录shell被执行。此时该shell程序会根据该字符，执行某些与登录过程相应的操作。登录shell会首先从/etc/profile文件以及.profile文件（若存在的话）读取命令并执行。如果在进入shell时设置了ENV环境变量，或者在登录shell的.profile文件中设置了该变量，则shell下一步会从该变量命名的文件中读去命令并执行。因此用户应该把每次登录时都要执行的命令放在.profile文件中，而把每次运行shell都要执行的命令放在ENV变量指定的文件中。设置ENV环境变量的方法是把下列语句放在你起始目录的.profile文件中。
+ENV=$HOME/.anyfilename; export ENV
+在执行shell时，除了一些指定的可选项以外，如果还指定了命令行参数，则shell会把第一个参数看作是一个脚本文件名并执行其中的命令，而其余的参数则被看作是shell的位置参数（$1、$2等）。否则shell程序将从其标准输入中读取命令。
+在执行shell程序时可以有很多选项，请参见Linux系统中的有关sh的在线手册页
+中的说明。
+** linux中source exec和shell script的区别
+exec和source都属于linux内部命令，在bash下输入man exec或者man source可
+以查看所有的内部命令信息。
+
+bash  shell的，命令分为两类：外部命令和内部命令。外部命令是通过系统调
+用或者独立的程序实现的，如sed awk等，内部命令是由特殊文件格式(.def)来
+实现，如cd history等
+
+fork是linux的系统调用，用来创建子进程，环境变量只能单向从父进程传给子
+进程。不管子进程的环境变量如何变化，都不会影响父进程的环境变量。
+
+有两种方式执行shell scripts,一种是新产生一个shell, 然后执行响应的shell
+scripts;一种是在当前shell下执行，不再启用其他shell。
+
+新产生一个shell然后再执行scripts的方法是在scripts文件开头加入以下语句
+#！/bin/sh
+这种方法先启用新的shell，然后在其下执行命令。
+
+另外一种就是source命令，不再产生新的shell, 而在当前shell下执行一条命令。
+
+source命令和. 命令是一样的
+由于所有执行结果均于当前shell内完成，若script的环境有所改变，当然也会
+改变当前环境了
+
+在bash下输入man source，找到source命令解释处，可以看到解释"Read and
+execute commands from filename in the current shell environment and
+..."。从中可以知道，source命令是在当前进程中执行参数文件中的各个命令，
+而不是另起子进程(或sub-shell)。
+
+在bash下输入man exec，找到exec命令解释处，可以看到有"No new process is
+created."这样的解释，这就是说exec命令不产生新的子进程。那么exec与
+source的区别是什么呢？
+
+shell的内建命令exec将并不启动新的shell，而是用要被执行命令替换当前的shell进程，并且将老进程的环境清理掉，而且exec命令后的其它命令将不再执行。
+因此，如果你在一个shell里面，执行exec ls那么，当列出了当前目录后，这个shell就自己退出了，因为这个shell进程已被替换为仅仅执行ls命令的一个进程，执行结束自然也就退出了。
+exec也是让script在同一个进程上执行，但是原有进程则被结束了。
+也就是简而言之：原有进程会否终止，就是exec与source/fork的最大差异了。
+
+** fcntl系统调用
+功能描述：根据文件描述词来操作文件的特性。
+
+用法：
+int fcntl(int fd, int cmd);
+int fcntl(int fd, int cmd, long arg);
+int fcntl(int fd, int cmd, struct flock *lock);
+
+参数：
+fd：文件描述词
+cmd：操作命令
+arg：供命令使用的参数
+lock：同上
+
+fcntl函数有5种功能：
+1.复制一个现有的描述符（cmd=F_DUPFD）.
+2.获得／设置文件描述符标记(cmd=F_GETFD或F_SETFD).
+3.获得／设置文件状态标记(cmd=F_GETFL或F_SETFL).
+4.获得／设置异步I/O所有权(cmd=F_GETOWN或F_SETOWN).
+5.获得／设置记录锁(cmd=F_GETLK,F_SETLK或F_SETLKW).
+
+F_DUPFD ：复制文件描述词 。
+FD_CLOEXEC ：设置close-on-exec标志。如果FD_CLOEXEC位是0，执行execve的过程中，文件保持打开。反之则关闭。
+F_GETFD ：读取文件描述词标志。
+F_SETFD ：设置文件描述词标志。
+F_GETFL ：读取文件状态标志。
+F_SETFL ：设置文件状态标志。
+其中O_RDONLY， O_WRONLY， O_RDWR， O_CREAT，  O_EXCL， O_NOCTTY 和
+O_TRUNC不受影响，
+
+能更改的标志有 O_APPEND，O_ASYNC， O_DIRECT， O_NOATIME 和 O_NONBLOCK。
+
+七.  F_GETLK, F_SETLK 和 F_SETLKW ：获取，释放或测试记录锁，使用到的参数是以下结构体指针：F_SETLK：在指定的字节范围获取锁（F_RDLCK, F_WRLCK）或释放锁（F_UNLCK）。如果和另一个进程的锁操作发生冲突，返回 -1并将errno设置为EACCES或EAGAIN。
+
+F_SETLKW：行为如同F_SETLK，除了不能获取锁时会睡眠等待外。如果在等待的过程中接收到信号，会即时返回并将errno置为EINTR。
+F_GETLK：获取文件锁信息。
+F_UNLCK：释放文件锁。
+
+为了设置读锁，文件必须以读的方式打开。为了设置写锁，文件必须以写的方式打开。为了设置读写锁，文件必须以读写的方式打开。
+
+等等... ...
+
+** linux进程
+*** 进程组
+每个进程除了有一个进程ID之外，还属于一个进程组，每个进程组有一个唯一的
+进程组ID，用pid_t getpgrp(void);函数可以获取组ID
+
+每个进程组都可以有一个组长进程，组长进程的标志是，其进程组ID等于其进程
+ID，只要进程组有还有一个进程存在，进程组就存在
+** linux线程
+*** 线程简介
+就像每个进程有一个进程ID一样，每个线程也有一个线程ID，进程ID在整个系统
+中是唯一的，但线程ID不同，线程ID只在它所属的进程环境中有效。
+
+进程ID用pid_t数据类型来表示，是一个非负整数。线程ID则用pthread_t数据类
+型来表示，实现的时候可以用一个结构来代表pthread_t数据类型，所以可移植
+的操作系统实现不能把它作为整数来处理，这里使用一个函数来对两个线程Id进
+行比较
+int pthread_equal(pthread_t tid1, pthread_t tid2);
+若相等则返回非0值，否则返回0
+
+线程可以通过pthread_t pthread_self(void);函数来获得自身的线程ID
+
+
+
+* Linux常见问题
+** /etc/shadow文件被覆盖 su故障
+重启电脑在root账户下执行passwd kong重新生成账户密码, 执行 sudo passwd root重新生成ro
+ot的密码,然后su就可以恢复工作
+** 文件的每一行后边多一个^M
+这个问题是由于Unix和Window的换行符不一样造成的Unix中是以\n作为换行，
+Window中是以\n\r作为换行符，一个直接结果是，Unix系统下的文件在Window中
+打开都是一行，Window下的文件在Unix下打开的话在 每行的结尾可能会多出一
+个^M符号
+
+在Unix下转换Window下文件的两种方式：
+1. 命令dos2unix test.file
+2. 去掉'\r', 用命令sed -i 's/\r//' test.file
+ok!!
+
+** archlinux签名错误
+error: GPGME error: No data
+
+最近archlinux　yaourt的时候, 老是遇到＂GPGME error: No data＂的错误…
+翻遍了论坛, 试着重新更新pacman-key, 删除/et/pacman.d/gnupg; /var/lib/pacman/sync/*db.sig*　等均不管用;
+
+(1) 修改/etc/pacman.conf
+设置全局SigLevel = Never
+这个方案可以解决问题, 但是禁用了签名验证, 不推荐. 至少我的版本是在某次升级后, networkmanager挂掉了. = =!
+
+(2) 或者修改mirrorlist
+后来将mirrorlist用官方原始的那份覆盖过来了下, 问题解决了..
+估计是之前配置的国内哪个源签名的问题. = =!
+
+ref:
+1. pacman-key
+
+https://wiki.archlinux.org/index.php/Pacman-key#Master_keys

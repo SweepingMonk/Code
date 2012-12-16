@@ -1,0 +1,67 @@
+* 学习Lisp
+** List命令
+| 关键字 | 简介                                 |
+|--------+--------------------------------------|
+| first  | 返回列表的第一个元素                 |
+| rest   | 返回列表中除了第一个元素外的其它元素 |
+| car    | 作用同first，区别不详                |
+| cdr    | 作用同rest，区别不详                 |
+| cons   | 构造函数，两个参数                   |
+| append | 连接两个列表                         |
+| List   | 返回一个由所有参数组成的列表         |
+** Lisp推荐书籍
+SICP 麻省理工的本科教材，实例以schema表示
+On Lisp 是迄今为止讲Lisp的书籍里最深的一本，适合有一定基础的人看，有一
+定难度。
+Successful Lisp 适合做入门教材
+Practical Common Lisp 提供了很多面向对象的实例，但不推荐
+** Lisp特性
+自动内存回收 显示类型 闭包
+Lisp凌驾于面向对象程序设计 动态的面向对象语言
+** 学习Lisp 基本操作符
+Lisp 的 7 个公理（基本操作符）
+操作符一： quote
+(quote x) 返回x
+操作符二： atom
+(atom x) 当 x 是一个原子或者空表时返回原子 t，否则返回NIL
+操作符三： eq
+(eq x y) 当 x 和y 指向相同的对象的时候返回t，否则返回NIL，值得注意的是
+在Common Lisp中，原子对象在内存中只会有一份拷贝，所以(eq 'a 'a)返回t
+操作符四： car
+(car x) 要求 x 是一个表，它返回 x 中的第一个元素
+操作符五： cdr
+(cdr x) 同样要求 x 是一个表，它返回x中除第一个元素之外的所有元素组成的
+表
+操作符六： cons
+(cons x y) 返回一个cons cell (x y)，如果y不是一个list，将会一dotted
+pair形式展现这个cons cell
+
+*多重的cons cell就构成了表*
+(cons 'a (cons 'b (cons 'c ())))
+(a b c)
+
+操作符七： cond
+(cond (p1 e1) ...(pn en)) 的求值规则如下. 对“条件表达式p”依次求值直
+到有一个返回t. 如果能找到这样的p表达式,相应的“结果表达式e”的值作为整
+个cond表达式的返回值.
+(cond ((eq 'a 'b) 'first)  ((atom 'a)  'second))
+
+** Lisp高级属性
+*构造函数*
+cons
+(cons 'lions '(tigers bears)) cons带有两个参数，一个原子和一个列表，
+cons将原子作为第一个原子添加到该列表中。
+append
+(append '(lisons) '(tigers bears)) append连接两个列表
+list
+(list 'lions 'tigers 'bears) list包含一个有所有参数组成的列表
+
+使用cons和first rest可以构建任何列表或者列表片段
+
+*循环操作*
+数循环
+(dotimes (i 10) (print i))
+打印列表
+(dolist (i '(0 1 2 3 3 4 5 6)) (print i))
+常见的do操作
+(do ((i 0 (+ 1 i))) ((> i 10)) (print i))

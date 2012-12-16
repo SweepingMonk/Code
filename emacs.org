@@ -1,0 +1,66 @@
+* 配置emacs
+** emacs快捷键
+| 命令类型                           | 快捷键          | 快捷键描述                             |
+|------------------------------------+-----------------+----------------------------------------|
+| 查找命令                               | C-s C-w         | 在查找模式下，查找光标指定位置处的单词 |
+| 指定目录下查找文件                 | find-name-dired |                                        |
+| 指定目录下查找只包含指定内容的文件 | find-grep-dired |                                        |
+| 与上边两个类似但自由度最高         | find-dired      | gre                                    |
+** 10.16 ecb 和 全屏显示
+配置ecb   darkroom 和 win32fullscreen
+其中darkroom和win32fullscreen都可以实现全屏显示
+主要用到了四个文件w32-fullscreen.el w32toggletitle.exe
+darkroom-mode.el frame-local-vars.el
+将w32toggletitle.exe放在path目录中，其它三个el文件都配置在init.el文件
+中
+** 10.17 sr-speedbar
+新增sr-speedbar功能，使speedbar可以在同一个frame中显示，不用重新开启一
+个frame
+下载sr-speedbar.el文件，在init.el文件中添加 (require 'sr-speedbar)
+** 10.17 查看历史打开文件 和历史编辑记录
+recentf-open-files命令  C-c o按键
+goto-last-change        C-c k 查看立即编辑记录
+** 10.17 查看历史编辑记录
+使用goto-last-change命令回到上次编辑的位置，快捷键是C-c k   快捷键C-c
+h被ecb占用
+** 10.17 用iexp命令在org模式插入括号
+C-x p  you may try.
+*** 10.18 emacs打开文件的字符编码问题
+使用命令revert-buffer-with-coding-system手动选择打开文件的字符编码，
+在保存的时候还可以指定文件的保存编码，使用命令
+set-buffer-file-coding-system
+*** 10.18 emacs配置etags
+find -name "*.[chCH]" -print | etags - 命令用来生成TAGS
+visit-tags-table 用来查找指定的TAGS
+成功配置etags
+f5可以查找TAG，f6可以查找当前TAG,C-f6可以回跳
+*** 10.28 emacs显示图片
+参考博文： http://www.cnblogs.com/tianyuhuo/archive/2012/09/12/2012-9-12-1.html
+window中的emacs默认不能显示图片，而是一堆乱码，根本原因是缺少解析图片
+所需要的dll，只要下载好指定图片对应的dll就可以了。
+
+两个下载地址：
+地址1：GnuWin Packages
+
+地址2：winterTTr's github
+
+然后按M-x iimage-mode RET就可以了
+
+要在org-mode里启用iimage-mode需要把一下代码加入emacs配置文件中
+#+BEGIN_EXAMPLE
+(defun org-toggle-iimage-in-org ()
+
+　　"display images in your org file"
+
+　　(interactive)
+
+　　(if (face-underline-p 'org-link)
+
+　　　　(set-face-underline-p 'org-link nil)
+
+　　　　(set-face-underline-p 'org-link t))
+
+　　　　(iimage-mode))
+#+END_EXAMPLE
+以后你只要输入M-x org-toggle-iimage-in-org RET或M-x iimage-mode RET就
+可以了

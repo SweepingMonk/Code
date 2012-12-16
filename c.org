@@ -1,0 +1,272 @@
+* c编程
+** 类型提升 不怎么准 在ANSI C中已经取消了
+整型提升，就是char,short,int和位段类型(无论signed或unsigned)以及枚举类
+型将被提升为int，前提是int能够完整的容纳原先的数据，否则将被转换为
+unsigined int。float将被转换为double类型，任何数组将被转换为相应类型的
+指针。 char c1,c2; c1 = c1 + c2; 运算的时候，把每个变量的值提升为int的
+长度，然后对int执行加法，然后对运 算结果进行裁剪。 试试sizeof('c')的值
+注意：另一个会发生隐式类型转换的地方就是参数传递，由于函数的参数也是表
+达式，所以也会发生类型提升，在被调用函数的内部，提升后的参数被裁剪为原
+先声明的大小。
+** fgets()函数
+fgets(s, n, stdin); 函数最多接收n-1个字符，并自动在字符串最后加上结束
+符号\0
+
+如果所要读取的字符串的长度小于n-1则会读取字符串结尾的\n符，然后在最后
+添加一个\0
+** swap交换两个元素 注意情况
+*a ^= *b;
+*b ^= *a;
+*a ^= *b;
+当a,b指向同一个元素时，该元素最后会被置为0，如果不是同一个元素，可以正
+常交换
+
+** 结构体位段
+首先位段的成员必须声明为int、signed int或unsigned int类型。其次，在成
+员名的后面是一个冒号和一个整数，这个整数必须制定该位段所占用的位的数目。
+#+BEGIN_EXAMPLE
+struct CHAR{
+    unsinged ch   : 7;
+    unsigned font : 6;
+    unsigned size : 19;
+};
+#+END_EXAMPLE
+在上边的结构体中，如果在32位机器上运行，可能的一种内存分配方式是，7、6、
+19，总共占用32位，注意每一个变量占用的长度不能超过一个整形长度，所以如
+果在16机器上运行，可能编译不通过。
+这个例子说明了一个使用位段的好理由，能够把长度为奇数的数据包装在一起，
+节省存储空间。
+** malloc
+使用malloc动态分配内存时，1-12字节的记录需要消耗48字节的内存空间，
+13-28字节的记录需要消耗64字节的内存空间, 这个因编译器而异。
+另外malloc分配的内存空间通常比申请的要大，多出来的部分用来记录对内存的
+管理。
+** malloc calloc和realloc
+calloc也用来分配内存，malloc和calloc的主要区别是calloc在返回指向内存的
+指针前把它初始化为0，另一个就是请求内存数量的方式并不相同，calloc有两
+个参数，一个是所要分配的元素个数，第二个是每个元素的大小。
+realloc函数用于修改一个原来已经分配的内存大小，使用这个函数你可以使一
+个内存扩大或者缩小。扩大内存时，新增的内存添加到原先的内存后边，新内不
+能并未初始化，如果原先的内存块无法改变大小，realloc将分配一块正确大小
+的内存，并把原先那块内存的内容复制到新内存上，因此在使用realloc函数后，
+不能使用原来指向旧内存的指针，应该使用realloc所返回的指针。
+** 字符串常量
+"xyz"  字符串常量的值是个指针常量
+"xyz" + 1 的结果是个指针，指向字符y
+
+** 文本文件、二进制文件 EOF
+判断文件是否结束 EOF 和 feof(FILE * fp)
+#define  EOF  (-1)
+#define  _IOEOF  0x0010
+#define  feof(_stream)  ((_stream)->_flag & _IOEOF)
+在文本文件中EOF作为结束符号，在屏幕上不显示。但是在二进制文件中，信息都
+是以数值方式存在的。EOF的值可能就是所要处理的二进制文件中的信息，为了
+解决这个问题，提供了一个feof()函数，可以用它来判断文件是否结束。
+#+BEGIN_EXAMPLE
+while(!feof(pfile))
+{
+    ch = fgetc(pfile);
+    putchar(ch);
+}
+#+END_EXAMPLE
+
+** 函数和宏
+宏在执行时间上效率稍高，省去了函数调用的消耗，而函数在程序的长度方面更
+胜一筹
+
+** fseek rewind fsetpos函数用来指针定位
+** c语言中return, exit的区别
+C语言中的return,exit,break,continue。前两个函数使用的同时通常都会带上程序退出时的状态码，标准C中有EXIT_SUCCESS和EXIT_FAILURE两个宏，位于/usr/include/stdlib.h中。
+是这样定义的的：
+#define EXIT_FAILURE 1
+#define EXIT_SUCCESS 0
+一.exit函数的作用及其与_exit()函数的区别。
+有库文件中的定义可知：exit是一个库函数，exit(1）表示发生错误后退出程序，exit(0)表示正常退出。
+在stdlib.h中exit函数是这样子定义的：void exit(int status);
+这个系统调用是用来终止一个进程的，无论在程序中的什么位置，只要执行exit，进程就会从终止进程的运行。
+讲到exit这个系统调用，就要提及另外一个系统调用，_exit,_exit()函数位于unistd.h中，相比于exit()，_exit()函数的功能最为简单，直接终止进程的运行，释放其所使用的内存空间，并销毁在内存中的数据结构，而exit()在于在进程退出之前要检查文件的状态，将文件缓冲区中的内容写回文件。
+下面我们通过于printf这个操作缓冲区的函数结合来说明上面的情况：1.exit终止进程。
+#+BEGIN_EXAMPLE
+#include <stdlib.h>
+#include <stdio.h>
+main()
+{
+printf("output begin\n");
+exit(0);
+printf("output end\n");
+}
+#+END_EXAMPLE
+
+执行gcc -o exit1 exit1.c生成exit1,执行，只会打印出output begin.
+2. exit将缓冲区内容写回文件。
+对应每一个打开的文件，在内存中都有一片缓冲区，每次读文件时，会多读出若干条记录，这样下次读文件时就可以直接从内存的缓冲区中读取，每次写文件的时候，也仅仅是写入内存中的缓冲区，等满足了一定的条件（达到一定数量，遇到特定字符（如换行符\n和文件结束符EOF）），再将缓冲区中的内容一次性写入文件，我们知道
+void exit(int status);
+exit()用来正常终结目前进程的执行，并把参数status返回给父进程，而进程所
+有的缓冲区数据会自动写回并关闭未关闭的文件。
+#+BEGIN_EXAMPLE
+#include <stdlib.h>
+#include <stdio.h>
+main()
+{
+printf("output begin\n");
+printf("content in buffer");
+exit(0);
+}
+$ ./exit1
+output begin
+content in buffer
+printf()会根据参数format字符串来转换并格式化数据，然后将结果写出到标准输出设备，直到出现字符串结束('\0')为止。可见，exit将未出现换行符的语句保存到标注输出文件。
+3._exit()不会执行清理I/O缓冲的操作。
+_exit()用来立刻结束目前进程的执行，并把参数status返回给父进程，并关闭未关闭的文件。此函数调用后不会返回，并且会传递SIGCHLD信号给父进程，父进程可以由wait函数取得子进程结束状态。
+#include <stdio.h>
+#include <unistd.h>
+main()
+{
+printf("output begin\n");
+printf("content in buffer\n");
+_exit(0);
+}
+#+END_EXAMPLE
+$ ./exit2
+output begin
+实际上因为第二条printf语句没有满足特定的条件，它们还只是保存在缓冲区内，这时我们用_exit()函数直接将进程关闭，缓冲区中的数据就会丢失，
+和exit比较，return主要用于提供函数返回值，continue,break语句则大多数情况下用于循环中。许多朋友可能会将这三条语句与exit搞混，并且对这三个语句区分不清楚。
+二.exit和return的区别与联系。
+当然，在进程操作中，我们需要来区分一下exit和return。
+1.exit()结束当前进程/当前程序/，在整个程序中，只要调用exit就结束（当前进程或者在main时候为整个程序）
+2.return()是当前函数返回，当然如果是在主函数main, 自然也就结束当前进程了，如果不是，那就是退回上一层调用。在多个进程时.如果有时要检测上进程是否正常退出的.就要用到上个进程的返回值，依次类推。
+进程环境与进程控制(1): 进程的开始与终止
+exit可以返回小于256的任何整数。返回的不同数值主要是给调用者作不同处理的。
+单独的进程是返回给操作系统的。如果是多进程，是返回给父进程的。父进程里面调用waitpid()等函数得到子进程退出的状态，以便作不同处理。根据相应的返回值来让调用者作出相应的处理.总的说来，exit（）就是当前进程把控制权返回给调用该程序的程序,括号里的是返回值,告诉调用程序该程序的运行状态。
+进程终止:
+C程序的终止分为两种: 正常终止和异常终止.
+正常终止分为: return, exit, _exit, _Exit, pthreade_exit
+异常中指分为: abort, SIGNAL, 线程响应取消
+主要说一下正常终止的前4种, 即exit系列函数。
+return函数exit函数区别：
+1，exit用于在程序运行的过程中随时结束程序，exit的参数是返回给OS的。main函数结束时也会隐式地调用 exit函数。exit函数运行时首先会执行由atexit()函数登记的函数，然后会做一些自身的清理工作，同时刷新所有输出流、关闭所有打开的流并且关闭通过标准I/O函数tmpfile()创建的临时文件。exit是结束一个进程，它将删除进程使用的内存空间，同时把错误信息返回父进程,而 return是返回函数值并退出函数
+2，return是语言级别的，它表示了调用堆栈的返回；而exit是系统调用级别的，它表示了一个进程的结束。
+3.在有返回值的函数中，return语句的作用是提供整个函数的返回值，并结束当前函数返回到调用它的地方。在没有返回值的函数中也可以使用return语句，例如当检查到一个错误时提前结束当前函数的执行并返回。一般程序执行到 main() 的结束就完成了, 如果想在程序结束时做一些事情, 可以尝试着用这个函数.
+example:
+#+BEGIN_EXAMPLE
+void test1(void)
+{
+printf("exit test1\n");
+}
+void test2(void)
+{
+printf("exit test2\n");
+}
+int main()
+{
+atexit(test1);
+atexit(test2);
+printf("exit main\n");
+return 0;
+}
+
+#+END_EXAMPLE
+函数名称：exit
+头文件：<stdlib.h>
+函数原型：void exit(int state)
+函数用途：程序中止执行，返回调用过程
+输入参数：state 0-正常中止，非0-非正常中止
+1，exit用于在程序运行的过程中随时结束程序，exit的参数是返回给OS的。main函数结束时也会隐式地调用exit函数。exit函数运行时首先会执行由atexit()函数登记的函数，然后会做一些自身的清理工作，同时刷新所有输出流、关闭所有打开的流并且关闭通过标准I/O函数tmpfile()创建的临时文件。
+2，exit是结束一个进程，它将删除进程使用的内存空间，同时把错误信息返回父进程,而return是返回函数值并退出函数。
+3，return是语言级别的，它表示了调用堆栈的返回；而exit是系统调用级别的，它表示了一个进程的结束。exit函数是退出应用程序，并将应用程序的一个状态返回给OS，这个状态标识了应用程序的一些运行信息。
+4，atexit()函数的参数是一个函数指针，函数指针指向一个没有参数也没有返回值的函数。atexit()的函数原型是：int atexit (void (*)(void));在一个程序中最多可以用atexit()注册32个处理函数，这些处理函数的调用顺序与其注册的顺序相反，也即最先注册的最后调用，最后注册的最先调用。
+5，return是从A城市中的x小区到y小区，exit—走出A城
+在main函数里面return(0)和exit(0)是一样的，子函数用return返回；而子进程用exit退出，调用exit时要调用一段终止处理程序，然后关闭所有I/O流。
+6，exit本身不是系统调用，而是一个C标准库的函数而已，在stdlib里面，系统调用是exit内部实现去完成的。exit()通常是用在子程序中用来终结程序用的，使用后程序自动结束跳会操作系统。
+但在如果把exit用在main内的时候无论main是否定义成void返回的值都是有效的，并且exit不需要考虑类型，exit(1)等价于return (1)
+引用地址:http://wangxmin2005.blog.163.com/blog/static/130407131200992432348514/
+
+
+exit() 结束当前进程/当前程序/，在整个程序中，只要调用 exit ，就结束
+　　return() 是当前函数返回，当然如果是在主函数main, 自然也就结束当前进程了，如果不是，那就是退回上一层调用。在多个进程时.如果有时要检测上进程是否正常退出的.就要用到上个进程的返回值..
+　　exit(1)表示进程正常退出. 返回 1;
+　　exit(0)表示进程非正常退出. 返回 0.
+　　进程环境与进程控制(1): 进程的开始与终止
+
+
+1. 进程的开始:
+　　C程序是从main函数开始执行, 原型如下:
+　　int main(int argc, char *argv[]);
+　　通常main的返回值是int型, 正确返回0.
+　　如果main的返回值为void或者无, 某些编译器会给出警告, 此时main的返回值通常是0.
+　　关于main的命令行参数不做过多解释, 以下面的程序展示一下:
+
+以下是代码片段：
+#+BEGIN_EXAMPLE
+　　#include
+　　int main(int argc, char *argv[])
+　　{
+　　int i;
+　　for (i = 0; i < argc; i++)
+　　printf("argv[%d]: %s\n", i, argv[i]);
+　　return 0;
+　　}
+#+END_EXAMPLE
+　　2. 进程终止:
+　　C程序的终止分为两种: 正常终止和异常终止.
+　　正常终止分为: return, exit, _exit, _Exit, pthreade_exit
+　　异常中指分为: abort, SIGNAL, 线程响应取消
+　　主要说一下正常终止的前4种, 即exit系列函数.
+
+以下是代码片段：
+#+BEGIN_EXAMPLE
+    #include
+　　void exit(int status);
+　　void _Exit(int status);
+　　#include
+　　void _exit(int status);
+#+END_EXAMPLE
+　　以上3个函数的区别是:
+　　exit()(或return 0)会调用终止处理程序和用户空间的标准I/O清理程序(如fclose), _exit和_Exit不调用而直接由内核接管进行清
+　　理.
+　　因此, 在main函数中exit(0)等价于return 0.
+　　3. atexit终止处理程序:
+　　ISO C规定, 一个进程最对可登记32个终止处理函数, 这些函数由exit按登记相反的顺序自动调用. 如果同一函数登记多次, 也会被
+　　调用多次.
+　　原型如下:
+　　#include
+　　int atexit(void (*func)(void));
+　　其中参数是一个函数指针, 指向终止处理函数, 该函数无参无返回值.
+　　以下面的程序为例:
+
+以下是代码片段：
+#+BEGIN_EXAMPLE
+　#include
+　　static void myexit1()
+　　{
+　　printf("first exit handler\n");
+　　}
+　　static void myexit2()
+　　{
+　　printf("second exit handler\n");
+　　}
+　　int main()
+　　{
+　　if (atexit(my_exit2) != 0)
+　　printf("can't register my_exit2\n");
+　　if (atexit(my_exit1) != 0)
+　　printf("can't register my_exit1\n");
+　　if (atexit(my_exit1) != 0)
+　　printf("can't register my_exit1\n");
+　　printf("main is done\n");
+　　return 0;
+　　}
+#+END_EXAMPLE
+　　运行结果:
+
+以下是代码片段：
+　$ ./a.out
+　　main is done
+　　first exit handler
+　　first exit handler
+　　second exit handler运行结果:
+　　$./a.out arg1 arg2 arg3
+　　argv[0]: ./a.out
+　　argv[1]: arg1
+　　argv[2]: arg2
+　　argv[3]: arg3

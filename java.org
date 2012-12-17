@@ -594,6 +594,59 @@ RSA是第一个既能用于数据加密也能用于数字签名的算法。RSA�
 DES：data encryption standard
 DES的算法是对称的，既可用于加密又可用于解密,是一个密码长度为56位的古老
 的分组密码，DES算法现在已经过时了，因为可以用穷举法破解。
+** 各种加密机制
+http://snowolf.iteye.com/blog/379860
+*** DSA数字签名
+http://snowolf.iteye.com/blog/382749
+
+** 证书管理
+数字证书好比人的身份证。可以用证书像别人证明自己的身份一样。
+
+获得安全证书有两种方式：一种方式是到权威机构购买，还有一种方式是创建自我签名的证。SUN公司提供了制作证书的工具keytool。在JDK 1.4以后的版本中都包含了这一工具，它的位置为<JAVA_HOME>\bin\keytool.exe。此外，也可以到SUN的网站上下载，下载地址如下：
+
+http://java.sun.com/j2se/1.5.0/docs/tooldocs/#security
+
+通过keytool工具创建证书的命令为：
+
+keytool -genkeypair -alias "tomcat" -keyalg "RSA"
+
+以上命令将生产一对非对称密钥和自我签名的证书，这个命令中几个参数的意思如下：
+
+keytool 参数说明：
+A.genkey： 生成一对非对称密钥
+B.alias ：取个别名，以后操作这个证书的时候都通过别名来操作
+C.keyalg ： 指定加密算法
+D.keystore ： 指定安全证书的存放路径
+E.storepass:打开keystore所需要的密码
+F.keypass:设置存储在keystore中密钥对的密码
+G.validity:有效时间，单位是天（上例中即为180天）
+
+-genkeypair：生成一对非对称密钥。
+
+首先会提示输入keystore的密码，这里我输入的密码是sunchis。
+
+然后提示输入个人信息，如姓名、组织单位和所在城市等，只要输入真实信息即可。
+
+接着会提示输入信息是否正确，输入“y”表示信息正确。
+
+最后要求输入<Tomcat>的主密码，这里设置与keystore相同的密码，因此只需根
+据提示按回车键即可。
+
+以上命令将在操作系统的用户目录下生成名为“.keystore”的文件。我当前登录到操作系统的用户名是XuLiang，那么在Wnidows下，文件的位置为：
+
+C:\Documents and Settings\XuLiang\.keystore
+
+在Linux下，该文件的位置为：home\XuLiang\.keystore
+
+另外，如果希望生成的keystore文件存放在其他目录中，可以再keytool命令中加入-keystore参数，这个参数用来指定keystore文件的存放位置，例如以下命令将在D:\下生成名为“sunchis.keystore”的文件：
+
+keytool -genkeypair -alias "tomcat" -keyalg "RSA" –keystore
+"D:\sunchis.keystore"
+
+查看指定目录下生成的别名为abnerCA的证书的命令为：
+keytool -list -alias abnerCA -keystore "C:\Documents and Settings\XuLiang\.keystore"
+
+
 ** java虚拟机和delvik虚拟机的区别
 
 | java虚拟机             | Dalvik                             |

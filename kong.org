@@ -2354,7 +2354,26 @@ long long 八个字节
    一次存在一个线程设置了高位之后被另外一个线程交换出去，而改变了其高
    位或者低位的值，存在同步问题，需要synchronized关键字
 
-* 4. 工作计划
+* 4. 错误记录
+** 0298E Unable to allocate remote transaction program: Descriptive message
+解决方法：首先查看端口8044-8047，如果端口监听正常，那么查看所使用参数
+是否正常，如果get file，请使用REMOTE_FILE_FR LOCALE_FILE_FR 和
+REMOTE_SYSTEM_RF选项。
+
+如果是send job那么请使用参数LOCAL_FILE_S
+** 0286E Error setting local user id
+这种情况下，首先对可执行文件a.out进行以下操作
+chrgp xcomadm a.out
+chmod 6555 a.out
+如果对于java可执行文件，需要把相应的java和.so文件都使用上述命令进行权
+限修改
+
+如果以上操作仍不奏效，查看源文件中的queue参数是否被显式的赋值为yes，如
+果没有请修改参数
+
+** 发送文件的大小为0
+解决方法：修改codeflag参数，如果为binary修改为ascii
+* 5. 工作计划
 ** TODO 后缀树
 ** TODO 后缀数组
 ** TODO java webservice

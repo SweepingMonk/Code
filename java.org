@@ -594,10 +594,14 @@ RSA是第一个既能用于数据加密也能用于数字签名的算法。RSA�
 DES：data encryption standard
 DES的算法是对称的，既可用于加密又可用于解密,是一个密码长度为56位的古老
 的分组密码，DES算法现在已经过时了，因为可以用穷举法破解。
-** 各种加密机制
+** 证书和各种加密机制
 http://snowolf.iteye.com/blog/379860
-*** DSA数字签名
+DSA数字签名
 http://snowolf.iteye.com/blog/382749
+数字证书原理
+http://www.cnblogs.com/JeffreySun/archive/2010/06/24/1627247.html
+
+http://hubingforever.blog.163.com/blog/static/17104057920118631458629/
 
 ** 证书管理
 数字证书好比人的身份证。可以用证书像别人证明自己的身份一样。

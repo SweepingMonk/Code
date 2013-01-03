@@ -667,6 +667,736 @@ ID，只要进程组有还有一个进程存在，进程组就存在
 
 inetd守护进程xinetd，它侦听系统网络接口，以便取得来自网络的对各种网络
 服务进程的请求。
+*** 进程间通信
+大多数进程间通信，通常限于同一台主机的各个进程间的IPC,最后两种，即套接
+字和STREAMS,是仅有的两种支持不同主机上各个进程间IPC的类型。
+**** 管道
+管道道是UNIX系统中IPC的最古老形式，所有UNIX系统都提供此种通信机制。
+1. 历史上它们是半双工的，现在某些系统提供全双工管道
+2. 通常一个管道由一个进程创建，然后该进程调用fork，此后父子进程之间就
+   可以应用该管道
+FIFO命名管道没有2的这种限制，可以在任意进程间通信
+源代码实现如下：
+#+BEGIN_EXAMPLE
+#include <apue.h>
+
+int main(void)
+{
+    int n;
+    int fd[2];
+    pid_t pid;
+    char line[MAXLINE];
+    if(pipe(fd)<0)
+        err_sys("pipe error");
+    if(pid=for()<0)
+        err_sys("fork error");
+    else if(pid>0)
+    {
+        close(fd[0]);
+        write(fd[1], "hello world\n", 12);
+    }
+    else
+    {
+        close(fd[1]);
+        read(fd[0], line, MAXLINE);
+        write(STDOUT_FILENO,line,n);
+    }
+    exit(0);
+}
+#+END_EXAMPLE
+在上面的例子中，直接对管道描述符调用read和write，更好的方法时将管道描
+述符复制为标准输入和标准输出。在此之后通常子进程执行另一个程序，该程序
+或者从标准输入读数据，或者将数据写至标准输出。
+
+管道的使用：
+单个进程的管道几乎没有用处，一般情况下，用户创建父子两个进程，即父进程创建pipe后接着调用 fork（）函数，这样就创建了父进程到子进程（或者反向）的管道。下面考虑父进程到子进程的管道：fork之后父进程所有打开的文件描述符都被复制给子进程，也就是说，父子进程每个打开的相同描述符共享一个文件表项，父进程关闭管道的读端（filedes[0]），子进程关闭管道的写端（filedes[1]），这样，对于管道，父进程负责写数据，子进程负责读数据。
+当管道的一端被关闭后，下列两条规则起作用：
+　　（1）当读一个写端已经关闭的管道，在所有数据都被读取后，read返回0，以表示达到文件末尾；
+　　（2）当写一个读端已经关闭的管道，则产生信号SIGPIPE。
+　　根据APUE，借用系统已经存在的分页程序（如more或者less），通过管道直
+接将文件内容送到分页程序，代码如下：
+
+#+BEGIN_EXAMPLE
+#include <stdlib.h>
+ #include <unistd.h>
+ #include <sys/wait.h>
+ #include <string.h>
+
+ #define MAXLINE 1024
+ #define DEF_PAGER "/bin/more"
+
+ int main(int argc, char *argv[])
+ {
+     int count;
+     int fd[2];
+     pid_t pid;
+     char line[MAXLINE];
+     char *pager, *argv0;
+     FILE *fp;
+
+     if((fp = fopen(argv[1], "r")) == NULL)
+       perror("fopen");
+
+     if(pipe(fd) < 0)
+       perror("pipe");
+
+     if((pid = fork()) < 0)
+       perror("fork");
+     else if(pid > 0) {
+         close(fd[0]);
+         while(fgets(line, MAXLINE, fp) != NULL) {
+             count = strlen(line);
+             write(fd[1], line, count);
+         }
+         if(ferror(fp))
+           perror("fgets");
+         close(fd[1]);
+         if(waitpid(pid, NULL, 0) < 0)
+           perror("waitpid");
+         exit(0);
+     } else {
+         close(fd[1]);
+         /* 将管道复制为标准输入 */
+         if(fd[0] != STDIN_FILENO) {
+             if(dup2(fd[0], STDIN_FILENO) != STDIN_FILENO)
+               perror("dup2");
+             close(fd[0]);
+         }
+         if((pager = getenv("PAGER")) == NULL)    //通常是/bin/more
+           pager = DEF_PAGER;
+         if((argv0 = strrchr(pager, '/')) != NULL)   //这里得到程序名
+       字more
+             argv0++;
+         else
+           argv0 = pager;
+         if(execl(pager, argv0, NULL) < 0)
+           perror("execl");
+     }
+     exit(0);
+ }
+#+END_EXAMPLE
+在这个程序中，父进程创建管道后，调用fork产生子进程，父进程首先关闭读端，运用fgets将文件内容读入，并写入管道；子进程关闭写端，并将标准输入和fd[0]共享同一个文件表项，这样分页程序就能够利用管道中的数据。
+
+**** FIFO命名管道
+管道应用的一个重大限制是它没有名字，因此，只能用于具有亲缘关系的进程间
+通信，在命名管道中，它提供了一个路径名与之关联，以FIFO的文件形式存在于
+文件系统中，这样即使与FIFO的创建进程不存在亲缘关系的进程，只要可以访问
+该路径，就能彼此通过FIFO相互通信，因此，通过FIFO不相关的进程也能交换数
+据，值得注意的是，FIFO严格遵循先进先出，对管道及FIFO的读总是从开始处返
+回数据。
+
+FIFO是一个文件类型，stat结构中st_mode指明一个文件结点是不是一个FIFO，
+可以使用宏S_ISFIFO来测试这一点。
+
+FIFO依然是半双工的。
+
+创建FIFO的函数如下：
+#include <sys/stat.h>
+int mkfifo(const char * name, mode_t mode);
+成功返回0，失败返回-1
+
+| 名称     | mkfifo                                           |
+|----------+--------------------------------------------------|
+| 功能     | 创建有名管道                                     |
+| 头文件   | #include <sys/types.h>                           |
+| 函数原型 | int mkfifo(const char * pathname, mode_t mdoe)   |
+| 参数     | pathname表示管道的路径  mode_t表示管道的读写情况 |
+| 返回值   | 成功返回0，失败返回-1                            |
+
+参数pathname指出想要创建的FIFO路径，参数mode指定创建的FIFO访问模式。这个访问会与当前进程的umask进程运算，以产生实际应用的权限模式。
+mkfifo返回-1时表示创建过程中遇到某种错误，此时会设置errno，用户可以检测errno来取得进一步信息：
+EACCES： 路径所在的目录不允许执行权限
+EEXIST：路径已经存在，这时包括路径是一个符号链接，无论它是悬空还没有悬空。
+ENAMETOOLONG：要么全部的文件名大于PATH_MAX，要么是单独的文件名大于NAME_MAX。在GNU系统里没有这个文件名长度的限制，但在其它系统里可能存在。
+ENOENT：目录部分不存在，或者是一个悬空链接。
+ENOTDIR：目录部分不一个目录。
+EROFS：路径指向一个只读的文件系统。
+
+mkfifo的第一个参数是一个已经存在的路径名时，会返回EEXIST错误
+所以一般典型的调用代码首先会检查是否返回该错误，如果确实返回该错误，那
+么只要调用打开FIFO的函数就可以了
+一般文件的I/O函数都可以用于FIFO，如close、read、write等等。
+
+使用命令man 3 mkfifo可以查看此函数信息
+FIFO创建后，可以像普通文件一样对其进行访问。Linux下一个同名命令mkfifo
+用于创建FIFO，例如：
+$mkfifo /tmp/fifo
+$cat /tmp/fifo
+程序阻塞。
+再打开一个shell，执行
+$echo hello > /tmp/fifo
+前一个程序返回，显示hello
+
+下面用一个简答 程序，演示FIFO IPC的用法
+
+该程序分为两部分：
+server程序创建一个FIFO，并从FIFO读取字符，转换成大写后输出到屏幕
+client程序读取用户输入并写入FIFO.
+
+server
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <ctype.h>
+#define FIFO_PATH "/tmp/myfifo"
+
+int main()
+{
+    int ret;
+    char buffer;
+    /* 创建命名管道 */
+    ret=mkfifo(FIFO_PATH, 0777);
+    /* 打开命名管道 */
+    int fd=open(FIFO_PATH, O_RDONLY);
+    /* 成功打开命名管道返回0，否则返回-1 */
+    if(fd==-1)
+    {
+        printf("error\n");
+        return -1;
+    }
+    while(1)
+    {
+        /* 从管道中读数据，当没有数据的时候阻塞 */
+        int nread=read(fd,&buffer,1);
+        if(nread>0)
+            /* 将字符转换为大写然后输出 */
+            printf("%c\n",toupper(buffer));
+    }
+    return 0;
+}
+#+END_EXAMPLE
+
+client
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#define FIFO_PATH "/tmp/myfifo"
+
+int main()
+{
+    /* 设置缓冲区 */
+    /* if(setvbuf(stdin,NULL,_IONBF,0)!=0) */
+    /*     err_sys("setvbuf error"); */
+    /* if(setvbuf(stdout,NULL,_IOLBF,0)!=0) */
+    /*     err_sys("setvbuf error"); */
+    int fd;
+    /* 打开指定的命名管道 */
+    fd=open(FIFO_PATH, O_WRONLY);
+    /* 成功打开返回0 */
+    if(fd==-1)
+    {
+        printf("error\n");
+        return -1;
+    }
+    int c;
+    /* 持续从标准输入读取字符，然后写入管道中 */
+    while(c=getchar())
+    {
+        write(fd,&c,1);
+    }
+
+    return 0;
+}
+#+END_EXAMPLE
+
+先启动server程序，再运行client，随便输入些字符。
+server端将在屏幕上显示转换为大写后的输入字符。
+
+1. 命名管道的打开规则
+   如果当前打开操作是为读而打开FIFO时，若已经有相应进程为写而打开，则
+   当前打开操作将成功返回，否则，可能阻塞直到有相应进程为写而打开该
+   FIFO(当前打开操作设置了阻塞表示)；或者，如果当前打开操作没有设置阻
+   塞标志，则将成功返回
+
+   如果当前打开操作是为写而打开FIFO时，如果已经有相应进程为读而打开该
+   FIFO，则当前打开操作成功返回；否则，可能阻塞直到有相应进程为读而打
+   开该FIFO（当前打开操作设置了阻塞标志）；或者返回ENXIO错误(当前打开
+   操作没有设置阻塞标志)
+
+2. 命名管道的读写规则
+   如果有进程写打开FIFO，且当前FIFO内没有数据，则对于设置了阻塞标志的
+   读操作来说，将一直阻塞。对于没有设置阻塞标志读操作来说则返回-1，当
+   前errno值为EAGAIN，提醒以后再试
+
+   对于设置了阻塞标志的读操作说，造成阻塞的原因有两种：当前FIFO内有数
+   据，但有其它进程在读这些数据；另外就是FIFO内没有数据。解阻塞的原因
+   则是FIFO中有新的数据写入，不论信写入数据量的大小，也不论读操作请求
+   多少数据量。
+
+   读打开的阻塞标志只对本进程第一个读操作施加作用，如果本进程中有多个
+   读操作序列，则在第一个读操作被唤醒并完成读操作后，其它将要执行的读
+   操作将不再阻塞，即使在执行读操作时，FIFO中没有数据也一样（此时，读
+   操作返回0）。
+
+   如果没有进程写打开FIFO，则设置了阻塞标志的读操作会阻塞。
+
+   向FIFO中写入数据：
+   1. 对于设置了阻塞标志的写操作：
+   当要写入的数据量不大于PIPE_BUF时，linux将保证写入的原子性。如果
+   此时管道空闲缓冲区不足以容纳要写入的字节数，则进入睡眠，直到当
+   缓冲区中能够容纳要写入的字节数时，才开始进行一次性写操作。
+
+   当要写入的数据量大于PIPE_BUF时，linux将不再保证写入的原子性。FIFO缓
+   冲区一有空闲区域，写进程就会试图向管道写入数据，写操作在写完所有请
+   求写的数据后返回。
+
+   2. 对于于没有设置阻塞标志的写操作：
+   当要写入的数据量不大于PIPE_BUF时，linux将保证写入的原子性。如果当前FIFO空闲缓冲区能够容纳请求写入的字节数，写完后成功返回；如果当前FIFO空闲缓冲区不能够容纳请求写入的字节数，则返回EAGAIN错误，提醒以后再写。
+   当要写入的数据量大于PIPE_BUF时，linux将不再保证写入的原子性。在
+   写满所有FIFO空闲缓冲区后，写操作返回。
+**** 消息队列
+**** 信号量
+**** 共享存储器
+共享内存是最有用的进程间通信方式，也是最快的IPC形式。两个不同进程共享
+内存的意思是，同一块物理内存被映射到进程A、B各自的进程地址空间。进程A
+可以即时看到进程B对共享内存中数据的更新，反之亦然。由于多个进程共享同
+一块内存区域，必然需要某种同步机制，互斥锁和信号量都可以。
+
+采用共享内存通信的一个显而易见的好处是效率高，因为进程可以直接读写内存，而不需要任何数据的拷贝。对于像管道和消息队列等通信方式，则需要在内核和用户空间进行四次的数据拷贝，而共享内存则只拷贝两次数据：一次从输入
+文件到共享内存区，另一次从共享内存区到输出文件。
+
+进程之间在通信时，会一直保持共享区域，直到通信完毕为止，这样，数据内容
+一直保持在共享内存中，并没有写回文件。共享内存中的内容往往是在解除映射
+时才写回文件的，因此采用共享内存的通信方式效率是非常高的。
+
+Linux的2.2.x内核支持多种共享内存方式，如mmap()系统调用，Posix共享内存，以及系统V共享内存。
+
+#mmap()及其相关系统调
+mmap()系统调用使得进程之间通过映射同一个普通文件实现共享内存。普通文件
+被映射到进程地址空间后，进程可以向访问普通内存一样对文件进行访问，不必
+再调用read()，write（）等操作。
+
+mmap()系统调用并不是完全为了用于共享内存而设计的，它本身提供了不同于一
+般对普通文件的访问方式，进程可以像读写内存一样对普通文件的操作。而
+Posix或系统V的共享内存IPC则纯粹用于共享目的
+
+1. mmap()系统调用形式如下：
+void* mmap ( void * addr , size_t len , int prot , int flags , int fd , off_t offset )
+参数fd为即将映射到进程空间的文件描述字，一般由open()返回，同时，fd可以指定为-1，此时须指定flags参数中的MAP_ANON，表明进行的是匿名映射（不涉及具体的文件名，避免了文件的创建及打开，很显然只能用于具有亲缘关系的进程间通信）。
+len是映射到调用进程地址空间的字节数，它从被映射文件开头offset个字节开
+始算起。prot 参数指定共享内存的访问权限。可取如下几个值的或：PROT_READ
+（可读） , PROT_WRITE （可写）, PROT_EXEC （可执行）,PROT_NONE（不可访
+问）。flags由以下几个常值指定：MAP_SHARED ,MAP_PRIVATE , MAP_FIXED，其
+中，MAP_SHARED , MAP_PRIVATE必选其一，而MAP_FIXED则不推荐使用。
+
+offset参数一般设为0，表示从文件头开始映射。
+
+参数addr指定文件应被映射到进程空间的起始地址，一般被指定一个空指针，此
+时选择起始地址的任务留给内核来完成。函数的返回值为最后文件映射到进程空
+间的地址，进程可直接操作起始地址为该值的有效地址。
+
+2. 系统调用mmap()用于共享内存的两种方式
+（1）使用普通文件提供的内然后再调用mmap()
+#+BEGIN_EXAMPLE
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+struct people{
+    char name;
+    int age;
+};
+
+// map a normal file as shared mem:
+int main(int argc, char** argv)
+{
+    int fd,i;
+    people *p_map;
+    char temp;
+    /* open the identify file */
+    fd=open(argv[1],O_CREAT|O_RDWR|O_TRUNC,00777);
+    /* change the file offset, so that the file's size is
+     * sizeof(people)*5 */
+    lseek(fd, sizeof(people)*5-1,SEEK_SET);
+    /* write a null char into the file */
+    write(fd,"",1);
+    /* 做内存映射，映射的空间大小为sizeof(peopel)*10 */
+    p_map = (people*) mmap( NULL,sizeof(people)*10,PROT_READ|PROT_WRITE,
+                            MAP_SHARED,fd,0 );
+    close( fd );
+    /* 关闭文件描述符，并直接对内存进行操作，这些操作会映射到文件中 */
+    temp = 'a';
+    for(i=0; i<10; i++)
+    {
+        temp += 1;
+        /* 修改成员变量的值 */
+        memcpy(&((*(p_map+i)).name), &temp, 1);
+        (*(p_map+i)).age = 20+i;
+    }
+    printf(" initialize over \n ");
+    sleep(10);
+    /* 解除映射 */
+    munmap( p_map, sizeof(people)*10 );
+    printf( "umap ok \n" );
+}
+
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+
+struct people{
+char name;
+int  age;
+};
+
+// map a normal file as shared mem:
+int main(int argc, char** argv)
+{
+    int fd,i;
+    people *p_map;
+    /* 打开文件 */
+    fd=open( argv[1],O_CREAT|O_RDWR,00777 );
+    /* 对指定文件进行映射 */
+    p_map = (people*)mmap(NULL,sizeof(people)*10,PROT_READ|PROT_WRITE,
+                          MAP_SHARED,fd,0);
+    /* 读取映射文件中的内容 */
+    for(i = 0;i<10;i++)
+        printf( "name: %c age %d;\n",(*(p_map+i)).name, (*(p_map+i)).age );
+    /* 解除映射 */
+    munmap( p_map,sizeof(people)*10 );
+    return 0;
+}
+#+END_EXAMPLE
+这个例子中包括了两个子进程，它们通过把同一个文件映射到自己的内存空间进
+行读写操作，来实现进程间通信。
+第一个进程打开或创建了一个文件，并把文件的长度设置为5个people结构大小，
+然后从mmap()的返回地址开始，设置了10个people结构，注意这里的映射地址空
+间大于文件大小。
+
+第二个进程只是简单的映射一个文件，并以people数据结构的格式从mmap()返回
+的地址处读取10个people结构，并输出读取的值，然后解除映射
+
+程序的运行结果得出结论：
++最终被映射文件的内容的长度不会超过文件本身的初始大小，即映射不能改变文
+件的大小；
++可以用于进程通信的有效地址空间大小大体上受限于被映射文件的大小，但不
+完全受限于文件大小。打开文件被截短为5个people结构大小，而在第一个进程
+中初始化了10个people数据结构，在恰当时候（map_normalfile1输出initialize over 之后，输出umap ok之前）调用map_normalfile2会发现map_normalfile2将输出全部10个people结构的值
+
+注意：在linux中，内存的保护是以页为基本单位的，即使被映射文件只有一个字节大小，内核也会为映射分配一个页面大小的内存。当被映射文件小于一个页面大小时，进程可以对从mmap()返回地址开始的一个页面大小进行访问，而不会出错；但是，如果对一个页面以外的地址空间进行访问，则导致错误发生，后面将进一步描述。因此，可用于进程间通信的有效地址空间大小不会超过文件大小及一个页面大小的和。
+
++ 文件一旦被映射后，调用mmap()的进程对返回地址的访问是对某一内存区域的
+  访问，暂时脱离了磁盘上文件的影响。所有对mmap()返回地址空间的操作只在
+  内存中有意义，只有在调用了munmap()后或者msync()时，才把内存中的相应
+  内容写回磁盘文件，所写内容仍然不能超过文件的大小。
+
+
+（2）使用特殊文件提供匿名内存映射：适用于具有亲缘关系的进程之间； 由于父子进程特殊的亲缘关系，在父进程中先调用mmap()，然后调用fork()。那么在调用fork()之后，子进程继承父进程匿名映射后的地址空间，同样也继承mmap()返回的地址，这样，父子进程就可以通过映射区域进行通信了。注意，这里不是一般的继承关系。一般来说，子进程单独维护从父进程继承下来的一些变量。而mmap()返回的地址，却由父子进程共同维护。
+对于具有亲缘关系的进程实现共享内存最好的方式应该是采用匿名内存映射的方
+式。此时，不必指定具体的文件，只要设置相应的标志即可
+#+BEGIN_EXAMPLE
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+typedef struct{
+  char name[4];
+  int  age;
+}people;
+main(int argc, char** argv)
+{
+  int i;
+  people *p_map;
+  char temp;
+  p_map=(people*)mmap(NULL,sizeof(people)*10,PROT_READ|PROT_WRITE,
+       MAP_SHARED|MAP_ANONYMOUS,-1,0);
+  if(fork() == 0)
+  {
+    sleep(2);
+    for(i = 0;i<5;i++)
+      printf("child read: the %d people's age is %d\n",i+1,(*(p_map+i)).age);
+    (*p_map).age = 100;
+    munmap(p_map,sizeof(people)*10); //实际上，进程终止时，会自动解除映射。
+    exit();
+  }
+  temp = 'a';
+  for(i = 0;i<5;i++)
+  {
+    temp += 1;
+    memcpy((*(p_map+i)).name, &temp,2);
+    (*(p_map+i)).age=20+i;
+  }
+  sleep(5);
+  printf( "parent read: the first people,s age is %d\n",(*p_map).age );
+  printf("umap\n");
+  munmap( p_map,sizeof(people)*10 );
+  printf( "umap ok\n" );
+}
+#+END_EXAMPLE
+3. 解除内存映射munmap()
+
+int munmap( void * addr, size_t len )
+该调用在进程地址空间中解除一个映射关系，addr是调用mmap()时返回的地址，len是映射区的大小。当映射关系解除后，对原来映射地址的访问将导致段错误发生
+
+4. 共享内存数据写回磁盘msync()
+int msync ( void * addr , size_t len, int flags)
+一般说来，进程在映射空间的对共享内容的改变并不直接写回到磁盘文件中，往往在调用munmap（）后才执行该操作。可以通过调用msync()实现磁盘上文件内容与共享内存区的内容一致。
+
+5. 对mmap()返回地址的访问
+linux采用的是页式管理机制。对于用mmap()映射普通文件来说，进程会在自己
+的地址空间新增一块空间，空间大小由mmap()的len参数指定，注意，进程并不
+一定能够对全部新增空间都能进行有效访问。进程能够访问的有效地址大小取决
+于文件被映射部分的大小。简单的说，能够容纳文件被映射部分大小的最少页面
+个数决定了进程从mmap()返回的地址开始，能够有效访问的地址空间大小。超过
+这个空间大小，内核会根据超过的严重程度返回发送不同的信号给进程。可用如
+下图示说明：
+[[file:pic/mmap.gif]]
+
+注意：文件被映射部分而不是整个文件决定了进程能够访问的空间大小，另外，
+如果指定文件的偏移部分，一定要注意为页面大小的整数倍。
+
+**** 网络套接字socket
+http://www.cnblogs.com/skynet/archive/2010/12/12/1903949.html
+
+套接字是一种进程间的通信方法，与以往介绍的进程间通信方式不同的是，它并
+不局限与同一台计算机的资源。
+
+主要API
+htons();          //将short类型的值从主机字节序转换为网络字节序
+inet_addr();      //将IP地址字符串转换为long类型的网络字节序
+gethostbyname();  //获得与该域名对应的IP地址
+inet_ntoa();      //将long类型的网络字节序转换成IP地址字符串
+
+套接字的工作过程（服务器端）：
+1. 服务端通过socket系统调用创建一个套接字，它是系统分配给该服务器进程的类似文件描述符的资源，不能与其它进程共享。
+2. 服务器进程使用bind系统调用给套接字命名，本地套接字的名字是linux文件
+   系统的文件名，一般放在/tmp或者/usr/tmp目录下。
+3. 接下来，服务器进程开始等待客户连接到这个命名套接字，调用listen创建
+   一个等待队列以便存放来自客户的连接。
+4. 服务器通过accept系统调用来接收客户的连接。此时会产生一个与原有的命
+   名套接字不同的套接字，它仅用于与这个特定的客户通信，而命名套接字则
+   被保留下来继续处理来自其它客户的连接。
+
+套接字的工作过程（客户端）：
+1. 调用socket创建一个未命名的套接字
+2. 将服务器的命名套接字作为一个地址来调用connect与服务器建立连接。服务
+   器的命名套接字中需要指明IP地址和端口号。
+3. 一旦建立了连接，就可以像使用底层文件描述符那样用套接字进行双向的数
+   据通信。
+
+服务器端代码：
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main(int argc, char *argv[])
+{
+    int server_sockfd;//服务器端套接字
+    int client_sockfd;//客户端套接字
+    int len;
+    struct sockaddr_in my_addr;     //服务器网络地址结构体
+    struct sockaddr_in remote_addr; //客户端网络地址结构体
+    int sin_size;
+    char buf[BUFSIZE];  //数据传送的缓冲区
+    memset(&my_addr,0,sizeof(my_addr)); //数据初始化--清零
+    my_addr.sin_family=AF_INET; //设置为IP通信
+    my_addr.sin_addr.s_addr=INADDR_ANY;//服务器IP地址--允许连接到所有本地地址上
+    my_addr.sin_port=htons(8000); //服务器端口号
+
+    /*创建服务器端套接字--IPv4协议，面向连接通信，TCP协议*/
+    if((server_sockfd=socket(PF_INET,SOCK_STREAM,0))<0)
+    {
+        perror("socket");
+        return 1;
+    }
+
+        /*将套接字绑定到服务器的网络地址上*/
+    if (bind(server_sockfd,(struct sockaddr *)&my_addr,sizeof(struct sockaddr))<0)
+    {
+        perror("bind");
+        return 1;
+    }
+
+    /*监听连接请求--监听队列长度为5*/
+    listen(server_sockfd,5);
+
+    sin_size=sizeof(struct sockaddr_in);
+
+    /*等待客户端连接请求到达*/
+    if((client_sockfd=accept(server_sockfd,(struct sockaddr *)&remote_addr,&sin_size))<0)
+    {
+        perror("accept");
+        return 1;
+    }
+    //打印客户端的IP地址
+    printf("accept client %s/n",inet_ntoa(remote_addr.sin_addr));
+    len=send(client_sockfd,"Welcome to my server/n",21,0);//发送欢迎信息
+
+    /*接收客户端的数据并将其发送给客户端--recv返回接收到的字节数，send返回发送的字节数*/
+    while((len=recv(client_sockfd,buf,BUFSIZ,0))>0))
+    {
+        buf[len]='/0';
+        printf("%s/n",buf);
+        if(send(client_sockfd,buf,len,0)<0)
+        {
+            perror("write");
+            return 1;
+        }
+    }
+    close(client_sockfd);
+    close(server_sockfd);
+        return 0;
+}
+#+END_EXAMPLE
+客户端代码：
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main(int argc, char *argv[])
+{
+	int client_sockfd;
+	int len;
+	struct sockaddr_in remote_addr; //服务器端网络地址结构体
+	char buf[BUFSIZ];  //数据传送的缓冲区
+	memset(&remote_addr,0,sizeof(remote_addr)); //数据初始化--清零
+	remote_addr.sin_family=AF_INET; //设置为IP通信
+	remote_addr.sin_addr.s_addr=inet_addr("127.0.0.1");//服务器IP地址
+	remote_addr.sin_port=htons(8000); //服务器端口号
+
+	/*创建客户端套接字--IPv4协议，面向连接通信，TCP协议*/
+	if((client_sockfd=socket(PF_INET,SOCK_STREAM,0))<0)
+	{
+		perror("socket");
+		return 1;
+	}
+
+	/*将套接字绑定到服务器的网络地址上*/
+	if(connect(client_sockfd,(struct sockaddr *)&remote_addr,sizeof(struct sockaddr))<0)
+	{
+		perror("connect");
+		return 1;
+	}
+	printf("connected to server/n");
+	len=recv(client_sockfd,buf,BUFSIZ,0);//接收服务器端信息
+         buf[len]='/0';
+	printf("%s",buf); //打印服务器端信息
+
+	/*循环的发送接收信息并打印接收信息--recv返回接收到的字节数，send返回发送的字节数*/
+	while(1)
+	{
+		printf("Enter string to send:");
+		scanf("%s",buf);
+		if(!strcmp(buf,"quit")
+			break;
+		len=send(client_sockfd,buf,strlen(buf),0);
+		len=recv(client_sockfd,buf,BUFSIZ,0);
+		buf[len]='/0';
+		printf("received:%s/n",buf);
+	}
+	close(client_sockfd);//关闭套接字
+         return 0;
+}
+#+END_EXAMPLE
+
+UDP协议
+服务器端代码：
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main(int argc, char *argv[])
+{
+	int server_sockfd;
+	int len;
+	struct sockaddr_in my_addr;   //服务器网络地址结构体
+         struct sockaddr_in remote_addr; //客户端网络地址结构体
+	int sin_size;
+	char buf[BUFSIZ];  //数据传送的缓冲区
+	memset(&my_addr,0,sizeof(my_addr)); //数据初始化--清零
+	my_addr.sin_family=AF_INET; //设置为IP通信
+	my_addr.sin_addr.s_addr=INADDR_ANY;//服务器IP地址--允许连接到所有本地地址上
+	my_addr.sin_port=htons(8000); //服务器端口号
+
+	/*创建服务器端套接字--IPv4协议，面向无连接通信，UDP协议*/
+	if((server_sockfd=socket(PF_INET,SOCK_DGRAM,0))<0)
+	{
+		perror("socket");
+		return 1;
+	}
+
+        /*将套接字绑定到服务器的网络地址上*/
+	if (bind(server_sockfd,(struct sockaddr *)&my_addr,sizeof(struct sockaddr))<0)
+	{
+		perror("bind");
+		return 1;
+	}
+	sin_size=sizeof(struct sockaddr_in);
+	printf("waiting for a packet.../n");
+
+	/*接收客户端的数据并将其发送给客户端--recvfrom是无连接的*/
+	if((len=recvfrom(server_sockfd,buf,BUFSIZ,0,(struct sockaddr *)&remote_addr,&sin_size))<0)
+	{
+		perror("recvfrom");
+		return 1;
+	}
+	printf("received packet from %s:/n",inet_ntoa(remote_addr.sin_addr));
+	buf[len]='/0';
+	printf("contents: %s/n",buf);
+	close(server_sockfd);
+        return 0;
+}
+#+END_EXAMPLE
+客户端代码：
+#+BEGIN_EXAMPLE
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main(int argc, char *argv[])
+{
+	int client_sockfd;
+	int len;
+        struct sockaddr_in remote_addr; //服务器端网络地址结构体
+	int sin_size;
+	char buf[BUFSIZ];  //数据传送的缓冲区
+	memset(&remote_addr,0,sizeof(remote_addr)); //数据初始化--清零
+	remote_addr.sin_family=AF_INET; //设置为IP通信
+	remote_addr.sin_addr.s_addr=inet_addr("127.0.0.1");//服务器IP地址
+	remote_addr.sin_port=htons(8000); //服务器端口号
+
+         /*创建客户端套接字--IPv4协议，面向无连接通信，UDP协议*/
+	if((client_sockfd=socket(PF_INET,SOCK_DGRAM,0))<0)
+	{
+		perror("socket");
+		return 1;
+	}
+	strcpy(buf,"This is a test message");
+	printf("sending: '%s'/n",buf);
+	sin_size=sizeof(struct sockaddr_in);
+
+	/*向服务器发送数据包*/
+	if((len=sendto(client_sockfd,buf,strlen(buf),0,(struct sockaddr *)&remote_addr,sizeof(struct sockaddr)))<0)
+	{
+		perror("recvfrom");
+		return 1;
+	}
+	close(client_sockfd);
+	return 0;
+}
+#+END_EXAMPLE
+
 ** linux线程
 *** 线程简介
 就像每个进程有一个进程ID一样，每个线程也有一个线程ID，进程ID在整个系统
@@ -712,7 +1442,6 @@ linux使用clone系统调用来实现pthread_create, clone系统调用创建子�
 住状态要么是不加锁状态，而且一次只有一个线程可以对其加锁。读写锁可以有
 三种状态:读模式下加锁状态，写模式下加锁状态，不加锁状态。一次只有一个
 线程可以占有写模式的读写锁，但是多个线程可以同时占有读模式的读写锁。
-
 
 * Linux常见问题
 ** /etc/shadow文件被覆盖 su故障

@@ -650,7 +650,6 @@ keytool -genkeypair -alias "tomcat" -keyalg "RSA" –keystore
 查看指定目录下生成的别名为abnerCA的证书的命令为：
 keytool -list -alias abnerCA -keystore "C:\Documents and Settings\XuLiang\.keystore"
 
-
 ** java虚拟机和delvik虚拟机的区别
 
 | java虚拟机             | Dalvik                             |

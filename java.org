@@ -650,6 +650,37 @@ keytool -genkeypair -alias "tomcat" -keyalg "RSA" –keystore
 查看指定目录下生成的别名为abnerCA的证书的命令为：
 keytool -list -alias abnerCA -keystore "C:\Documents and Settings\XuLiang\.keystore"
 
+** SSL证书以及验证机制
+SSL证书是数字证书的一种，类似于驾驶证、护照和营业执照的电子副本。
+
+ssl证书的数据结构：
+1. 证书版本号
+2. 算法标志
+3. 颁发者
+4. 有效期
+5. 使用者公钥信息
+6. 公钥算法
+7. 公钥
+8. 颁发者唯一标识
+...
+10. 证书签名算法
+11. 证书签名
+
+实际上我们使用的证书分很多类型，SSL证书只是其中的一种，证书的格式是由
+X.509标准定义。SSL证书负责传输公钥，是一种PKI证书。
+我们常见的证书根据用途不同大致有以下几种：
+1. SSL证书，用于加密HTTP协议，也就是HTTPS协议
+2. 代码签名证书，用于签名二进制文件，比如windows内核驱动，firefox插件，
+   java代码签名等。
+3. 客户端证书，用于加密邮件。
+4. 双因素证书，网银专业版使用的USB key里面用的就是这种类型的证书。
+
+** SSH和SSL
+SSL是通讯链路的附加层，可以包含很多协议。https、ftps
+SSH只是加密的shell，最初是用来替代telnet的。通过port forward，也可以让
+其他协议通过ssh的隧道而起到加密的效果。
+
+
 ** java虚拟机和delvik虚拟机的区别
 
 | java虚拟机             | Dalvik                             |

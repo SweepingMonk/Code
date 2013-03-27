@@ -1318,6 +1318,20 @@ merge根据所给对象的id值来判断是更新还是新增
 ** J2EE struts2
 *** 起源
 struts 2由web work发展而来,struts2是无侵入式的
+1. struts是通过Filter启动的，而struts1.x中，struts框架是在Servlet启动
+   的。
+2. 自从struts2.1.3以后，FilterDispatcher已经被标注为过时了，在
+   StrutsPrePareAndExecuteFilter的init()方法中将会读取类路径下默认的配
+   置文件struts.xml完成初始化操作，struts2读取到struts.xml的内容后，以
+   javabean形式存放在内存中，以后struts2对用户的每次请求处理都将使用内
+   存中的数据，而不是每次都读取struts.xml文件
+ 3. struts2的很多功能都是由拦截器来实现的
+ 4.定义struts的package时要继承struts-default，这样才能使用struts的很多
+   拦截器 
+4. 如果没有为Action指定class，则默认是ActionSupport,如果没有为action指
+   定method，默认执行action中的execute()方法，如果没有指定result的name
+   属性，默认值为success
+
 *** ActionMapper
 ActionMapper其实是HttpServletRequest和Action调用请求的一个映射，它屏蔽
 了Action对于Request等java servlet类的依赖。struts2中它的默认实现类是
@@ -1344,6 +1358,15 @@ url格式，它自己也有Resultful的实现
 7. 一旦Action执行完毕，ActionInvocation负责根据struts.xml中的配置找到
    对应的返回结果。如上文中将结构返回“add.jsp”，但大部分时候都是返回
    另外一个action，那么流程又得走一遍
+
+
+1.strutsPrepareAndExecuteFilter是Struts2框架的核心控制器，它负责拦截由
+<url-pattern>/*</url-pattern>指定的所有用户请求，当用户请求到达时，该
+Filter会过滤用户的请求，默认情况下，如果用户请求的路径不带后缀或者后缀
+以action结尾，这时请求将被转入struts 2框架处理，否则Struts 2框架将略过
+该请求的处理。当请求转入struts2框架处理时会先经过一系列的拦截器，然后
+再到Action，与struts1不同，struts2对用户的每一次请求都会创建一个Action，
+所以struts2中的Action是线程安全的。而struts1中则是
 ** SSH的整合
 spring和hibernate的整合
 hibernate将sessionFactory提交给Spring来管理

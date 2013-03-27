@@ -1,0 +1,130 @@
+//http://www.cnblogs.com/huangxincheng/archive/2012/07/22/2603956.html
+//平衡二叉树
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node
+{
+    char data;
+    node * left;
+    node * right;
+};
+
+int height(node * t)
+{
+    if(t==NULL)
+        return -1;
+    int left=height(t->left);
+    int right=height(t->right);
+    return (left>=right ? left:right)+1;
+}
+
+node * insert(node * t, char data)
+{
+    node * tp1,*tp2;
+    if(t==NULL)
+    {
+        t=(node *)malloc(sizeof(node));
+        t->left=NULL;
+        t->right=NULL;
+        t->data=data;
+        return t;
+    }
+    if(t->data > data)
+    {
+        t->left=insert(t->left,data);
+        if(height(t->left)-height(t->right)==2)
+        {
+            //LL
+            if(data<t->left->data)
+            {
+                tp1=t->left;
+                tp2=tp1->left;
+                t->left=tp1->right;
+                tp1->right=t;
+                return tp1;
+            }
+            //LR
+            else
+            {
+                tp1=t->left;
+                tp2=tp1->right;
+                tp1->right=tp2->left;
+                tp2->left=tp1;
+                t->left=tp2;
+
+                t->left=tp2->right;
+                tp2->right=t;
+                return tp2;
+            }
+        }
+    }
+    else
+    {
+        t->right=insert(t->right,data);
+        if(height(t->right)-height(t->left)==2)
+        {
+            //RR
+            if(data>t->right->data)
+            {
+                tp1=t->right;
+                tp2=tp1->right;
+                t->right=tp1->left;
+                tp1->left=t;
+                return tp1;
+            }
+            //RL
+            else
+            {
+                tp1=t->right;
+                tp2=tp1->left;
+                tp1->left=tp2->right;
+                tp2->right=tp1;
+                t->right=tp2;
+
+                t->right=tp2->left;
+                tp2->left=t;
+                return t;
+            }
+        }
+    }
+    return t;
+}
+
+void print(node * t)
+{
+    if(t==NULL)
+        return;
+    print(t->left);
+    printf("%c\n",t->data);
+    print(t->right);
+}
+
+void del(node * t)
+{
+    if(t==NULL)
+        return;
+    del(t->left);
+    del(t->right);
+    free(t);
+}
+
+int main()
+{
+    node * head=(node *)malloc(sizeof(node));
+    head->data='e';
+    head=insert(head,'a');
+    head=insert(head,'b');
+    head=insert(head,'c');
+    head=insert(head,'d');
+    print(head);
+    del(head);
+    return 0;
+}
+
+* 可以修改java字节码的工具
+开源工具有
+apache.org的BCEL; jboss.com的javassist；objectweb.org的asm
+* java编程的动态性
+** 类和类的装入

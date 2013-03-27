@@ -1536,4 +1536,3 @@ Node   *build(int   l ,  int r ) //建立二叉树
     return    root;
 }
 #+END_EXAMPLE
-2. 

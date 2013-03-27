@@ -20,9 +20,6 @@ darkroom-mode.el frame-local-vars.el
 ** 10.17 查看历史打开文件 和历史编辑记录
 recentf-open-files命令  C-c o按键
 goto-last-change        C-c k 查看立即编辑记录
-** 10.17 查看历史编辑记录
-使用goto-last-change命令回到上次编辑的位置，快捷键是C-c k   快捷键C-c
-h被ecb占用
 ** 10.17 用iexp命令在org模式插入括号
 C-x p  you may try.
 *** 10.18 emacs打开文件的字符编码问题
@@ -31,8 +28,7 @@ C-x p  you may try.
 set-buffer-file-coding-system
 *** 10.18 emacs配置etags
 find -name "*.[chCH]" -print | etags - 命令用来生成TAGS
-visit-tags-table 用来查找指定的TAGS
-成功配置etags
+visit-tags-table 用来查找指定的TAGS成功配置etags
 f5可以查找TAG，f6可以查找当前TAG,C-f6可以回跳
 *** 10.28 emacs显示图片
 参考博文： http://www.cnblogs.com/tianyuhuo/archive/2012/09/12/2012-9-12-1.html

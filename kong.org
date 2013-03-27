@@ -200,24 +200,6 @@ PS：权衡offer还有许多方法。比如，将自己重视的feature列一下
 选择一份工作只是职业生涯的开始，以后发展得如何本质上还是看个人，不取决
 于公司能给予的外界条件。可以类比高考或考研后对高校、学院、专业的选择。
 ** java相关
-*** final finally finalize
-final  finally   finalize
------------------------------------------------------------
-final可以用于控制成员、方法、或者是一个类是否可以被覆写或继承等功能
-final用于成员时，这个变量一旦被初始化，便不可改变。它的初始化可以放在
-两个地方一个是变量定义出，另一个是在构造函数中。
-final用于参数时，可以防止在函数中改变它的值
-final用于函数时不允许子类来覆写这个方法
-final用于类时，这个类不能被继承，因此一个类不能即被声明为abstract又被
-声明为final
-
-finally是对java异常处理模型的最佳补充，无论有无异常发生，finally里的代
-码总会执行，如果在try块里边有return语句，则在return语句执行之前会先执
-行finally中的语句
-
-finalize是垃圾回收器删除对象之前对这个对象调用的
------------------------------------------------------------
-
 *** sleep()和wait()区别
 sleep()是使线程停止一段时间的方法，在sleep时间间隔期满以后，线程不一定
 立即回复执行，这是因为在那个时刻，其它线程可能正在运行，而且没有被调度
@@ -293,7 +275,7 @@ System.out.print(name +" " + who);   hello world
 
 创建模式：用来创建对象的实例。如单例模式
 结构模式：用于帮助将多个对象组织成更大的结构，如适配器模式、桥接模式、组合器模式等
-行为模式：维护多个对象间复杂的逻辑关系，如命令行模式
+行为模式：维护多个对象间复杂的逻辑关系，如命令行模式,调停者模式
 ** 其它知识点
 *** 基本知识点
 -----------------------------------------------------------
@@ -1860,7 +1842,7 @@ B树与红黑树最大的不同在于，B树的结点可以有许多子女，从
 
 ** 面试资料
 *** binder简介
-client server services manager
+client server services manager binder驱动程序
 
 server向services manager注册服务，client向services manager发出请求，services manager返回给
 客户端一个binder的引用
@@ -2371,30 +2353,11 @@ long long 八个字节
    一次存在一个线程设置了高位之后被另外一个线程交换出去，而改变了其高
    位或者低位的值，存在同步问题，需要synchronized关键字
 
-* 4. 错误记录
-** 0298E Unable to allocate remote transaction program: Descriptive message
-解决方法：首先查看端口8044-8047，如果端口监听正常，那么查看所使用参数
-是否正常，如果get file，请使用REMOTE_FILE_FR LOCALE_FILE_FR 和
-REMOTE_SYSTEM_RF选项。
-
-如果是send job那么请使用参数LOCAL_FILE_
-** 0286E Error setting local user id
-这种情况下，首先对可执行文件a.out进行以下操作
-chrgp xcomadm a.out
-chmod 6555 a.out
-如果对于java可执行文件，需要把相应的java和.so文件都使用上述命令进行权
-限修改
-
-如果以上操作仍不奏效，查看源文件中的queue参数是否被显式的赋值为yes，如
-果没有请修改参数
-
-** 发送文件的大小为0
-解决方法：修改codeflag参数，如果为binary修改为ascii
-* 5. 网页收集
+* 4. 网页收集
+安装Fedora 16后需做的几件事情
 http://wenjun.in/?p=84
 
-* 6. 工作计划
-** TODO 后缀树
+* 5. 工作计划
 ** TODO 后缀数组
 ** TODO java webservice
 ** TODO Delvik虚拟机和Java虚拟机的区别 Android技术内幕
@@ -2405,3 +2368,14 @@ http://wenjun.in/?p=84
 ** TODO 迷宫生成算法http://maskray.me/posts/2012-11-02-perfect-maze-generation.html
 http://bbs.byr.cn/#!article/ACM_ICPC/23147
 ** TODO STL
+** TODO java书籍
+java编程思想
+java虚拟机
+java并发编程
+java设计模式
+** 算法书籍
+编程之美
+黑宝书
+四本算法书籍
+各种算法网页
+

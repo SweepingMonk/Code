@@ -191,7 +191,7 @@ CachedRowSet 被缓存的行集：允许与用户的整个交互过程中，断�
 ** 网络通信
 **** java获取本机地址的方式
 InetAddress.getByName("localhost") #结果总是127.0.0.1
-InetAddress.getLocalHost();     #得到本机的有效网络地址
+InetAddress.getLocalHost();        #得到本机的有效网络地址
 **** java中创建socke超时的解决办法
 Socket s = new Socket("time....", 13); #创建一个Socket连接
 s.setSoTimeOut(1000);                  #设置socket获取信息的超时时间
@@ -234,7 +234,7 @@ urn:ietf:rfc:1738
    和HTTP-POST是使用HTTP的标准协议动词，用于编码和传送变量名/变量值对
    参数，如果请求成功则返回应答。URL字符串中如果含有中文字符则用base64
    加密。
-
+   
    POST方式，变量名/变量值不作为URL的一部分传送，而是放在实际的HTTP请
    求消息内部被传送
 
@@ -569,7 +569,7 @@ CRC算法：循环冗余校验，碰撞几率比较高
 
 由于MD5 与SHA-1均是从MD4 发展而来，它们的结构和强度等特性有很多相似之处，表（1）是对MD5与SHA-1 的结构比较。SHA-1与MD5 的最大区别在于其摘要比MD5 摘要长 32 比特。对于强行攻击，产生任何一个报文使之摘要等于给定报文摘要的难度：MD5 是2^128 数量级的操作，SHA-1 是2^160 数量级的操作。产生具有相同摘要的两个报文的难度：MD5是 2^64 是数量级的操作，SHA-1 是2^80 数量级的操作。因而,SHA-1 对强行攻击的强度更大。但由于SHA-1 的循环步骤比MD5 多（80:64）且要处理的缓存大（160 比特:128 比特），SHA-1 的运行速度比MD5 慢。
 
-D5 和SHA-1 是单项散列函数的典型代表
+MD5 和SHA-1 是单项散列函数的典型代表
 
 *** DSA(Datasignature Algorithm数字签名)
 生成一对公钥和私钥，把公钥发送给需要获取消息的人。将所要发送的消息用自
@@ -679,7 +679,6 @@ X.509标准定义。SSL证书负责传输公钥，是一种PKI证书。
 SSL是通讯链路的附加层，可以包含很多协议。https、ftps
 SSH只是加密的shell，最初是用来替代telnet的。通过port forward，也可以让
 其他协议通过ssh的隧道而起到加密的效果。
-
 
 ** java虚拟机和delvik虚拟机的区别
 
@@ -1203,6 +1202,21 @@ spring提供了一种无侵入式的高扩展性框架，代码中无须设计sp
 机制，通过动态调用来避免硬编码的约束，并构建了BeanFactory作为其依赖注
 入的基础
 
+
+面向切面编程的实现：
+1. 定义一个切面类
+2. 定义一个切点，表明对哪些方法进行拦截
+3. 定义通知，前置通知/后置通知/异常通知/环绕通知
+
+spring的事务
+事务管理器
+定义数据操作时的回滚与不回滚操作
+
+事务管理器
+当数据库操作失误时，是否进行回滚等操作。
+定义事务管理器管理的类和函数
+定义事务传播属性
+
 ** J2EE hibernate
 *** 工作流程
 hibernate可以理解为一个中间件，它负责接收java中的sql语句并发送到数据库，
@@ -1261,7 +1275,7 @@ detached：脱管状态或者游离态
 游离状态的实例可以通过调用save()、persist()或者saveOrUpdate()方法进行持久化。
 持久化实例可以通过调用 delete()变成脱管状态。通过get()或load()方法得到
 的实例都是持久化状态的。
-脱管状态的实例可以通过调用 update()、0saveOrUpdate()、lock()或者
+脱管状态的实例可以通过调用 update()、saveOrUpdate()、lock()或者
 replicate()进行持久化。
 
 save()和persist()将会引发SQL的INSERT，delete()会引发SQLDELETE，
@@ -1298,12 +1312,12 @@ saveOrUpdate()做下面的事:
 标识符，这个insert将立即运行，不管你是在事务内部还是外部。
 
 五、merge()和update()区别
-update制作更新操作
+update只做更新操作
 merge根据所给对象的id值来判断是更新还是新增
 
 ** J2EE struts2
 *** 起源
-struts 2由web work发展而来
+struts 2由web work发展而来,struts2是无侵入式的
 *** ActionMapper
 ActionMapper其实是HttpServletRequest和Action调用请求的一个映射，它屏蔽
 了Action对于Request等java servlet类的依赖。struts2中它的默认实现类是
@@ -1330,6 +1344,10 @@ url格式，它自己也有Resultful的实现
 7. 一旦Action执行完毕，ActionInvocation负责根据struts.xml中的配置找到
    对应的返回结果。如上文中将结构返回“add.jsp”，但大部分时候都是返回
    另外一个action，那么流程又得走一遍
+** SSH的整合
+spring和hibernate的整合
+hibernate将sessionFactory提交给Spring来管理
+
 ** websphere weblogic
 websphere和weblogic都是web应用服务器
 ** J2EE webservice + axis

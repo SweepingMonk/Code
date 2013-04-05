@@ -1,0 +1,12 @@
+ #+STARTUP: overview
+ #+TAGS: {OFFICE(o) COMPUTER(c) HOME(h) PROJECT(p) READING(r) DVD(d)}
+ #+STARTUP: hidestars
+
+* CANCELLED eating with my friend                                               :home:
+CLOSED: [2013-03-30 六 17:20] DEADLINE: <2013-04-05 五> SCHEDULED: <2013-04-02 二>
+* DONE 一块吃饭吧                                                               :home:
+CLOSED: [2013-03-30 周六 22:49] DEADLINE: <2013-04-02 二> SCHEDULED: <2013-03-31 日>
+- State "DONE"       from "TODO"       [2013-03-30 周六 22:49]
+- State "TODO"       from "CANCELLED"  [2013-03-30 六 17:39]
+* PROJECT 明天学驾校交规课                                                      :company:
+DEADLINE: <2013-04-25 四> SCHEDULED: <2013-04-03 三>

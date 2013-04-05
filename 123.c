@@ -1,44 +1,72 @@
+//1845
 #include <iostream>
-#include <cstdio>
-#include <cmath>
 using namespace std;
 
-const int maxn = 31270;
-int t, n;
-unsigned len[maxn], s[maxn];
+int a,b;
+int table[1000000],num[1000000];
+int t,p;
 
-void preprocess();
+void getMult(int a)
+{
+    int k=a;
+    int count;
+    p=0;
+    for(int i=2; i*i<=a && k > 1;)
+    {
+        count=0;
+        while(k%i==0)
+        {
+            count++;
+            k/=i;
+        }
+        if(count>0)
+        {
+            table[p]=i;
+            num[p++]=count;
+        }
+        if(i==2)
+            i++;
+        else
+            i+=2;
+    }
+    if(k > 1)
+    {
+        table[p]=k;
+        num[p++]=1;
+    }
+}
+
+long long power(int base, int n)
+{
+    if(n==0)
+        return 1;
+    long long t=power(base,n/2) % 9901;
+    t = (t * t) %9901;
+    if(n%2)
+        t=(t*base)%9901;
+    return t;
+}
+
+long long getNP(int base, int n)
+{
+    if(n==0)
+        return 1;
+    else if(n%2)
+        return (getNP(base,n/2) *(1+power(base,n/2+1))) % 9901;
+    else if(n%2==0)
+        return (getNP(base,n/2-1) * (1+power(base,n/2+1)) + power(base,n/2))%9901;
+}
 
 int main()
 {
-
-    int i, pos, length, val;
-    len[1] = 1;
-    s[1] = 1;
-    for(i = 2; i < maxn; i++)
+    long long sum;
+    while(cin>>a>>b)
     {
-        len[i] = len[i-1] + (unsigned int) log10((double)i) + 1;
-        s[i] = s[i-1] + len[i];
+        getMult(a);
+        sum=1;
+        for(int i=0;i<p;i++)
+            sum = (sum * (getNP(table[i],num[i]*b) % 9901))%9901;
+        cout<<sum<<endl;
     }
-
-    scanf("%d", &t);
-    while(t-- != 0)
-    {
-        length = 0;
-        scanf("%d", &n);
-        for(i = 1; s[i] < n; i++);
-
-        pos = n - s[i-1];
-        i = 1;
-        while(length < pos)
-        {
-            length += (int)log10((double)i) + 1;
-            i++;
-        }
-
-        val = ((i - 1) / (int) pow((double)10, length - pos)) % 10;
-        printf("%d\n", val);
-    }
-
     return 0;
 }
